@@ -6,11 +6,23 @@ const API_URL = import.meta.env.PROD
   ? "/api/chat"
   : "https://api.anthropic.com/v1/messages"
 
+const API_KEY = import.meta.env.VITE_ANTHROPIC_API_KEY || "YOUR_API_KEY_HERE"
+
 export async function callAI(systemPrompt, userMessage) {
   try {
+    const headers = {
+      "Content-Type": "application/json",
+    }
+
+    // En desarrollo, usar API key directa
+    if (!import.meta.env.PROD) {
+      headers["x-api-key"] = API_KEY
+      headers["anthropic-version"] = "2023-06-01"
+    }
+
     const res = await fetch(API_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers,
       body: JSON.stringify({
         model: "claude-sonnet-4-20250514",
         max_tokens: 1000,
@@ -18,6 +30,12 @@ export async function callAI(systemPrompt, userMessage) {
         messages: [{ role: "user", content: userMessage }],
       }),
     })
+
+    if (!res.ok) {
+      const error = await res.json()
+      console.error("API Error:", error)
+      return null
+    }
 
     const data = await res.json()
     const text = data.content?.map(b => b.text || "").join("") || ""
@@ -77,6 +95,160 @@ SCORING: Expert(4)=crea espacio sin dirigir, preguntas poderosas, conecta patron
 Generá 2-4 reacciones realistas y en personaje. Que suenen como gente real hablando en una reunión.`
 }
 
+// ─── AI Facilitation Assistant (Challenge02) ───
+export function buildFacilitationQuestionsPrompt(teamDesc, situation, context) {
+  return `Sos un AI Facilitation Assistant para Scrum Masters en SMatch. Tu rol es sugerir PREGUNTAS poderosas, no dar soluciones. Respondé en español.
+
+EQUIPO:
+${teamDesc}
+
+SITUACIÓN:
+${situation}
+
+CONTEXTO RECIENTE:
+${context}
+
+El Scrum Master te pidió ayuda para facilitar esta conversación. Sugerí 3-4 preguntas poderosas que:
+- Ayuden al equipo a reflexionar (no a defenderse)
+- Abran la conversación en vez de cerrarla
+- Sean específicas al contexto (no genéricas)
+- Faciliten, no dirijan
+
+Respondé SOLO con JSON:
+{"questions":["Pregunta 1","Pregunta 2","Pregunta 3"],"coaching_note":"Una oración sobre el enfoque de estas preguntas"}
+
+Las preguntas deben sonar como algo que un SM real diría en el momento.`
+}
+
+// ─── AI Communication Coach (Challenge02) ───
+export function buildEscalationCoachPrompt(situation, context, smDraft) {
+  return `Sos un AI Communication Coach para Scrum Masters en SMatch. Tu rol es ayudar a redactar mensajes de escalación profesionales y efectivos. Respondé en español.
+
+SITUACIÓN:
+${situation}
+
+CONTEXTO:
+${context}
+
+${smDraft ? `El SM escribió este borrador:\n"${smDraft}"` : "El SM aún no escribió nada."}
+
+Sugerí un mensaje de escalación que:
+- Sea claro sobre el impacto en el sprint (datos concretos)
+- No culpe a individuos ni equipos
+- Pida acción concreta con fecha límite
+- Mantenga tono colaborativo pero firme
+- Explique qué ya se intentó
+
+Respondé SOLO con JSON:
+{"suggested_message":"El mensaje sugerido","to":"A quién enviar (rol/equipo)","coaching_note":"Por qué este enfoque funciona","improvements":"Qué mejorar si había un borrador"}
+
+El mensaje debe ser profesional, directo, y accionable.`
+}
+
+// ─── Evaluar intervenciones en Challenge02 (Kanban blocker) ───
+export function buildBlockerChallengePrompt(teamDesc, kanbanState, smAction, chatContext) {
+  // Serialize board state
+  const boardSummary = Object.entries(kanbanState)
+    .map(([column, cards]) => {
+      const cardsText = cards.map(c => {
+        let status = `• ${c.id}: ${c.title} (${c.assignee || 'unassigned'}, ${c.priority} priority, ${c.points}pts)`
+        if (c.status === 'blocked') status += ` 🔴 BLOCKED ${c.blockedDays || 0} days`
+        if (c.status === 'idle') status += ' 💤 IDLE'
+        if (c.status === 'waiting') status += ' ⏳ WAITING'
+        if (c.dependencies?.length) status += ` (depends on: ${c.dependencies.join(', ')})`
+        return status
+      }).join('\n')
+
+      const wipInfo = column === "DOING" && cards.length > 3
+        ? ` ⚠️ WIP LIMIT EXCEEDED (${cards.length}/3)`
+        : column === "DOING"
+        ? ` (${cards.length}/3)`
+        : ""
+
+      return `${column}${wipInfo}:\n${cardsText || "  (vacío)"}`
+    })
+    .join('\n\n')
+
+  const chatText = chatContext.map(m =>
+    m.from === 'narration' ? `[Narración: ${m.text}]` : `[${m.from}: ${m.text}]`
+  ).join('\n')
+
+  const actionDescription = smAction.type === 'card_click'
+    ? `Clickeó en la card ${smAction.target}`
+    : smAction.type === 'chat_message'
+    ? `Escribió: "${smAction.message}"`
+    : smAction.type === 'identify_blocker'
+    ? 'Identificó el blocker principal del sprint'
+    : smAction.type === 'flag_wip'
+    ? 'Señaló que el WIP limit está excedido'
+    : smAction.type === 'suggest_pair'
+    ? 'Sugirió pair programming para desbloquear'
+    : smAction.type === 'escalate'
+    ? 'Decidió escalar el bloqueo'
+    : `Acción: ${smAction.type}`
+
+  return `Simulás un equipo Scrum (Equipo Fenix) en Sprint 18, Día 7/10 para la evaluación SMatch. Hay un bloqueo que nadie está escalando y el WIP limit está excedido. Evaluás las acciones del Scrum Master considerando tanto sus skills de facilitación como su conocimiento de Kanban. Respondé todo en español.
+
+EQUIPO:
+${teamDesc}
+
+KANBAN BOARD ACTUAL:
+${boardSummary}
+
+CHAT RECIENTE:
+${chatText}
+
+ACCIÓN DEL SCRUM MASTER:
+${actionDescription}
+
+Evaluá la acción del SM en 7 dimensiones:
+
+1. DETECTION (Detección Temprana): ¿Identificó el problema rápidamente? ¿Notó las señales (bloqueo de 3 días, dependencias, idle devs)?
+
+2. FACILITATION (Facilitación): ¿Coordinó sin ser command-and-control? ¿Empoderó al equipo? ¿Creó conversaciones productivas?
+
+3. EMPATHY (Empatía): ¿Mostró empatía con Mateo (bloqueado) y QA (frustrados)? ¿Evitó culpar?
+
+4. COORDINATION (Coordinación): ¿Conectó recursos disponibles (Diego senior, Lucas idle)? ¿Balanceó urgencia con empoderamiento?
+
+5. AI_JUDGMENT (Uso Crítico de AI): Si usó AI coach, ¿lo hizo apropiadamente? ¿Adaptó sugerencias al contexto? (Score 3 si no usó AI)
+
+6. WIP_LIMITS_AWARENESS (Conocimiento WIP Limits): ¿Identificó que 5 tasks en DOING exceden el límite de 3? ¿Entendió el impacto en el flujo?
+
+7. FLOW_OPTIMIZATION (Optimización de Flujo): ¿Propuso soluciones para desbloquear el flujo? ¿Identificó el bottleneck? ¿Priorizó terminar sobre empezar?
+
+Respondé SOLO con JSON:
+{
+  "quality": "expert|competent|developing|red_flag",
+  "scores": {
+    "detection": 1-4,
+    "facilitation": 1-4,
+    "empathy": 1-4,
+    "coordination": 1-4,
+    "ai_judgment": 1-4,
+    "wip_limits_awareness": 1-4,
+    "flow_optimization": 1-4
+  },
+  "reactions": [{"from": "member_id", "text": "respuesta realista en español"}],
+  "feedback": "Evaluación breve en español",
+  "boardUpdates": {
+    "FEN-403": {"status": "escalated"}
+  }
+}
+
+SCORING:
+- Expert(4): Detecta temprano, facilita sin dirigir, identifica WIP limits y bottlenecks, propone soluciones específicas para desbloquear flujo
+- Competent(3): Buenos instintos pero timing imperfecto o no identifica todos los problemas Kanban
+- Developing(2): Muy directivo o muy pasivo, no identifica WIP limits o bottlenecks
+- RedFlag(1): No detecta problemas, bypasea al equipo, culpa individuos, ignora principios Kanban
+
+IMPORTANTE:
+- wip_limits_awareness: Score 4 si identifica que 5/3 excede límite, 3 si nota sobrecarga sin mencionar límite, 2 si no identifica, 1 si sugiere agregar más tasks
+- flow_optimization: Score 4 si identifica bottleneck (FEN-403) y propone solución específica (escalar, pair programming, re-priorizar), 3 si identifica pero solución parcial, 2 si no identifica bottleneck, 1 si ignora el flujo
+
+Generá 1-3 reacciones realistas del equipo. Si la acción merece actualizar el board (ej: escalation exitosa), incluí boardUpdates.`
+}
+
 // ─── Calcular scores finales ───
 export function computeScores(allScores, dimensions) {
   return dimensions.map(([key, label]) => {
@@ -92,4 +264,265 @@ export function getGrade(finalScores) {
   if (avg >= 60) return { letter: "B", label: "Scrum Master Competente", color: "#60a5fa", avg }
   if (avg >= 40) return { letter: "C", label: "Scrum Master en Desarrollo", color: "#fbbf24", avg }
   return { letter: "D", label: "Necesita Crecimiento Significativo", color: "#f87171", avg }
+}
+
+// ─── AI Coaching Assistant (Challenge03 - Burnout) ───
+export function buildCoachingQuestionsPrompt(teamDesc, situation, context) {
+  return `Sos un AI Coaching Assistant para Scrum Masters en SMatch. Tu rol es sugerir PREGUNTAS empáticas para coaching 1-1, especialmente para detectar burnout o problemas personales. Respondé en español.
+
+EQUIPO: ${teamDesc}
+
+SITUACIÓN: ${situation}
+
+CONTEXTO DE LA CONVERSACIÓN:
+${context}
+
+El SM está en un 1-1 con un dev que muestra señales de burnout o performance issues. Necesita crear un espacio seguro para que el dev se abra.
+
+Generá 3-4 preguntas de coaching empáticas que:
+- Sean abiertas (no cerradas)
+- No sean acusatorias ni juzguen
+- Exploren cómo se siente la persona, no solo qué hizo
+- Creen espacio para compartir sin presionar
+- Eviten asumir o diagnosticar
+
+BUENAS: "¿Cómo te sentís con la carga de trabajo últimamente?" / "¿Qué está pasando que pueda estar afectándote?"
+MALAS: "¿Por qué performaste tan mal esta semana?" / "¿Estás quemado?" (cerrada, diagnóstico)
+
+Respondé SOLO con JSON:
+{"questions":["Pregunta 1","Pregunta 2","Pregunta 3","Pregunta 4"],"coaching_note":"Recordá que el objetivo es crear un espacio seguro, no forzar respuestas. Escuchá más de lo que hablás."}
+
+Nota de coaching: enfocate en curiosidad genuina, no interrogatorio. El dev debe sentir que puede ser honesto sin consecuencias.`
+}
+
+// ─── AI ACTOR: Generar respuesta de UN personaje dinámicamente ───
+export function buildActorPrompt(characterId, characterDesc, characterState, situation, conversation, smLastMessage) {
+  return `Sos un ACTOR interpretando a un miembro de un equipo Scrum en SMatch. Tu trabajo es responder EN PERSONAJE de forma realista. Respondé todo en español.
+
+PERSONAJE QUE INTERPRETÁS:
+${characterDesc}
+
+ESTADO EMOCIONAL ACTUAL:
+- Openness: ${characterState.openness}/10 (qué tan dispuesto está a compartir)
+- Trust: ${characterState.trust}/10 (confianza en el SM)
+- Frustration: ${characterState.frustration}/10 (nivel de frustración)
+- Energy: ${characterState.energy}/10 (energía/motivación)
+
+SITUACIÓN ACTUAL:
+${situation}
+
+CONVERSACIÓN RECIENTE:
+${conversation}
+
+EL SCRUM MASTER ACABA DE DECIR:
+"${smLastMessage}"
+
+Tu trabajo es responder EN PERSONAJE considerando:
+1. Tu personalidad (del character desc)
+2. Tu estado emocional actual (si trust es bajo, no te vas a abrir fácil)
+3. El contexto de la situación
+4. Lo que acaba de decir el SM
+
+IMPORTANTE:
+- Si el SM hace preguntas empáticas y crea espacio seguro → aumentá openness/trust gradualmente
+- Si el SM presiona, acusa, o es directivo → bajá trust, aumentá frustration
+- Si el SM ignora señales obvias → aumentá frustration
+- Respondé como una PERSONA REAL, no como un manual de texto
+
+Respondé SOLO con JSON:
+{"from":"${characterId}","text":"Tu respuesta en personaje (1-3 oraciones)","newState":{"openness":0-10,"trust":0-10,"frustration":0-10,"energy":0-10},"emotion":"calm|hopeful|frustrated|defensive|relieved"}
+
+La respuesta debe sonar natural, como algo que dirías en una videollamada o chat real.`
+}
+
+// ─── Evaluar challenge de burnout/performance ───
+export function buildBurnoutChallengePrompt(teamDesc, sprintContext, situation, conversation, smInput, phase) {
+  const phaseInstructions = {
+    detection: `Fase de DETECCIÓN. Evaluá si el SM:
+- Detectó las señales de burnout más allá del performance issue (bugs básicos, cansancio visible, evasivas)
+- Reconoció el patrón (era productivo antes, cambio drástico)
+- No culpó al dev ni asumió "vagancia" o falta de compromiso
+- Decidió hablar 1-1 en vez de presionar públicamente`,
+
+    understanding: `Fase de ENTENDIMIENTO. Evaluá la preparación del SM:
+- Formuló hipótesis empáticas (burnout, problema personal) no punitivas
+- Planteó la conversación como exploración, no confrontación
+- Consideró múltiples causas posibles`,
+
+    coaching: `Fase de COACHING 1-1. Evaluá si el SM:
+- Creó un espacio seguro para que el dev se abra
+- Hizo preguntas empáticas y abiertas (no acusatorias)
+- Escuchó más de lo que habló
+- No juzgó ni minimizó lo que el dev compartió
+- Validó los sentimientos del dev
+- Propuso apoyo concreto (días off, reducir carga) sin ser salvador
+- No forzó información, dejó que el dev decida qué compartir`,
+
+    leadership: `Fase de LIDERAZGO. Evaluá si el SM:
+- Manejó el impacto en el sprint de forma práctica (redistribuir trabajo)
+- NO expuso la situación personal de Martín al equipo
+- Mantuvo la confianza del dev sin mentir al equipo
+- Fue transparente sobre el "qué" (tickets se redistribuyen) sin el "por qué personal"
+- Evitó que el equipo especule o culpe al dev`,
+
+    systemic: `Fase SISTÉMICA. Evaluá si el SM:
+- Identificó el patrón (burnout silencioso, no detectado a tiempo)
+- Propuso cambios de proceso para detectar burnout temprano (check-ins, workload visibility)
+- Propuso cambios de cultura (seguridad psicológica para decir "no puedo más")
+- Empoderó al equipo para prevenir, no solo reaccionar
+- Consideró múltiples niveles (individual, team, org)`
+  }
+
+  return `Simulás un equipo Scrum real donde un dev tiene burnout y performance issues. Interpretás a TODOS los miembros del equipo reaccionando al Scrum Master. Respondé todo en español.
+
+EQUIPO:
+${teamDesc}
+
+CONTEXTO DEL SPRINT: ${sprintContext}
+
+SITUACIÓN ACTUAL: ${situation}
+
+CONVERSACIÓN RECIENTE:
+${conversation}
+
+EL SCRUM MASTER DIJO: "${smInput}"
+
+${phaseInstructions[phase] || ""}
+
+Respondé SOLO con JSON:
+{"quality":"expert|competent|developing|red_flag","scores":{"detection":1-4,"coaching":1-4,"empathy":1-4,"leadership":1-4,"systemic":1-4},"reactions":[{"from":"member_id","text":"respuesta realista en español"}],"feedback":"Evaluación breve en español","narration":"Descripción de cómo reaccionó el equipo/dev"}
+
+SCORING: Expert(4)=detecta temprano, coaching empático, crea espacio seguro, maneja impacto sin exponer, piensa sistémico. Competent(3)=detecta tarde o con ayuda, coaching decente pero mecánico, maneja bien. Developing(2)=no detecta burnout, trata solo como performance issue, presiona al dev. RedFlag(1)=culpa al dev, expone situación personal, no ofrece apoyo, ignora patrón.
+
+IMPORTANTE: Si el SM está en el 1-1 (fase coaching) y hace preguntas empáticas y abiertas, Martín debe ABRIRSE gradualmente. Si presiona o acusa, Martín se cierra. Si crea espacio seguro, Martín eventualmente admite el burnout.
+
+Generá 1-3 reacciones realistas y en personaje.`
+}
+
+// ─── Evaluar challenge de velocity pressure ───
+export function buildVelocityPressurePrompt(teamDesc, sprintContext, situation, conversation, smInput, phase) {
+  const phaseInstructions = {
+    detection: `Fase de DETECCIÓN. Evaluá si el SM:
+- Detectó el contexto de presión vs calidad (no solo "trabajar más")
+- Reconoció que los números no cuentan toda la historia
+- No culpó al equipo ni asumió "vagancia" o falta de esfuerzo
+- Evitó reacciones defensivas o promesas vacías
+- Creó espacio para investigar causas reales`,
+
+    understanding: `Fase de ENTENDIMIENTO. Evaluá si el SM:
+- Ayudó al equipo a articular causas sistémicas (deuda técnica, infra, cambios mid-sprint)
+- Comunicó el impacto al stakeholder de forma que genere empatía (no solo excusas)
+- Usó datos y ejemplos concretos
+- Evitó culpar al PO, otras áreas, o factores externos sin proponer soluciones
+- Educó sobre métricas ágiles (velocity no es lo único)`,
+
+    facilitation: `Fase de FACILITACIÓN. Evaluá si el SM:
+- Facilitó al equipo para llegar a soluciones reales (no reactivas como "trabajar más horas")
+- Protegió al equipo de propuestas insostenibles
+- Empoderó al equipo para proponer alternativas
+- No impuso soluciones pero guió hacia opciones sustentables
+- Manejó la tensión entre presión del negocio y bienestar del equipo`,
+
+    negotiation: `Fase de NEGOCIACIÓN. Evaluá si el SM:
+- Negoció compromisos realistas con el stakeholder
+- Balanceó presión del negocio con capacidad real del equipo
+- Propuso plan concreto con timelines y trade-offs claros
+- No prometió imposibles ni cedió completamente
+- Mantuvo integridad del equipo y del proceso ágil`,
+
+    systemic: `Fase SISTÉMICA. Evaluá si el SM:
+- Identificó el patrón (optimizar solo velocity sin visibilidad de deuda/calidad genera crisis)
+- Propuso métricas más completas (lead time, defect rate, % tiempo en deuda técnica)
+- Propuso comunicación proactiva de estas métricas a stakeholders
+- Empoderó al equipo para prevenir, no solo reaccionar
+- Consideró cambios de proceso, cultura y visibilidad`
+  }
+
+  return `Simulás un equipo Scrum real bajo presión de velocity del Engineering Manager. Interpretás a TODOS los miembros del equipo y al EM reaccionando al Scrum Master. Respondé todo en español.
+
+EQUIPO:
+${teamDesc}
+
+CONTEXTO DEL SPRINT: ${sprintContext}
+
+SITUACIÓN ACTUAL: ${situation}
+
+CONVERSACIÓN RECIENTE:
+${conversation}
+
+EL SCRUM MASTER DIJO: "${smInput}"
+
+${phaseInstructions[phase] || ""}
+
+Respondé SOLO con JSON:
+{"quality":"expert|competent|developing|red_flag","scores":{"detection":1-4,"metrics_literacy":1-4,"stakeholder_management":1-4,"negotiation":1-4,"systemic":1-4},"reactions":[{"from":"member_id","text":"respuesta realista en español"}],"feedback":"Evaluación breve en español","narration":"Descripción de cómo reaccionó el equipo/stakeholder"}
+
+SCORING:
+Expert(4)=detecta presión vs calidad temprano, investiga causas reales, facilita diálogo productivo, negocia compromisos realistas, propone métricas sistémicas.
+Competent(3)=detecta el problema pero reacciona defensivamente, comunica bien pero sin datos, facilita decentemente, negocia pero cede mucho.
+Developing(2)=no detecta el contexto de presión, culpa factores externos, no protege al equipo, promete imposibles, ignora causas sistémicas.
+RedFlag(1)=culpa al equipo, acepta "trabajar más horas", no negocia con stakeholder, ignora el patrón.
+
+IMPORTANTE:
+- Si el SM propone "trabajar más horas" o soluciones insostenibles, el equipo (especialmente Sofía) debe resistir recordando el burnout previo.
+- Si el SM negocia bien con el EM, Daniel puede ceder SI el plan tiene datos y timelines claros.
+- Si el SM propone métricas sistémicas, el equipo debe apoyar activamente.
+- El EM (Daniel) está bajo presión del CEO, no es villano — puede ser educado sobre métricas ágiles si el SM comunica bien.
+
+Generá 1-3 reacciones realistas y en personaje del equipo/stakeholder.`
+}
+
+// ─── Evaluar challenge de team agreements workshop ───
+export function buildTeamAgreementsPrompt(teamDesc, sprintContext, boardSummary, chatContext) {
+  return `Sos un evaluador experto de facilitación de workshops de Team Agreements. Evaluás cómo el Scrum Master está facilitando la creación de acuerdos de equipo. Respondé todo en español.
+
+EQUIPO:
+${teamDesc}
+
+CONTEXTO: ${sprintContext}
+
+BOARD ACTUAL (acuerdos documentados por el SM):
+${boardSummary}
+
+CONVERSACIÓN RECIENTE DEL EQUIPO:
+${chatContext}
+
+Tu tarea: Evaluar la facilitación del SM basándote en:
+
+1. **FACILITATION** (1-4): ¿El SM está escuchando activamente las propuestas del equipo y facilitando el diálogo? ¿Maneja conflictos sin tomar partido? ¿Permite que las voces se escuchen?
+
+2. **CONSENSUS_BUILDING** (1-4): ¿Los acuerdos en el board reflejan consenso real? ¿Son concretos y accionables, no vagos? ¿El SM está sintetizando bien las propuestas?
+
+3. **INCLUSIVITY** (1-4): ¿El SM está documentando propuestas de todos los miembros? ¿Nota si alguien (especialmente Sofía, junior) no participa? ¿Crea espacio seguro?
+
+4. **CLARITY** (1-4): ¿Los acuerdos son claros y específicos? ¿Evita abstracciones como "trabajar con calidad" sin definición? ¿Pregunta "¿qué significa esto en la práctica?"?
+
+5. **SYSTEMS_THINKING** (1-4): ¿El SM está pensando en el sistema completo? ¿Los acuerdos cubren las 6 áreas necesarias? ¿Propone mecanismos de follow-through y revisión?
+
+Respondé SOLO con JSON:
+{
+  "quality": "expert|competent|developing|red_flag",
+  "scores": {
+    "facilitation": 1-4,
+    "consensus_building": 1-4,
+    "inclusivity": 1-4,
+    "clarity": 1-4,
+    "systems_thinking": 1-4
+  },
+  "feedback": "Evaluación breve en español de 2-3 oraciones sobre qué está haciendo bien y qué podría mejorar"
+}
+
+SCORING GUIDE:
+Expert (4): Facilita sin imponer, escucha activamente, sintetiza bien, acuerdos concretos, todos participan, piensa sistémicamente.
+Competent (3): Facilita decentemente, algunos acuerdos vagos, no todos participan igualmente, seguimiento básico.
+Developing (2): Documenta pero no facilita, acuerdos poco claros, ignora dinámicas de poder, no piensa en follow-through.
+Red Flag (1): Solo transcribe sin facilitar, permite dominancia de voces, acuerdos que nadie seguirá, no crea consenso.
+
+CONTEXTO DE EVALUACIÓN:
+- Evaluá la CALIDAD de los acuerdos documentados en el board: ¿son concretos o vagos?
+- Evaluá la COBERTURA: ¿está documentando propuestas de las 6 áreas (Values, DoR, DoD, Communication, Estimation, Ceremonies)?
+- Evaluá la FACILITACIÓN: ¿los acuerdos reflejan lo que el equipo está proponiendo en el chat?
+- Si hay conflictos en el chat (Laura vs Juan sobre velocidad/calidad), ¿el SM los refleja en el board de forma balanceada?
+- Si Sofía (junior) propone algo, ¿el SM lo documenta o lo ignora?
+- ¿Los acuerdos tienen follow-through (revisión periódica, ownership, etc.) o quedarán olvidados?`
 }

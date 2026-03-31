@@ -1,10 +1,14 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom"
 import Landing from "./pages/Landing"
 import ChallengeMenu from "./pages/ChallengeMenu"
+import CandidateReport from "./pages/CandidateReport"
+import RecruiterDashboard from "./pages/RecruiterDashboard"
 import Challenge01 from "./challenges/Challenge01"
-
-// Importá futuros challenges acá:
-// import Challenge02 from "./challenges/Challenge02"
+import Challenge02 from "./challenges/Challenge02"
+import Challenge03 from "./challenges/Challenge03"
+import Challenge04 from "./challenges/Challenge04"
+import Challenge05 from "./challenges/Challenge05"
+import Challenge06 from "./challenges/Challenge06"
 
 export default function App() {
   return (
@@ -13,11 +17,13 @@ export default function App() {
         <Route path="/" element={<Landing />} />
         <Route path="/challenges" element={<ChallengeMenu />} />
         <Route path="/challenge/1" element={<Challenge01 />} />
-        {/* Futuros:
         <Route path="/challenge/2" element={<Challenge02 />} />
-        <Route path="/recruiter" element={<RecruiterDashboard />} />
-        <Route path="/recruiter/positions" element={<ManagePositions />} />
-        */}
+        <Route path="/challenge/3" element={<Challenge03 />} />
+        <Route path="/challenge/4" element={<Challenge04 />} />
+        <Route path="/challenge/5" element={<Challenge05 />} />
+        <Route path="/challenge/6" element={<Challenge06 />} />
+        <Route path="/report/:id" element={<CandidateReport />} />
+        <Route path="/dashboard" element={<RecruiterDashboard />} />
       </Routes>
     </BrowserRouter>
   )

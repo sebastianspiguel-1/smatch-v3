@@ -1,6 +1,15 @@
 import { useState, useEffect } from "react"
 import { T, DIM_LABELS } from "../theme"
 
+// Re-export new components
+export { default as RadarChartComponent } from "./RadarChartComponent"
+export { default as FeedbackModal } from "./FeedbackModal"
+export { default as ProgressBar } from "./ProgressBar"
+export { default as TopBar } from "./TopBar"
+export { default as FeedbackToast } from "./FeedbackToast"
+export { default as FeedbackTimeline } from "./FeedbackTimeline"
+export { default as SuccessModal } from "./SuccessModal"
+
 // ─── Avatar ───
 export function Avatar({ member, size = 24 }) {
   if (!member) return null
@@ -15,37 +24,88 @@ export function Avatar({ member, size = 24 }) {
   )
 }
 
-// ─── Sticky Note ───
+// ─── Sticky Note (Lexipol-style with left border) ───
 export function StickyCard({ sticky, memberMap, delay = 0 }) {
   const [show, setShow] = useState(false)
   useEffect(() => { const t = setTimeout(() => setShow(true), delay); return () => clearTimeout(t) }, [delay])
   const m = memberMap[sticky.author]
-  const rot = ((sticky.text.length * 7 + sticky.col * 13) % 5) - 2.5
+
+  // Get initials from name
+  const getInitials = (name) => {
+    if (!name) return "?"
+    return name.split(" ").map(w => w[0] || "").join("").toUpperCase().slice(0, 2)
+  }
+
+  // Hash-based avatar colors
+  const AVATAR_COLORS = [
+    { bg: "#dbeafe", text: "#1e40af" }, { bg: "#fce7f3", text: "#9d174d" },
+    { bg: "#dcfce7", text: "#166534" }, { bg: "#fef3c7", text: "#92400e" },
+    { bg: "#ede9fe", text: "#5b21b6" }, { bg: "#ffedd5", text: "#9a3412" },
+    { bg: "#cffafe", text: "#155e75" }, { bg: "#fef9c3", text: "#713f12" },
+  ]
+  const hash = (str = "") => {
+    let h = 0
+    for (let i = 0; i < str.length; i++) h = ((h << 5) - h) + str.charCodeAt(i)
+    return Math.abs(h)
+  }
+  const avatarColor = AVATAR_COLORS[hash(sticky.author || "") % AVATAR_COLORS.length]
 
   return (
     <div style={{
-      background: sticky.color, borderRadius: 3, padding: "7px 9px", marginBottom: 5,
-      color: "#1a1a1a", fontSize: 10.5, lineHeight: 1.4, position: "relative",
-      transform: `rotate(${rot}deg)`, boxShadow: "1px 2px 5px rgba(0,0,0,0.12)",
-      opacity: show ? 1 : 0, transition: "all 0.4s ease",
+      background: "#fff",
+      border: `1.5px solid ${T.border}`,
+      borderLeft: `4px solid ${sticky.color}`,
+      borderRadius: 8,
+      padding: "9px 12px",
+      marginBottom: 7,
+      display: "flex",
+      alignItems: "center",
+      gap: 8,
+      boxShadow: "0 1px 3px rgba(0,0,0,.04)",
+      opacity: show ? 1 : 0,
+      transform: show ? "translateY(0)" : "translateY(8px)",
+      transition: "all 0.3s ease",
+      transitionDelay: `${delay}ms`
     }}>
-      <div style={{ fontWeight: 700, fontSize: 9, marginBottom: 2, opacity: 0.6 }}>{m?.name}</div>
-      <div>{sticky.text}</div>
+      <div style={{
+        width: 24,
+        height: 24,
+        borderRadius: "50%",
+        background: avatarColor.bg,
+        color: avatarColor.text,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontSize: 10,
+        fontWeight: 700,
+        flexShrink: 0,
+        border: "2px solid #fff",
+        boxShadow: "0 1px 3px rgba(0,0,0,.1)"
+      }}>
+        {getInitials(m?.name || sticky.author)}
+      </div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: 13, fontWeight: 600, color: T.navy, lineHeight: 1.4 }}>
+          {sticky.text}
+        </div>
+        <div style={{ fontSize: 11, color: T.dim, marginTop: 2 }}>
+          {m?.name || sticky.author}
+        </div>
+      </div>
       {sticky.votes?.length > 0 && (
-        <div style={{ display: "flex", alignItems: "center", gap: 2, marginTop: 5, flexWrap: "wrap" }}>
-          {sticky.votes.map((v, i) => {
-            const vm = memberMap[v]
-            return vm ? (
-              <div key={i} style={{
-                width: 15, height: 15, borderRadius: "50%", background: vm.color, opacity: 0.8,
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: 6.5, fontWeight: 700, color: "#fff",
-              }}>{vm.init}</div>
-            ) : null
-          })}
-          <span style={{ fontSize: 8, fontWeight: 700, opacity: 0.45, marginLeft: 2 }}>
-            {sticky.votes.length} votos
-          </span>
+        <div style={{
+          background: "#dcfce7",
+          borderRadius: 100,
+          padding: "3px 8px",
+          fontSize: 11,
+          fontWeight: 700,
+          color: "#166534",
+          display: "flex",
+          alignItems: "center",
+          gap: 4,
+          flexShrink: 0
+        }}>
+          👍 {sticky.votes.length}
         </div>
       )}
     </div>

@@ -58,13 +58,9 @@ export default function Landing() {
   function handleLogin(e) {
     e.preventDefault()
     if (loginTab === "candidate") {
-      // TODO: Supabase auth
-      if (loginEmail === "test@test.com" && loginPass === "test") {
-        setLoginOpen(false)
-        nav("/challenges")
-      } else {
-        alert("Credenciales incorrectas.\n\nPara la demo:\nEmail: test@test.com\nPassword: test")
-      }
+      // TODO: Supabase auth - For now, allow login without credentials
+      setLoginOpen(false)
+      nav("/challenges")
     } else {
       // Recruiter login
       alert("Recruiter login próximamente. Contactanos en hola@smatch.com")
@@ -106,8 +102,8 @@ export default function Landing() {
                 </button>
               </div>
             </li>
-            <li><a href="#" className="nav-cta" onClick={handleStartAssessment}>Start Assessment →</a></li>
             <li><a href="https://calendly.com" target="_blank" rel="noreferrer" className="nav-btn-secondary">Schedule Demo</a></li>
+            <li><a href="#" className="nav-cta" onClick={handleStartAssessment}>Start Assessment →</a></li>
           </ul>
           <button className={`mobile-menu-toggle ${mobileOpen ? "active" : ""}`} onClick={() => setMobileOpen(!mobileOpen)}>
             <span /><span /><span />
@@ -123,11 +119,11 @@ export default function Landing() {
           <div className="shape shape-3" />
         </div>
         <div className="hero-content">
-          <h1>Encuentra el <span className="gradient-text">talento ágil perfecto</span></h1>
-          <p>Reduce el riesgo de malas contrataciones en roles ágiles —con data real de desempeño, verificado en contextos reales. Sin CVs inflados. Sin adivinar.</p>
+          <h1>Contrata <span className="gradient-text">Scrum Masters</span> que generen impacto real</h1>
+          <p>Identifica el talento ágil correcto con evaluaciones prácticas y objetivas. Reduce el riesgo de contrataciones equivocadas con data real de desempeño.</p>
           <div className="hero-ctas">
-            <a href="#contacto" className="btn btn-primary" onClick={(e) => { e.preventDefault(); scrollTo("contacto") }}>Publicar Posición</a>
-            <a href="#como-funciona" className="btn btn-secondary" onClick={(e) => { e.preventDefault(); scrollTo("como-funciona") }}>Ver Cómo Funciona</a>
+            <a href="#contacto" className="btn btn-primary" onClick={(e) => { e.preventDefault(); scrollTo("contacto") }}>Probar Gratis</a>
+            <a href="#como-funciona" className="btn btn-secondary" onClick={(e) => { e.preventDefault(); scrollTo("como-funciona") }}>Ver Demo</a>
           </div>
         </div>
       </section>
@@ -137,9 +133,9 @@ export default function Landing() {
         <div className="container">
           <div className="feature-section">
             <div className="feature-text">
-              <h2>Donde los Scrum Masters demuestran sus skills jugando</h2>
-              <p>No más entrevistas genéricas. No más adivinar si alguien puede facilitar un sprint o resolver un conflicto de equipo.</p>
-              <p>En SMatch, los candidatos enfrentan simulaciones reales. Los ves en acción antes de contratarlos.</p>
+              <h2>Evaluaciones basadas en situaciones reales</h2>
+              <p>Simulaciones interactivas donde los candidatos demuestran sus habilidades de facilitación, resolución de conflictos y liderazgo ágil.</p>
+              <p>Métricas objetivas y reportes detallados para tomar decisiones de contratación con confianza.</p>
             </div>
             <div className="feature-visual">
               <div className="visual-card">
@@ -264,6 +260,22 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* ═══ RECRUITER CTA BANNER ═══ */}
+      <section className="recruiter-cta-section">
+        <div className="recruiter-cta-banner">
+          <div className="recruiter-cta-content">
+            <div className="recruiter-cta-icon">👔</div>
+            <div className="recruiter-cta-text">
+              <strong>¿Eres recruiter?</strong>
+              <span>Evalúa candidatos con SMatch y toma decisiones basadas en data real</span>
+            </div>
+          </div>
+          <button onClick={() => scrollTo("contacto")} className="recruiter-cta-button">
+            Ver Planes →
+          </button>
+        </div>
+      </section>
+
       {/* ═══ CTA + CONTACT ═══ */}
       <section id="contacto" className="cta-section">
         <div className="cta-content">
@@ -297,6 +309,32 @@ export default function Landing() {
               <textarea id="mensaje" value={contactForm.mensaje} onChange={e => setContactForm(f => ({ ...f, mensaje: e.target.value }))} placeholder="Cuéntanos qué necesitas..." />
             </div>
             <button type="button" className="btn-submit" onClick={handleContact}>Enviar Mensaje</button>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══ TRUSTED BY ═══ */}
+      <section className="trusted-by-section">
+        <div className="trusted-container">
+          <p className="trusted-label">Empresas que confían en SMatch</p>
+          <div className="logos-grid">
+            {["TechCorp", "StartupX", "ScaleUp", "AgileCo", "DevTeam", "InnovaSoft"].map(company => (
+              <div key={company} className="company-logo">{company}</div>
+            ))}
+          </div>
+          <div className="trust-stats">
+            <div className="trust-stat">
+              <span className="trust-number">1,200+</span>
+              <span className="trust-text">Scrum Masters evaluados</span>
+            </div>
+            <div className="trust-stat">
+              <span className="trust-number">85+</span>
+              <span className="trust-text">Empresas activas</span>
+            </div>
+            <div className="trust-stat">
+              <span className="trust-number">94%</span>
+              <span className="trust-text">Tasa de match</span>
+            </div>
           </div>
         </div>
       </section>
