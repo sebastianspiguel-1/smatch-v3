@@ -8,7 +8,7 @@ const CHALLENGES = [
     id: 1,
     challengeFile: 6, // Maps to Challenge06 component
     title: "Team Agreements Workshop",
-    desc: "Sprint 0, primer día del equipo. Facilitá la creación de acuerdos sin imponer. DoR, DoD, valores, working agreements.",
+    desc: "Sprint 0. El equipo necesita establecer acuerdos de trabajo. Facilitá la sesión para poder llegar a un consenso de equipo sobre diversos temas centrales.",
     ready: true,
     icon: "□",
     accentColor: "#7c3aed",
@@ -19,7 +19,7 @@ const CHALLENGES = [
     id: 2,
     challengeFile: 4, // Maps to Challenge04 component
     title: "Estimación & Priorización",
-    desc: "Sprint 1 Planning. Facilitá Planning Poker, enseñá story points, ayudalos a estimar y priorizar el backlog del sprint.",
+    desc: "El equipo tiene diferentes seniorities. Muchos no saben de estimación y priorización. Facilitá una sesión para que el equipo tenga claro todo lo necesario a la hora de estimar y priorizar.",
     ready: true,
     icon: "■",
     accentColor: "#0891b2",
@@ -30,7 +30,7 @@ const CHALLENGES = [
     id: 3,
     challengeFile: 1, // Maps to Challenge01 component
     title: "La retro que parece perfecta",
-    desc: "Sprint 2 completado. Todo parece ir bien en la superficie... pero hay tensión oculta. Facilitá la retro que saca lo real.",
+    desc: "Retrospectiva del Sprint. Pareciese haber cierta tensión entre el equipo. Facilitá la Retro para poder sacar el mayor valor posible de la misma.",
     ready: true,
     icon: "◉",
     accentColor: "#00d4aa",
@@ -41,7 +41,7 @@ const CHALLENGES = [
     id: 4,
     challengeFile: 2, // Maps to Challenge02 component
     title: "El bloqueo que nadie escala",
-    desc: "Sprint 3, día 7. Un dev bloqueado hace 3 días, QA sin poder testear, WIP limit excedido. ¿Cómo coordinás sin ser PM?",
+    desc: "El equipo comenzó a utilizar un tablero kanban, pero pareciese que no está funcionando como esperaba. Miembros del equipo bloqueados, poco escalamiento de riesgos, WIP excedidos... ¡Ayudá al equipo a avanzar!",
     ready: true,
     icon: "◆",
     accentColor: "#f59e0b",
@@ -52,7 +52,7 @@ const CHALLENGES = [
     id: 5,
     challengeFile: 3, // Maps to Challenge03 component
     title: "El dev que se está apagando",
-    desc: "Sprint 5, día 6. Un dev senior está performando mal. ¿Burnout o falta de compromiso? Coaching empático, conversación difícil.",
+    desc: "Un miembro del equipo con buen historial está performando mal sin razón aparente. Generá un espacio seguro para una conversación difícil de coaching 1-1.",
     ready: true,
     icon: "⬢",
     accentColor: "#ff8a80",
@@ -63,7 +63,7 @@ const CHALLENGES = [
     id: 6,
     challengeFile: 5, // Maps to Challenge05 component
     title: "La presión de velocidad",
-    desc: "Sprint 6, día 3. El Engineering Manager quiere 30% más de velocidad. Con gráficos y métricas. El equipo te mira.",
+    desc: "El Engineering Manager exige acelerar 30% la velocidad y muestra métricas de \"bajo rendimiento\". El equipo te mira esperando que los defiendas. ¿Cómo manejás la situación?",
     ready: true,
     icon: "▲",
     accentColor: "#dc2626",
@@ -75,6 +75,15 @@ const CHALLENGES = [
 export default function ChallengeMenu() {
   const nav = useNavigate()
   const [showIntro, setShowIntro] = useState(true)
+  const [showOnboarding, setShowOnboarding] = useState(() => {
+    // Only show onboarding if user hasn't seen it before
+    return !localStorage.getItem("smatch_onboarding_seen")
+  })
+
+  const handleCloseOnboarding = () => {
+    localStorage.setItem("smatch_onboarding_seen", "true")
+    setShowOnboarding(false)
+  }
 
   if (showIntro) {
     return (
@@ -164,8 +173,7 @@ export default function ChallengeMenu() {
               <div className="role-card">
                 <h2>🎯 Tu Rol como Scrum Master</h2>
                 <p className="role-description">
-                  Vas a enfrentar <strong>6 situaciones críticas</strong> del equipo Setlist.
-                  Algunas ocurren ahora (Sprint 3), otras son <strong>flashbacks</strong> que explican cómo llegamos hasta acá.
+                  Vas a enfrentar <strong>6 situaciones críticas</strong> del equipo Setlist. Algunas ocurren ahora (Sprint 3), otras son <strong>flashbacks</strong> que explican cómo llegamos hasta acá.
                 </p>
                 <div className="situations-preview">
                   <div className="situation-badge">Team Agreements que nunca hicieron</div>
@@ -176,21 +184,20 @@ export default function ChallengeMenu() {
                   <div className="situation-badge">Retro donde nadie dice la verdad</div>
                 </div>
                 <p className="role-description">
-                  Cada situación evalúa diferentes skills: <strong>facilitación, coaching, coordinación, manejo de stakeholders, pensamiento sistémico.</strong>
-                  No hay respuestas únicas correctas — se evalúa tu proceso de pensamiento y decisiones.
+                  Cada situación evalúa diferentes skills: <strong>facilitación, coaching, coordinación, manejo de stakeholders, pensamiento sistémico.</strong> No hay respuestas únicas correctas — se evalúa tu proceso de pensamiento y decisiones.
                 </p>
                 <div className="role-format">
                   <div className="format-item">
                     <span className="format-icon">🎮</span>
-                    <span>Simulaciones interactivas con AI</span>
+                    <span>Simulaciones con AI</span>
                   </div>
                   <div className="format-item">
                     <span className="format-icon">⏱️</span>
-                    <span>60-90 min total · 6 challenges</span>
+                    <span>60-90 min total</span>
                   </div>
                   <div className="format-item">
                     <span className="format-icon">📊</span>
-                    <span>Feedback inmediato en múltiples dimensiones</span>
+                    <span>Feedback inmediato</span>
                   </div>
                 </div>
               </div>
@@ -213,6 +220,31 @@ export default function ChallengeMenu() {
     <div className="challenge-journey">
       <div className="journey-bg"></div>
 
+      {/* Onboarding Modal */}
+      {showOnboarding && (
+        <div className="onboarding-overlay" onClick={handleCloseOnboarding}>
+          <div className="onboarding-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="onboarding-header">
+              <h2>👋 Bienvenido a tu Assessment</h2>
+            </div>
+            <div className="onboarding-content">
+              <p>Vas a completar <strong>6 challenges situacionales</strong> que simulan escenarios reales de un Scrum Master.</p>
+              <ul className="onboarding-list">
+                <li>⏱️ <strong>60-90 minutos</strong> en total</li>
+                <li>🎯 <strong>Sin respuestas únicas correctas</strong> — se evalúa tu proceso de pensamiento</li>
+                <li>📊 <strong>Feedback inmediato</strong> con score detallado al final</li>
+              </ul>
+              <p className="onboarding-tip">💡 Tip: Respondé con naturalidad, como lo harías en tu día a día.</p>
+            </div>
+            <div className="onboarding-footer">
+              <button className="btn-start-assessment" onClick={handleCloseOnboarding}>
+                Entendido, comenzar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="journey-container">
         <button onClick={() => nav("/")} className="back-button">
           ← Volver al inicio
@@ -228,9 +260,10 @@ export default function ChallengeMenu() {
               <div className="stat-value">4/6</div>
               <div className="stat-label">Completados</div>
             </div>
-            <div className="stat-item">
+            <div className="stat-item stat-item-clickable" onClick={() => nav("/mi-progreso")}>
               <div className="stat-value">67%</div>
               <div className="stat-label">Progreso</div>
+              <div className="stat-cta">Ver detalle →</div>
             </div>
           </div>
         </div>

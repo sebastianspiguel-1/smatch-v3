@@ -115,6 +115,24 @@
   color: #0a1f44;
 }
 
+.back-buttons {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.back-btn.secondary {
+  background: rgba(100, 116, 139, 0.08);
+  border-color: rgba(100, 116, 139, 0.20);
+  color: #64748b;
+}
+
+.back-btn.secondary:hover {
+  background: rgba(100, 116, 139, 0.12);
+  border-color: rgba(100, 116, 139, 0.35);
+  color: #475569;
+}
+
 .candidate-info {
   display: flex;
   align-items: center;

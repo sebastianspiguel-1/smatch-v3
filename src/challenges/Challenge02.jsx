@@ -3,7 +3,9 @@ import { useNavigate } from "react-router-dom"
 import { T } from "../theme"
 import { callAI, computeScores, getGrade, buildBlockerChallengePrompt } from "../engine/ai"
 import { saveResult } from "../engine/supabase"
-import { Avatar, ScoreBadges, RadarChartComponent, TopBar, SuccessModal } from "../components"
+import { Avatar, TopBar } from "../components"
+import ChallengeComplete from "../components/ChallengeComplete"
+import { markChallengeComplete, isLastChallenge } from "../utils/progressTracker"
 import {
   TEAM,
   MEMBER_MAP,
@@ -24,20 +26,23 @@ export default function Challenge02() {
   const [kanbanState, setKanbanState] = useState(INITIAL_KANBAN_STATE)
   const [selectedCard, setSelectedCard] = useState(null)
   const [chat, setChat] = useState([])
-  const [input, setInput] = useState("")
-  const [loading, setLoading] = useState(false)
   const [allScores, setAllScores] = useState([])
   const [allFeedback, setAllFeedback] = useState([])
-  const [timer, setTimer] = useState(900) // 15 minutes
-  const [showSuccessModal, setShowSuccessModal] = useState(false)
+  const [timer, setTimer] = useState(1200) // 20 minutes
   const [startTime] = useState(Date.now())
-  const [actionCount, setActionCount] = useState(0)
+  const [actionsCompleted, setActionsCompleted] = useState({
+    identify: false,
+    flagWIP: false,
+    pair: false,
+    escalate: false
+  })
+  const [draggedCard, setDraggedCard] = useState(null)
+  const [draggedFromColumn, setDraggedFromColumn] = useState(null)
 
   const chatRef = useRef(null)
-  const inputRef = useRef(null)
   const timerRef = useRef(null)
 
-  useEffect(() => { if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight }, [chat, loading])
+  useEffect(() => { if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight }, [chat])
   useEffect(() => {
     if (phase === "board") {
       timerRef.current = setInterval(() => {
@@ -53,7 +58,6 @@ export default function Challenge02() {
       return () => clearInterval(timerRef.current)
     }
   }, [phase])
-  useEffect(() => { if (phase === "results") { setTimeout(() => setShowSuccessModal(true), 800) } }, [phase])
 
   const mm = String(Math.floor(timer / 60)).padStart(2, "0")
   const ss = String(timer % 60).padStart(2, "0")
@@ -101,6 +105,7 @@ export default function Challenge02() {
   }
 
   function handleIdentifyBlocker() {
+    setActionsCompleted(prev => ({ ...prev, identify: true }))
     triggerChatReaction("on_identify_blocker")
     evaluateAction({
       type: "identify_blocker",
@@ -110,6 +115,7 @@ export default function Challenge02() {
   }
 
   function handleFlagWIP() {
+    setActionsCompleted(prev => ({ ...prev, flagWIP: true }))
     triggerChatReaction("on_flag_wip")
     evaluateAction({
       type: "flag_wip",
@@ -119,6 +125,7 @@ export default function Challenge02() {
   }
 
   function handleSuggestPair() {
+    setActionsCompleted(prev => ({ ...prev, pair: true }))
     triggerChatReaction("on_suggest_pair")
     evaluateAction({
       type: "suggest_pair",
@@ -128,11 +135,29 @@ export default function Challenge02() {
   }
 
   function handleEscalate() {
+    setActionsCompleted(prev => ({ ...prev, escalate: true }))
     triggerChatReaction("on_escalate")
     evaluateAction({
       type: "escalate",
       target: "Platform",
       message: "Voy a escalar al equipo Platform"
+    })
+
+    // UPDATE BOARD VISUALLY
+    setKanbanState(prev => {
+      const newState = { ...prev }
+      // Find FEN-403 and update it
+      Object.keys(newState).forEach(column => {
+        const cardIndex = newState[column].findIndex(c => c.id === "FEN-403")
+        if (cardIndex !== -1) {
+          newState[column][cardIndex] = {
+            ...newState[column][cardIndex],
+            status: "escalated",
+            blockedDays: 0
+          }
+        }
+      })
+      return newState
     })
 
     // Simulate resolution after escalation
@@ -141,24 +166,46 @@ export default function Challenge02() {
     }, 2000)
   }
 
-  async function handleChatSubmit() {
-    if (!input.trim() || loading) return
-    const txt = input.trim()
-    setInput("")
-    setLoading(true)
-    setChat(p => [...p, { isYou: true, text: txt }])
+  // Drag and Drop handlers
+  function handleDragStart(card, columnId) {
+    setDraggedCard(card)
+    setDraggedFromColumn(columnId)
+  }
 
-    // Generic facilitation
-    triggerChatReaction("on_generic_facilitation")
+  function handleDragOver(e) {
+    e.preventDefault() // Allow drop
+  }
 
-    // Evaluate action
-    await evaluateAction({
-      type: "chat_message",
-      target: null,
-      message: txt
+  function handleDrop(e, targetColumnId) {
+    e.preventDefault()
+    if (!draggedCard || !draggedFromColumn) return
+
+    // Don't do anything if dropped in same column
+    if (draggedFromColumn === targetColumnId) {
+      setDraggedCard(null)
+      setDraggedFromColumn(null)
+      return
+    }
+
+    // Move card from source to target column
+    setKanbanState(prev => {
+      const newState = { ...prev }
+      // Remove from source
+      newState[draggedFromColumn] = newState[draggedFromColumn].filter(c => c.id !== draggedCard.id)
+      // Add to target
+      newState[targetColumnId] = [...newState[targetColumnId], draggedCard]
+      return newState
     })
 
-    setLoading(false)
+    // Log the action for evaluation
+    evaluateAction({
+      type: "move_card",
+      target: draggedCard.id,
+      message: `Moved ${draggedCard.id} from ${draggedFromColumn} to ${targetColumnId}`
+    })
+
+    setDraggedCard(null)
+    setDraggedFromColumn(null)
   }
 
   async function evaluateAction(action) {
@@ -233,6 +280,7 @@ export default function Challenge02() {
 
   function finishChallenge() {
     clearInterval(timerRef.current)
+    markChallengeComplete(2) // Challenge 2 file number
     setPhase("results")
   }
 
@@ -342,76 +390,14 @@ export default function Challenge02() {
   // ═══════════════════════ RESULTS PHASE ═══════════════════════
   if (phase === "results") {
     return (
-      <div style={{ background: T.bg, minHeight: "100vh", color: T.text, fontFamily: "'Plus Jakarta Sans', 'Segoe UI', system-ui, sans-serif" }}>
-        <TopBar
-          title="📊 El bloqueo que nadie escala"
-          subtitle="Resultados"
-          currentStep={currentStep}
-          totalSteps={totalSteps}
-          score={Math.round(gradeData.avg)}
-        />
-        <div style={{ maxWidth: 520, margin: "0 auto", padding: "20px 16px" }}>
-          <div style={{ textAlign: "center", marginBottom: 16 }}>
-            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 3, color: T.orange }}>EVALUACIÓN COMPLETA</div>
-            <div style={{ fontSize: 52, fontWeight: 900, color: gradeData.color, marginTop: 6 }}>{gradeData.letter}</div>
-            <div style={{ fontSize: 13, color: T.sub }}>{gradeData.label}</div>
-            <div style={{ fontSize: 10, color: T.dim }}>Puntaje general: {Math.round(gradeData.avg)}%</div>
-            <div style={{ fontSize: 10, color: T.dim, marginTop: 4 }}>{actionCount} acciones evaluadas</div>
-          </div>
-          <div style={{ background: T.panel, borderRadius: 10, padding: 14, marginBottom: 14, border: `1px solid ${T.border}` }}>
-            <RadarChartComponent data={finalScores} height={220} />
-          </div>
-          <div style={{ marginBottom: 14 }}>
-            {finalScores.map(s => (
-              <div key={s.dimension} style={{ marginBottom: 7 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, marginBottom: 2 }}>
-                  <span style={{ color: T.sub }}>{s.dimension}</span>
-                  <span style={{ fontWeight: 700, color: s.score >= 75 ? T.green : s.score >= 50 ? T.blue : s.score >= 25 ? T.orange : T.red }}>{s.score}%</span>
-                </div>
-                <div style={{ height: 4, background: T.card, borderRadius: 2, overflow: "hidden" }}>
-                  <div style={{ height: "100%", borderRadius: 2, width: `${s.score}%`, background: s.score >= 75 ? T.green : s.score >= 50 ? T.blue : s.score >= 25 ? T.orange : T.red, transition: "width 0.8s" }} />
-                </div>
-              </div>
-            ))}
-          </div>
-          <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 2, color: T.orange, marginBottom: 6 }}>ANÁLISIS DE ACCIONES</div>
-          {allFeedback.map((fb, i) => {
-            const qc = fb.quality === "expert" ? T.green : fb.quality === "competent" ? T.blue : fb.quality === "developing" ? T.orange : T.red
-            return (
-              <div key={i} style={{ background: T.panel, borderRadius: 7, padding: 10, marginBottom: 6, border: `1px solid ${T.border}` }}>
-                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
-                  <span style={{ fontSize: 9, fontWeight: 700, color: T.dim, textTransform: "uppercase" }}>{fb.action} {fb.target ? `→ ${fb.target}` : ''}</span>
-                  <span style={{ fontSize: 9, fontWeight: 700, color: qc }}>{fb.quality?.toUpperCase()}</span>
-                </div>
-                <div style={{ fontSize: 11, color: T.sub, lineHeight: 1.35 }}>{fb.feedback}</div>
-                {fb.scores && <ScoreBadges scores={fb.scores} />}
-              </div>
-            )
-          })}
-          <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
-            <button onClick={() => nav("/challenges")} style={{ flex: 1, padding: "13px 0", background: T.card, color: T.orange, fontWeight: 700, fontSize: 13, border: `1px solid ${T.orange}`, borderRadius: 9, cursor: "pointer" }}>
-              VOLVER AL MENÚ
-            </button>
-            <button onClick={() => nav("/report/test@test.com")} style={{ flex: 1, padding: "13px 0", background: T.orange, color: T.bg, fontWeight: 700, fontSize: 13, border: "none", borderRadius: 9, cursor: "pointer" }}>
-              VER REPORTE COMPLETO →
-            </button>
-          </div>
-        </div>
-        {showSuccessModal && (
-          <SuccessModal
-            grade={gradeData.letter}
-            score={Math.round(gradeData.avg)}
-            onClose={() => setShowSuccessModal(false)}
-            onShareLinkedIn={() => {
-              window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.origin + '/report/test@test.com')}`, '_blank')
-            }}
-            onDownloadBadge={() => {
-              alert('Descarga de badge próximamente!')
-            }}
-            candidateId="test@test.com"
-          />
-        )}
-      </div>
+      <ChallengeComplete
+        challengeTitle="El bloqueo que nadie escala"
+        challengeNumber={2}
+        accentColor="#f59e0b"
+        gradientStart="rgba(245, 158, 11, 0.85)"
+        gradientEnd="rgba(217, 119, 6, 0.80)"
+        isLastChallenge={isLastChallenge(2)}
+      />
     )
   }
 
@@ -455,24 +441,40 @@ export default function Challenge02() {
 
           {/* Action Buttons */}
           <div className="action-buttons">
-            <button onClick={handleIdentifyBlocker} className="action-btn primary">
-              🎯 Identificar Bloqueador
+            <button
+              onClick={handleIdentifyBlocker}
+              disabled={actionsCompleted.identify}
+              className={`action-btn primary ${actionsCompleted.identify ? 'completed' : ''}`}
+            >
+              {actionsCompleted.identify ? '✓ Identificado' : '🎯 Identificar Bloqueador'}
             </button>
-            <button onClick={handleFlagWIP} className="action-btn warning">
-              ⚠️ Flag WIP Limit
+            <button
+              onClick={handleFlagWIP}
+              disabled={actionsCompleted.flagWIP}
+              className={`action-btn warning ${actionsCompleted.flagWIP ? 'completed' : ''}`}
+            >
+              {actionsCompleted.flagWIP ? '✓ WIP Flagged' : '⚠️ Flag WIP Limit'}
             </button>
-            <button onClick={handleSuggestPair} className="action-btn">
-              🤝 Sugerir Pair Programming
+            <button
+              onClick={handleSuggestPair}
+              disabled={actionsCompleted.pair}
+              className={`action-btn ${actionsCompleted.pair ? 'completed' : ''}`}
+            >
+              {actionsCompleted.pair ? '✓ Pair Sugerido' : '🤝 Sugerir Pair Programming'}
             </button>
-            <button onClick={handleEscalate} className="action-btn danger">
-              📢 Escalar a Platform
+            <button
+              onClick={handleEscalate}
+              disabled={actionsCompleted.escalate}
+              className={`action-btn danger ${actionsCompleted.escalate ? 'completed' : ''}`}
+            >
+              {actionsCompleted.escalate ? '✓ Escalado' : '📢 Escalar a Platform'}
             </button>
           </div>
 
           {/* Kanban Board */}
           <div className="board-columns">
             {KANBAN_COLUMNS.map(column => (
-              <div key={column.id} className="kanban-column">
+              <div key={column.id} className="kanban-column" data-column={column.id}>
                 <div className="column-header">
                   <div>
                     <h3>{column.label}</h3>
@@ -485,28 +487,32 @@ export default function Challenge02() {
                   )}
                 </div>
 
-                <div className="column-cards">
+                <div
+                  className="column-cards"
+                  onDragOver={handleDragOver}
+                  onDrop={(e) => handleDrop(e, column.id)}
+                >
                   {kanbanState[column.id].map(card => {
                     const member = card.assignee ? MEMBER_MAP[card.assignee] : null
-                    const priorityIcon = card.priority === 'high' ? '🔴' : card.priority === 'medium' ? '🟡' : '🔵'
+                    const priorityIcon = card.priority === 'high' ? '↑' : card.priority === 'medium' ? '=' : '↓'
 
                     return (
                       <div
                         key={card.id}
                         className={`kanban-card ${card.status} ${selectedCard === card.id ? 'selected' : ''}`}
+                        draggable
+                        onDragStart={() => handleDragStart(card, column.id)}
                         onClick={() => handleCardClick(card.id)}
                       >
-                        {/* Header: ID + Points */}
+                        {/* Title */}
                         <div className="card-header">
-                          <span className="card-id">{card.id}</span>
-                          <span className="card-points">{card.points}</span>
+                          <div className="card-title">{card.title}</div>
                         </div>
 
-                        {/* Title */}
-                        <div className="card-title">{card.title}</div>
-
-                        {/* Footer: Assignee + Status badges */}
+                        {/* ID + Assignee + Priority */}
                         <div className="card-meta">
+                          <span className="card-id">{card.id}</span>
+
                           {member && (
                             <div className="card-assignee">
                               <div className="assignee-avatar" style={{ background: member.color }}>
@@ -620,32 +626,8 @@ export default function Challenge02() {
                 </div>
               )
             })}
-            {loading && (
-              <div className="chat-message narration">
-                <div className="chat-message-text">El equipo está reaccionando...</div>
-              </div>
-            )}
           </div>
 
-          <div className="chat-input-area">
-            <textarea
-              ref={inputRef}
-              className="chat-textarea"
-              value={input}
-              onChange={e => setInput(e.target.value)}
-              onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleChatSubmit() } }}
-              placeholder="Escr ibí para facilitar con el equipo..."
-              rows={3}
-              disabled={loading}
-            />
-            <button
-              className="chat-submit-btn"
-              onClick={handleChatSubmit}
-              disabled={!input.trim() || loading}
-            >
-              →
-            </button>
-          </div>
         </div>
       </div>
     </div>

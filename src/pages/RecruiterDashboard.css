@@ -211,6 +211,25 @@
   color: #64748b;
 }
 
+.candidates-table th.sortable {
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.candidates-table th.sortable:hover {
+  color: #00d4aa;
+  background: rgba(0, 212, 170, 0.04);
+}
+
+.sort-arrow {
+  display: inline-block;
+  margin-left: 4px;
+  font-size: 10px;
+  color: #00d4aa;
+}
+
 .candidates-table tbody tr {
   border-bottom: 1px solid rgba(30, 41, 59, 0.08);
   transition: all 0.2s ease;
@@ -273,6 +292,38 @@
   font-weight: 900;
   border: 2px solid;
   background: rgba(0, 212, 170, 0.08);
+}
+
+.seniority-badge-table {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 800;
+  border: 2px solid;
+  background: rgba(255, 255, 255, 0.5);
+  letter-spacing: 0.3px;
+}
+
+.status-badge-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  border: 1.5px solid currentColor;
+  transition: all 0.2s ease;
+}
+
+.status-icon {
+  font-size: 10px;
+  line-height: 1;
+}
+
+.status-label {
+  white-space: nowrap;
 }
 
 .progress-cell {

@@ -16,74 +16,134 @@ export default function CandidateReport() {
     async function loadResults() {
       setLoading(true)
 
-      // Mock data for demo/test candidate
-      if (id === "demo" || id === "test") {
-        const mockResults = [
-          {
-            challenge_id: 1,
-            played_at: new Date().toISOString(),
-            time_used: 720,
-            scores: [
-              { dimension: "Facilitation", score: 85 },
-              { dimension: "Process", score: 78 },
-              { dimension: "Coaching", score: 82 },
-              { dimension: "Systems", score: 75 }
-            ],
-            feedback: [
-              { phase: "context", quality: "expert", feedback: "Excelente lectura del contexto del equipo" },
-              { phase: "action", quality: "competent", feedback: "Buenas preguntas abiertas, podría profundizar más" }
-            ],
-            grade: { letter: "A", avg: 80, color: "#059669" }
-          },
-          {
-            challenge_id: 2,
-            played_at: new Date(Date.now() - 3600000).toISOString(),
-            time_used: 900,
-            scores: [
-              { dimension: "Facilitation", score: 92 },
-              { dimension: "Process", score: 88 },
-              { dimension: "Coaching", score: 85 },
-              { dimension: "Systems", score: 80 }
-            ],
-            feedback: [
-              { phase: "workshop", quality: "expert", feedback: "Facilitación excepcional del workshop" },
-              { phase: "agreements", quality: "expert", feedback: "Acuerdos claros y concretos" }
-            ],
-            grade: { letter: "A", avg: 86, color: "#059669" }
-          },
-          {
-            challenge_id: 3,
-            played_at: new Date(Date.now() - 7200000).toISOString(),
-            time_used: 600,
-            scores: [
-              { dimension: "Facilitation", score: 70 },
-              { dimension: "Process", score: 75 },
-              { dimension: "Coaching", score: 68 },
-              { dimension: "Systems", score: 72 }
-            ],
-            feedback: [
-              { phase: "context", quality: "developing", feedback: "Podría hacer preguntas más profundas" },
-              { phase: "action", quality: "competent", feedback: "Buen manejo de la situación" }
-            ],
-            grade: { letter: "B", avg: 71, color: "#2563eb" }
-          },
-          {
-            challenge_id: 4,
-            played_at: new Date(Date.now() - 10800000).toISOString(),
-            time_used: 840,
-            scores: [
-              { dimension: "Facilitation", score: 88 },
-              { dimension: "Process", score: 90 },
-              { dimension: "Coaching", score: 82 },
-              { dimension: "Systems", score: 85 }
-            ],
-            feedback: [
-              { phase: "estimation", quality: "expert", feedback: "Excelente facilitación del planning poker" },
-              { phase: "prioritization", quality: "expert", feedback: "Ayudó al equipo a priorizar efectivamente" }
-            ],
-            grade: { letter: "A", avg: 86, color: "#059669" }
+      // Mock candidates data (same as dashboard)
+      const candidatesData = {
+        "demo": {
+          name: "María González",
+          score: 86,
+          dimensions: { facilitation: 89, process: 85, coaching: 84, systems: 87 },
+          redFlags: 0,
+          highlights: 6,
+          completed: 6
+        },
+        "candidate2": {
+          name: "Carlos Ramírez",
+          score: 78,
+          dimensions: { facilitation: 82, process: 76, coaching: 75, systems: 79 },
+          redFlags: 1,
+          highlights: 4,
+          completed: 6
+        },
+        "candidate3": {
+          name: "Ana Torres",
+          score: 92,
+          dimensions: { facilitation: 94, process: 91, coaching: 90, systems: 93 },
+          redFlags: 0,
+          highlights: 8,
+          completed: 6
+        },
+        "candidate4": {
+          name: "Jorge Sánchez",
+          score: 65,
+          dimensions: { facilitation: 68, process: 64, coaching: 62, systems: 66 },
+          redFlags: 2,
+          highlights: 2,
+          completed: 5
+        },
+        "candidate5": {
+          name: "Laura Martínez",
+          score: 81,
+          dimensions: { facilitation: 85, process: 80, coaching: 78, systems: 82 },
+          redFlags: 0,
+          highlights: 5,
+          completed: 6
+        },
+        "candidate6": {
+          name: "Diego Fernández",
+          score: 88,
+          dimensions: { facilitation: 90, process: 87, coaching: 86, systems: 89 },
+          redFlags: 0,
+          highlights: 7,
+          completed: 6
+        },
+        "candidate7": {
+          name: "Patricia Ruiz",
+          score: 72,
+          dimensions: { facilitation: 76, process: 71, coaching: 70, systems: 73 },
+          redFlags: 1,
+          highlights: 3,
+          completed: 6
+        },
+        "candidate8": {
+          name: "Roberto Silva",
+          score: 58,
+          dimensions: { facilitation: 62, process: 58, coaching: 55, systems: 60 },
+          redFlags: 3,
+          highlights: 1,
+          completed: 4
+        }
+      }
+
+      // Generate mock results for all candidates
+      const candidateData = candidatesData[id]
+      if (candidateData) {
+        // Helper to generate scores with variation
+        const generateScores = (baseDims, variation = 5) => {
+          return [
+            { dimension: "Facilitation", score: Math.max(0, Math.min(100, baseDims.facilitation + (Math.random() - 0.5) * variation * 2)) },
+            { dimension: "Process", score: Math.max(0, Math.min(100, baseDims.process + (Math.random() - 0.5) * variation * 2)) },
+            { dimension: "Coaching", score: Math.max(0, Math.min(100, baseDims.coaching + (Math.random() - 0.5) * variation * 2)) },
+            { dimension: "Systems", score: Math.max(0, Math.min(100, baseDims.systems + (Math.random() - 0.5) * variation * 2)) }
+          ].map(s => ({ ...s, score: Math.round(s.score) }))
+        }
+
+        const getGrade = (avg) => {
+          if (avg >= 80) return { letter: "A", avg, color: "#059669" }
+          if (avg >= 60) return { letter: "B", avg, color: "#2563eb" }
+          return { letter: "C", avg, color: "#ea580c" }
+        }
+
+        const generateFeedback = (avg, hasRedFlag) => {
+          if (hasRedFlag && candidateData.redFlags > 0) {
+            return [
+              { phase: "context", quality: "red_flag", feedback: "Mostró dificultad para identificar señales clave del equipo" },
+              { phase: "action", quality: "developing", feedback: "Las intervenciones no fueron del todo efectivas" }
+            ]
+          } else if (avg >= 85) {
+            return [
+              { phase: "context", quality: "expert", feedback: "Demostró excelente comprensión del contexto" },
+              { phase: "action", quality: "expert", feedback: "Intervenciones altamente efectivas y bien fundamentadas" }
+            ]
+          } else if (avg >= 70) {
+            return [
+              { phase: "context", quality: "competent", feedback: "Buena lectura de la situación del equipo" },
+              { phase: "action", quality: "competent", feedback: "Propuestas sólidas con margen de mejora" }
+            ]
+          } else {
+            return [
+              { phase: "context", quality: "developing", feedback: "Comprensión básica pero incompleta" },
+              { phase: "action", quality: "developing", feedback: "Las intervenciones necesitan más profundidad" }
+            ]
           }
-        ]
+        }
+
+        const challenges = []
+        for (let i = 1; i <= candidateData.completed; i++) {
+          const scores = generateScores(candidateData.dimensions, 8)
+          const avg = Math.round(scores.reduce((sum, s) => sum + s.score, 0) / scores.length)
+          const hasRedFlag = candidateData.redFlags > 0 && i === candidateData.completed && Math.random() < 0.5
+
+          challenges.push({
+            challenge_id: i,
+            played_at: new Date(Date.now() - (i * 3600000)).toISOString(),
+            time_used: Math.floor(600 + Math.random() * 600),
+            scores,
+            feedback: generateFeedback(avg, hasRedFlag),
+            grade: getGrade(avg)
+          })
+        }
+
+        const mockResults = challenges
         setResults(mockResults)
         setLoading(false)
         return
@@ -193,9 +253,14 @@ export default function CandidateReport() {
       <div className="report-container">
         {/* Header */}
         <div className="report-header">
-          <button onClick={() => nav("/challenges")} className="back-btn">
-            ← Volver al menú
-          </button>
+          <div className="back-buttons">
+            <button onClick={() => nav("/dashboard")} className="back-btn">
+              ← Dashboard
+            </button>
+            <button onClick={() => nav("/challenges")} className="back-btn secondary">
+              Menú de Challenges
+            </button>
+          </div>
 
           <div className="candidate-info">
             <div className="candidate-avatar">

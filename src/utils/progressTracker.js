@@ -1,0 +1,98 @@
+// Progress Tracker para challenges
+// Mantiene track de qué challenges se completaron y en qué orden
+
+const STORAGE_KEY = "smatch_challenge_progress"
+
+// Challenge order (secuencial obligatorio)
+export const CHALLENGE_ORDER = [6, 4, 1, 2, 3, 5]
+
+// Get progress from localStorage
+export function getProgress() {
+  const stored = localStorage.getItem(STORAGE_KEY)
+  if (!stored) {
+    return {
+      completed: [], // Array de challengeFile numbers completados
+      currentIndex: 0, // Índice en CHALLENGE_ORDER del siguiente challenge
+      startedAt: null,
+      lastCompletedAt: null
+    }
+  }
+  return JSON.parse(stored)
+}
+
+// Mark challenge as completed
+export function markChallengeComplete(challengeFile) {
+  const progress = getProgress()
+
+  // Si es el primer challenge, guardar timestamp de inicio
+  if (progress.completed.length === 0) {
+    progress.startedAt = new Date().toISOString()
+  }
+
+  // Agregar a completed si no está ya
+  if (!progress.completed.includes(challengeFile)) {
+    progress.completed.push(challengeFile)
+    progress.lastCompletedAt = new Date().toISOString()
+
+    // Avanzar currentIndex
+    const index = CHALLENGE_ORDER.indexOf(challengeFile)
+    if (index !== -1 && index === progress.currentIndex) {
+      progress.currentIndex = index + 1
+    }
+  }
+
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(progress))
+  return progress
+}
+
+// Check if a challenge is completed
+export function isChallengeCompleted(challengeFile) {
+  const progress = getProgress()
+  return progress.completed.includes(challengeFile)
+}
+
+// Check if a challenge is unlocked (can be played)
+export function isChallengeUnlocked(challengeFile) {
+  const progress = getProgress()
+  const index = CHALLENGE_ORDER.indexOf(challengeFile)
+
+  // Si es el primer challenge, siempre está unlocked
+  if (index === 0) return true
+
+  // Si está completado, está locked (no se puede repetir)
+  if (progress.completed.includes(challengeFile)) return false
+
+  // Está unlocked si es el siguiente en la secuencia
+  return index === progress.currentIndex
+}
+
+// Get next challenge file number
+export function getNextChallenge(currentChallengeFile) {
+  const currentIndex = CHALLENGE_ORDER.indexOf(currentChallengeFile)
+  if (currentIndex < CHALLENGE_ORDER.length - 1) {
+    return CHALLENGE_ORDER[currentIndex + 1]
+  }
+  return null // Es el último
+}
+
+// Check if current challenge is the last one
+export function isLastChallenge(challengeFile) {
+  return challengeFile === CHALLENGE_ORDER[CHALLENGE_ORDER.length - 1]
+}
+
+// Get completion percentage
+export function getCompletionPercentage() {
+  const progress = getProgress()
+  return Math.round((progress.completed.length / CHALLENGE_ORDER.length) * 100)
+}
+
+// Reset progress (for testing or retry)
+export function resetProgress() {
+  localStorage.removeItem(STORAGE_KEY)
+}
+
+// Get total completed count
+export function getCompletedCount() {
+  const progress = getProgress()
+  return progress.completed.length
+}

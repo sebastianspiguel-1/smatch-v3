@@ -17,7 +17,7 @@ export const MEMBER_MAP = Object.fromEntries(TEAM.map(t => [t.id, t]))
 export const KANBAN_COLUMNS = [
   { id: "TODO", label: "To Do", wipLimit: null, color: "#94a3b8" },
   { id: "DOING", label: "In Progress", wipLimit: 3, color: "#60a5fa" },
-  { id: "IN_REVIEW", label: "In Review", wipLimit: null, color: "#a78bfa" },
+  { id: "IN_REVIEW", label: "In Review", wipLimit: 2, color: "#a78bfa" },
   { id: "BLOCKED", label: "Blocked", wipLimit: null, color: "#ef4444" },
   { id: "DONE", label: "Done", wipLimit: null, color: "#10b981" }
 ]
@@ -25,27 +25,27 @@ export const KANBAN_COLUMNS = [
 // ─── INITIAL KANBAN STATE (Sprint 3, Day 7) ───
 export const INITIAL_KANBAN_STATE = {
   "TODO": [
-    { id: "SL-110", title: "Refactor setlist editor", assignee: null, priority: "low", status: "ok", points: 3 },
-    { id: "SL-111", title: "Update artist onboarding docs", assignee: null, priority: "low", status: "ok", points: 2 },
-    { id: "SL-112", title: "Venue dashboard widgets", assignee: null, priority: "medium", status: "ok", points: 5 }
+    { id: "SL-110", title: "Refactorizar editor de setlists para mejor UX", assignee: null, priority: "low", status: "ok", points: 3 },
+    { id: "SL-111", title: "Actualizar documentación onboarding artistas", assignee: null, priority: "low", status: "ok", points: 2 },
+    { id: "SL-112", title: "Crear widgets dashboard para venues", assignee: null, priority: "medium", status: "ok", points: 5 }
   ],
   "DOING": [
-    { id: "SL-101", title: "API rate limiting", assignee: "eric", priority: "high", status: "ok", days: 2, points: 5 },
-    { id: "SL-105", title: "Integración Mercado Pago", assignee: "david", priority: "high", status: "blocked", blockedDays: 3, dependencies: ["API keys Finance team"], points: 8 },
-    { id: "SL-103", title: "Flujo de firma digital", assignee: "nacho", priority: "high", status: "ok", days: 1, points: 5 },
-    { id: "SL-104", title: "Notifications push mobile", assignee: "nacho", priority: "medium", status: "ok", days: 1, points: 3 },
-    { id: "SL-109", title: "Artist profile photos upload", assignee: "alan", priority: "low", status: "ok", days: 1, points: 2 }
+    { id: "SL-101", title: "Implementar rate limiting en endpoints de API", assignee: "eric", priority: "high", status: "ok", days: 2, points: 5 },
+    { id: "SL-105", title: "Integrar procesamiento de pagos con Mercado Pago", assignee: "david", priority: "high", status: "blocked", blockedDays: 3, dependencies: ["API keys Finance team"], points: 8 },
+    { id: "SL-103", title: "Implementar firma digital de contratos artista-venue", assignee: "nacho", priority: "high", status: "ok", days: 1, points: 5 },
+    { id: "SL-104", title: "Configurar notificaciones push para iOS y Android", assignee: "nacho", priority: "medium", status: "ok", days: 1, points: 3 },
+    { id: "SL-109", title: "Habilitar carga de fotos de perfil de artistas", assignee: "alan", priority: "low", status: "ok", days: 1, points: 2 }
   ],
   "IN_REVIEW": [
-    { id: "SL-106", title: "Flujo de pago mobile", assignee: "alan", priority: "high", status: "waiting", dependencies: ["SL-105"], points: 5 },
-    { id: "SL-107", title: "Tests de transacciones", assignee: "gian", priority: "high", status: "waiting", dependencies: ["SL-105"], points: 3 }
+    { id: "SL-106", title: "Desarrollar flujo completo de pago en app mobile", assignee: "alan", priority: "high", status: "waiting", dependencies: ["SL-105"], points: 5 },
+    { id: "SL-107", title: "Crear tests E2E para flujo de transacciones", assignee: "gian", priority: "high", status: "waiting", dependencies: ["SL-105"], points: 3 }
   ],
   "BLOCKED": [],
   "DONE": [
-    { id: "SL-100", title: "Shows module basic CRUD", assignee: "alan", priority: "medium", status: "completed", points: 3 },
-    { id: "SL-102", title: "Artist profile validation", assignee: "eric", priority: "high", status: "completed", points: 3 },
-    { id: "SL-108", title: "CI/CD pipeline setup", assignee: "eric", priority: "medium", status: "completed", points: 2 },
-    { id: "SL-113", title: "Security headers audit", assignee: "david", priority: "high", status: "completed", points: 5 }
+    { id: "SL-100", title: "Desarrollar CRUD básico del módulo de shows", assignee: "alan", priority: "medium", status: "completed", points: 3 },
+    { id: "SL-102", title: "Implementar validación de perfiles de artistas", assignee: "eric", priority: "high", status: "completed", points: 3 },
+    { id: "SL-108", title: "Configurar pipeline CI/CD con GitHub Actions", assignee: "eric", priority: "medium", status: "completed", points: 2 },
+    { id: "SL-113", title: "Auditar y aplicar security headers en backend", assignee: "david", priority: "high", status: "completed", points: 5 }
   ]
 }
 
@@ -62,22 +62,22 @@ export const SPRINT_SUMMARY = {
   velocity: "55%"
 }
 
-export const SPRINT_CONTEXT = "Equipo Setlist, Sprint 3, día 7 de 10. Comprometieron 38 puntos, completaron 21 (55%). PROBLEMA CRÍTICO: El ticket SL-105 (Integración Mercado Pago, 8 pts) está bloqueado hace 3 días esperando API keys del Finance team. David (Dev de Pagos) bloqueado sin poder avanzar. Alan tiene SL-106 (Flujo de pago mobile) en review pero no puede testear porque depende de SL-105. Gian tiene SL-107 (Tests de transacciones) también esperando. WIP LIMIT EXCEDIDO: Hay 5 tasks en 'In Progress' pero el límite es 3 — Nacho tiene 2 tickets (SL-103 y SL-104) a la vez. PRESIÓN EXTERNA: Simon (contacto de Lollapalooza) le mandó WhatsApp a Gabriela esta mañana preguntando cuándo van a tener el módulo de pagos online listo. El piloto es en 5 semanas. Nadie escaló el bloqueo de SL-105 al Finance team."
+export const SPRINT_CONTEXT = "Equipo Setlist, Sprint 3, día 7/10. CONTEXT PREVIO: En Sprint 2, Nacho entregó SL-103 TARDE sin avisar. Alan hizo trabajo extra para cubrir pero NO lo mencionó en la retro. Simon (Lollapalooza) preguntó por el módulo de pagos y el equipo PROMETIÓ tenerlo en Sprint 3. HOY: Sprint 3 está en riesgo. SL-105 (integración Mercado Pago, 8 pts) bloqueado hace 3 días esperando API keys. David escribió al Finance team pero no escaló. Gian lo mencionó en el daily del día 5 pero nadie actuó. Alan y Gian están bloqueados esperando (16 puntos en riesgo, 42% del sprint). Simon mandó WhatsApp esta mañana preguntando por el estado. Nadie escaló hasta hoy."
 
 // ─── TEAM DESCRIPTION (para prompts de AI) ───
 export const TEAM_DESC = `Equipo de Setlist — startup de app mobile para artistas independientes latinoamericanos.
 
-Eric (Tech Lead): brillante y directo, a veces cortante. Construyó el backend casi solo. Desconfía del proceso ágil. Cuando algo técnico le preocupa lo dice; cuando algo humano le preocupa, se calla. Podría ayudar a David pero no se ofreció.
+Eric (Tech Lead): brillante y directo, a veces cortante. Construyó el backend casi solo. Se siente DEFENSIVO porque no sabía que SL-105 era tan crítico. "¿Por qué nadie me dijo?" Podría ayudar a David técnicamente pero no se ofreció porque nadie le pidió.
 
-David (Dev de Pagos): sólido y callado. Siempre entrega, pero guarda información crítica en lugar de escalar. Tiene miedo de decepcionar al equipo y eso lo paraliza. Está bloqueado hace 3 días en SL-105 esperando API keys de Mercado Pago. Escribió al Finance team por email pero no escaló más allá.
+David (Dev de Pagos): sólido y callado. Siempre entrega, pero está ASUSTADO de escalar porque teme decepcionar al equipo y eso lo paraliza. Bloqueado hace 3 días en SL-105 esperando API keys. Escribió al Finance team el día 4 y 6 pero NO ESCALÓ al CTO porque "no quería molestar".
 
-Alan (Dev Mobile): creativo y preciso. Relativamente callado en el equipo. Tiene SL-106 (flujo de pago mobile) listo para testear pero no puede porque depende de SL-105. Está esperando en silencio.
+Alan (Dev Mobile): creativo y preciso. Está FRUSTRADO porque tiene SL-106 listo para testear hace días pero nadie ve su trabajo. Dijo "cuando David termine" en el daily pero asumió que todos lo escucharon. En Sprint 2 hizo trabajo extra cuando Nacho entregó tarde, pero no lo mencionó en la retro.
 
-Gian (QA): meticuloso y frustrado. Detecta problemas antes que nadie pero raramente le hacen caso hasta que algo falla en producción. Tiene SL-107 (tests de transacciones) bloqueado por SL-105. Ya lleva días sin poder avanzar y está visiblemente frustrado.
+Gian (QA): meticuloso y FURIOSO. Detecta problemas antes que nadie pero raramente le hacen caso hasta que algo falla en producción. MENCIONÓ el bloqueo de SL-105 en el daily del día 5 pero nadie actuó. Se siente invisible en el equipo.
 
-Gabriela (Product Owner): conecta bien con artistas y venues pero genera scope creep constantemente. Recibió un WhatsApp de Simon (Lollapalooza) preguntando por el módulo de pagos. Está preocupada pero no sabe si es problema técnico o de proceso.
+Gabriela (Product Owner): conecta bien con artistas y venues pero genera scope creep constantemente. Recibió un WhatsApp de Simon (Lollapalooza) esta mañana preguntando por el módulo de pagos. Está preocupada porque el equipo PROMETIÓ tenerlo en Sprint 3.
 
-Nacho (Dev Frontend): entusiasta y rápido para aprender, pero sobreestima su velocidad. Tiene 2 tickets en DOING a la vez (SL-103 y SL-104), contribuyendo al WIP limit excedido. Acepta compromisos que no puede cumplir y no avisa hasta el último momento.
+Nacho (Dev Frontend): entusiasta y rápido, pero sobreestima su velocidad. Tiene 2 tickets en DOING (SL-103 y SL-104), contribuyendo al WIP limit excedido. En Sprint 2 entregó SL-103 TARDE, obligando a Alan a hacer trabajo extra.
 
 Simon (Contacto Lollapalooza): organizador del festival, contacto externo. Le mandó WhatsApp a Gabriela esta mañana preguntando por el estado del módulo de pagos. El piloto es en 5 semanas y está preocupado.`
 
@@ -90,8 +90,8 @@ export const CHAT_TRIGGERS = {
 
   // Click on blocked card SL-105
   on_card_click_SL105: [
-    { from: "david", text: "Sí... ese ticket está bloqueado hace 3 días. Le escribí al Finance team por email el día 4 pero no respondieron. No sé... pensé que se iba a resolver solo." },
-    { from: "gian", text: "Y yo no puedo testear las transacciones sin eso. Llevamos días esperando..." }
+    { from: "david", text: "Sí... ese ticket está bloqueado hace 3 días. Le escribí al Finance team el día 4 pero no respondieron. Pensé que se iba a resolver solo." },
+    { from: "gian", text: "YO LO HABÍA MENCIONADO en el daily del día 5. Nadie escaló. ¿Cuántas veces nos pasa esto?" }
   ],
 
   // Click on waiting cards (SL-106 or SL-107)
@@ -108,9 +108,10 @@ export const CHAT_TRIGGERS = {
 
   // Identify blocker action
   on_identify_blocker: [
-    { from: "eric", text: "Tenés razón, SL-105 es el cuello de botella. Está afectando a Alan y Gian, tenemos 16 puntos en riesgo." },
+    { from: "eric", text: "Tenés razón, SL-105 es el cuello de botella. ¿Por qué NADIE ME DIJO que era tan crítico?" },
     { from: "david", text: "Perdón... debí haber escalado antes. No quería molestar al Finance team de nuevo." },
-    { from: "gian", text: "No es tu culpa David. El proceso debería hacerlo más fácil." }
+    { from: "gian", text: "No es tu culpa David. El problema es que NADIE ESCUCHA en los dailies." },
+    { from: "alan", text: "Yo lo dije: 'cuando David termine'. Asumí que todos escucharon que estaba bloqueado." }
   ],
 
   // Flag WIP limit
@@ -130,18 +131,18 @@ export const CHAT_TRIGGERS = {
   // Escalate to Finance team
   on_escalate: [
     { from: "eric", text: "Buena decisión. ¿Le escribís al CTO o directamente al Head of Finance? Con Simon preguntando, esto es urgente." },
-    { from: "gian", text: "Por favor que sea pronto. Ya perdimos 3 días y el Lollapalooza es en 5 semanas." },
-    { from: "david", text: "Yo no sabía a quién escalar... por eso solo mandé email al Finance team." },
+    { from: "gian", text: "Por favor que sea pronto. YA perdimos 3 días y Lollapalooza es en 5 semanas." },
+    { from: "david", text: "Yo no sabía A QUIÉN escalar... por eso solo mandé email al Finance team." },
     { from: "gabriela", text: "Simon me mandó WhatsApp esta mañana. Está preocupado por el módulo de pagos. Necesitamos desbloquear esto YA." }
   ],
 
   // After escalation resolved (AI can trigger this)
   on_resolution: [
     { from: "narration", text: "El CTO respondió en 20 minutos. Las API keys fueron generadas y enviadas a David. SL-105 está desbloqueada." },
-    { from: "david", text: "¡Genial! Ya puedo seguir. Gracias por escalar." },
-    { from: "gian", text: "Bien que se resolvió, pero... ¿cuántas veces nos pasó esto?" },
-    { from: "eric", text: "Es verdad. Siempre esperamos al daily para mencionar bloqueos y después se pudren días." },
-    { from: "alan", text: "Y David escribió hace 3 días... nadie sabía que estaba bloqueado hasta hoy." }
+    { from: "david", text: "¡Listo! Ya puedo seguir. Gracias por escalar." },
+    { from: "gian", text: "Bien que se resolvió, pero... ¿CUÁNTAS VECES nos pasó esto?" },
+    { from: "eric", text: "Gian tiene razón. Siempre esperamos al daily para MENCIONAR bloqueos pero nadie ACTÚA." },
+    { from: "alan", text: "Y David escribió hace 3 días... nadie sabía que estaba bloqueado hasta hoy. El sistema falló." }
   ],
 
   // Simon's WhatsApp (external pressure)
@@ -174,15 +175,15 @@ export const DIMENSIONS = [
 // ─── CARD DETAILS (additional info shown when clicking) ───
 export const CARD_DETAILS = {
   "SL-105": {
-    description: "Integración completa con Mercado Pago para procesar pagos de artistas. Incluye tokenización, webhooks y reconciliación.",
-    blockerReason: "Esperando API keys (client_id y client_secret) del Finance team. David escribió por email el día 4 y 6, sin respuesta clara.",
+    description: "Integración completa con Mercado Pago para procesar pagos de artistas. Incluye tokenización, webhooks y reconciliación. CRÍTICO para Lollapalooza.",
+    blockerReason: "Esperando API keys (client_id y client_secret) del Finance team. David escribió por email el día 4 y 6, sin respuesta clara. NADIE ESCALÓ AL CTO.",
     history: [
-      "Día 4: David escribió al Finance team por email solicitando API keys",
-      "Día 5: Sin respuesta, David sigue esperando sin escalar",
-      "Día 6: David escribió de nuevo, respuesta vaga ('lo estamos viendo')",
-      "Día 7 (hoy): Sigue bloqueado, nadie escaló. Simon pregunta por WhatsApp."
+      "Día 4: David escribió al Finance team solicitando API keys",
+      "Día 5: Sin respuesta. Gian MENCIONÓ en daily que no podía avanzar SL-107. Nadie actuó.",
+      "Día 6: David escribió de nuevo. Respuesta vaga: 'lo estamos viendo'",
+      "Día 7 (hoy): Sigue bloqueado. Simon preguntó por WhatsApp. Nadie había escalado al CTO."
     ],
-    impact: "8 puntos bloqueados + 5 puntos de Alan (SL-106) + 3 puntos de Gian (SL-107) = 16 puntos en riesgo (42% del sprint). Lollapalooza es en 5 semanas."
+    impact: "8 puntos bloqueados (SL-105) + 5 puntos de Alan (SL-106 listo pero no se puede testear) + 3 puntos de Gian (SL-107 bloqueado) = 16 puntos en riesgo (42% del sprint). Lollapalooza es en 5 semanas. El equipo PROMETIÓ tener el módulo de pagos en Sprint 3."
   },
   "SL-106": {
     description: "Flujo mobile completo para que artistas procesen pagos desde la app.",

@@ -58,12 +58,13 @@ export default function Landing() {
   function handleLogin(e) {
     e.preventDefault()
     if (loginTab === "candidate") {
-      // TODO: Supabase auth - For now, allow login without credentials
+      // Candidate login - go to challenges
       setLoginOpen(false)
       nav("/challenges")
     } else {
-      // Recruiter login
-      alert("Recruiter login próximamente. Contactanos en hola@smatch.com")
+      // Recruiter login - instant access to dashboard
+      setLoginOpen(false)
+      nav("/dashboard")
     }
   }
 
@@ -405,7 +406,7 @@ export default function Landing() {
                 <p className="login-hint">💡 <strong>Para la demo:</strong> Email: test@test.com | Password: test</p>
               )}
               {loginTab === "recruiter" && (
-                <p className="login-hint">💡 <strong>Recruiter dashboard:</strong> Próximamente. Contactanos para early access.</p>
+                <p className="login-hint">💡 <strong>Demo instantáneo:</strong> Hacé click en "Entrar" para acceder al dashboard con 8 candidatos de ejemplo.</p>
               )}
             </div>
           </div>
