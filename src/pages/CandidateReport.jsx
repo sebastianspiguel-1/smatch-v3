@@ -6,10 +6,10 @@ import { RadarChartComponent } from "../components"
 import { getChallengeById } from "../data/challengesMetadata"
 import "./CandidateReport.css"
 
-export default function CandidateReport({ finalView = false }) {
-  const params = useParams()
-  const id = finalView ? "test@test.com" : params.id
+export default function CandidateReport() {
+  const { id } = useParams()
   const nav = useNavigate()
+  const finalView = false // ahora siempre se accede desde el dashboard del recruiter
   const [results, setResults] = useState([])
   const [loading, setLoading] = useState(true)
 

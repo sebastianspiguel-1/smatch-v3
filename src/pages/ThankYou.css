@@ -1,21 +1,21 @@
 /* ═══════════════════════════════════════════════════
-   THANK YOU PAGE - Mensaje final del candidato
+   THANK YOU PAGE - sobrio, B2B, confirmation respetuosa
    ═══════════════════════════════════════════════════ */
 
 .thankyou-page {
   position: relative;
   min-height: 100vh;
-  background: linear-gradient(180deg, #f0f4f8 0%, #ffffff 100%);
+  background: #f8fafc;
   color: #0f172a;
   font-family: 'Plus Jakarta Sans', 'Segoe UI', system-ui, sans-serif;
   overflow-x: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 40px 20px;
+  padding: 60px 24px;
 }
 
-/* Animated Background */
+/* Background shapes - muy sutiles */
 .thankyou-bg {
   position: fixed;
   top: 0;
@@ -30,63 +30,45 @@
 .thankyou-shape {
   position: absolute;
   border-radius: 50%;
-  filter: blur(80px);
-  opacity: 0.4;
-  animation: floatShape 20s ease-in-out infinite;
+  filter: blur(100px);
+  opacity: 0.15;
 }
 
 .thankyou-shape.shape-1 {
-  width: 400px;
-  height: 400px;
-  background: linear-gradient(135deg, #00d4aa, #059669);
-  top: -100px;
-  left: -100px;
+  width: 380px;
+  height: 380px;
+  background: #00d4aa;
+  top: -120px;
+  left: -120px;
 }
 
 .thankyou-shape.shape-2 {
-  width: 350px;
-  height: 350px;
-  background: linear-gradient(135deg, #7c3aed, #6d28d9);
-  bottom: -50px;
-  right: -50px;
-  animation-delay: -10s;
+  width: 320px;
+  height: 320px;
+  background: #60a5fa;
+  bottom: -100px;
+  right: -80px;
 }
 
+/* tercera shape eliminada — demasiado ruido */
 .thankyou-shape.shape-3 {
-  width: 300px;
-  height: 300px;
-  background: linear-gradient(135deg, #60a5fa, #3b82f6);
-  top: 50%;
-  left: 60%;
-  animation-delay: -5s;
-}
-
-@keyframes floatShape {
-  0%, 100% {
-    transform: translateY(0) translateX(0) scale(1);
-  }
-  33% {
-    transform: translateY(-30px) translateX(20px) scale(1.05);
-  }
-  66% {
-    transform: translateY(20px) translateX(-30px) scale(0.95);
-  }
+  display: none;
 }
 
 /* Container */
 .thankyou-container {
   position: relative;
   z-index: 1;
-  max-width: 720px;
+  max-width: 580px;
   width: 100%;
   text-align: center;
-  animation: fadeInUp 0.8s ease;
+  animation: fadeInUp 0.6s ease;
 }
 
 @keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(30px);
+    transform: translateY(20px);
   }
   to {
     opacity: 1;
@@ -94,172 +76,180 @@
   }
 }
 
-/* Emoji */
+/* Checkmark verde en vez de emoji 🎉 */
 .thankyou-emoji {
-  font-size: 80px;
-  margin-bottom: 24px;
-  animation: bounce 2s ease-in-out infinite;
-}
-
-@keyframes bounce {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-15px);
-  }
-}
-
-/* Title */
-.thankyou-title {
-  font-size: clamp(36px, 5vw, 52px);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #00d4aa, #059669);
+  color: #ffffff;
+  font-size: 36px;
   font-weight: 900;
+  margin: 0 auto 28px;
+  box-shadow: 0 8px 24px rgba(0, 212, 170, 0.25);
+  line-height: 1;
+}
+
+.thankyou-emoji::before {
+  content: '✓';
+}
+
+/* Reemplazar el emoji original con el checkmark */
+.thankyou-emoji {
+  font-size: 0; /* hide 🎉 text */
+}
+
+.thankyou-emoji::before {
+  font-size: 36px;
+}
+
+/* Title - profesional, sin gradient animado */
+.thankyou-title {
+  font-size: clamp(28px, 4vw, 36px);
+  font-weight: 800;
   color: #0a1f44;
-  margin: 0 0 20px 0;
-  letter-spacing: -1.5px;
-  line-height: 1.15;
+  margin: 0 0 16px 0;
+  letter-spacing: -1px;
+  line-height: 1.2;
 }
 
 .thankyou-title .gradient-text {
-  background: linear-gradient(135deg, #00d4aa, #7c3aed, #00d4aa);
-  background-size: 200% auto;
+  background: linear-gradient(135deg, #00d4aa, #059669);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  animation: gradientShift 4s linear infinite;
-}
-
-@keyframes gradientShift {
-  0% { background-position: 0% center; }
-  100% { background-position: 200% center; }
 }
 
 /* Subtitle */
 .thankyou-subtitle {
-  font-size: 18px;
-  color: #475569;
+  font-size: 16px;
+  color: #64748b;
   line-height: 1.6;
-  margin: 0 0 40px 0;
+  margin: 0 0 36px 0;
   font-weight: 500;
-  max-width: 600px;
+  max-width: 480px;
   margin-left: auto;
   margin-right: auto;
 }
 
-/* Info Card */
+/* Info Card - sobria */
 .thankyou-card {
   background: #ffffff;
-  border: 2px solid rgba(0, 212, 170, 0.20);
-  border-radius: 24px;
-  padding: 36px 32px;
-  margin-bottom: 32px;
-  box-shadow: 0 8px 32px rgba(15, 23, 42, 0.08);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 16px;
+  padding: 32px 28px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 12px rgba(15, 23, 42, 0.04);
   text-align: left;
 }
 
 .thankyou-card-icon {
-  font-size: 32px;
-  margin-bottom: 12px;
+  font-size: 24px;
+  margin-bottom: 8px;
   text-align: center;
+  opacity: 0.7;
 }
 
 .thankyou-card h2 {
-  font-size: 22px;
-  font-weight: 900;
+  font-size: 18px;
+  font-weight: 800;
   color: #0a1f44;
-  margin: 0 0 20px 0;
-  letter-spacing: -0.5px;
+  margin: 0 0 16px 0;
+  letter-spacing: -0.3px;
   text-align: center;
 }
 
 .thankyou-card p {
-  font-size: 15px;
+  font-size: 14px;
   color: #475569;
-  line-height: 1.7;
-  margin: 0 0 14px 0;
+  line-height: 1.65;
+  margin: 0 0 12px 0;
   font-weight: 500;
 }
 
 .thankyou-card p strong {
   color: #0a1f44;
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .thankyou-card-highlight {
-  background: linear-gradient(135deg, rgba(0, 212, 170, 0.08), rgba(124, 58, 237, 0.06));
-  border-left: 4px solid #00d4aa;
-  padding: 14px 18px;
-  border-radius: 10px;
-  margin-top: 18px !important;
+  background: rgba(0, 212, 170, 0.05);
+  border-left: 3px solid #00d4aa;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-top: 16px !important;
+  font-size: 13px !important;
 }
 
-/* Stats */
+/* Stats - mini, no celebratorio */
 .thankyou-stats {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-  margin-bottom: 36px;
+  gap: 10px;
+  margin-bottom: 32px;
 }
 
 .thankyou-stat {
   background: #ffffff;
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  border-radius: 16px;
-  padding: 20px 16px;
-  transition: all 0.3s ease;
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  border-radius: 12px;
+  padding: 16px 12px;
+  transition: border-color 0.2s ease;
 }
 
 .thankyou-stat:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 212, 170, 0.10);
-  border-color: rgba(0, 212, 170, 0.25);
+  border-color: rgba(0, 212, 170, 0.20);
 }
 
 .thankyou-stat-value {
-  font-size: 28px;
-  font-weight: 900;
+  font-size: 20px;
+  font-weight: 800;
   color: #00d4aa;
-  margin-bottom: 6px;
-  letter-spacing: -0.5px;
+  margin-bottom: 4px;
+  letter-spacing: -0.3px;
+  line-height: 1;
 }
 
 .thankyou-stat-label {
-  font-size: 11px;
+  font-size: 10px;
   color: #64748b;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  line-height: 1.3;
 }
 
 /* Actions */
 .thankyou-actions {
-  margin-bottom: 32px;
+  margin-bottom: 24px;
 }
 
 .thankyou-btn-primary {
   background: linear-gradient(135deg, #00d4aa, #059669);
   color: #ffffff;
   border: none;
-  padding: 18px 48px;
-  border-radius: 14px;
-  font-size: 15px;
-  font-weight: 900;
+  padding: 14px 36px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 800;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 8px 24px rgba(0, 212, 170, 0.30);
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 12px rgba(0, 212, 170, 0.25);
   font-family: inherit;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
+  letter-spacing: 0.2px;
 }
 
 .thankyou-btn-primary:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 12px 32px rgba(0, 212, 170, 0.40);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(0, 212, 170, 0.35);
 }
 
 /* Footer */
 .thankyou-footer {
-  font-size: 13px;
+  font-size: 12px;
   color: #94a3b8;
   margin: 0;
   font-weight: 500;
@@ -269,7 +259,7 @@
   color: #00d4aa;
   font-weight: 700;
   text-decoration: none;
-  transition: all 0.2s ease;
+  transition: color 0.2s ease;
 }
 
 .thankyou-footer a:hover {
@@ -278,25 +268,22 @@
 }
 
 /* Responsive */
-@media (max-width: 768px) {
+@media (max-width: 640px) {
   .thankyou-page {
-    padding: 24px 16px;
+    padding: 40px 16px;
   }
 
   .thankyou-emoji {
-    font-size: 64px;
+    width: 60px;
+    height: 60px;
   }
 
-  .thankyou-title {
-    font-size: clamp(28px, 8vw, 38px);
-  }
-
-  .thankyou-subtitle {
-    font-size: 16px;
+  .thankyou-emoji::before {
+    font-size: 30px;
   }
 
   .thankyou-card {
-    padding: 28px 22px;
+    padding: 24px 20px;
   }
 
   .thankyou-stats {
@@ -305,6 +292,6 @@
 
   .thankyou-btn-primary {
     width: 100%;
-    padding: 16px 32px;
+    padding: 14px 24px;
   }
 }

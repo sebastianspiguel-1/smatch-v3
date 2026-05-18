@@ -13,7 +13,7 @@ export default function ThankYou() {
       </div>
 
       <div className="thankyou-container">
-        <div className="thankyou-emoji">🎉</div>
+        <div className="thankyou-emoji" aria-hidden="true" />
 
         <h1 className="thankyou-title">
           ¡Gracias por completar tu <span className="gradient-text">Setlist Challenge</span>!
@@ -24,7 +24,6 @@ export default function ThankYou() {
         </p>
 
         <div className="thankyou-card">
-          <div className="thankyou-card-icon">📊</div>
           <h2>¿Qué pasa ahora?</h2>
           <p>
             Tus respuestas y decisiones quedaron registradas y van a ser evaluadas por el equipo de recruiting.

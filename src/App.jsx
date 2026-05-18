@@ -2,7 +2,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom"
 import Landing from "./pages/Landing"
 import ChallengeMenu from "./pages/ChallengeMenu"
 import CandidateReport from "./pages/CandidateReport"
-import CandidateProgress from "./pages/CandidateProgress"
 import ThankYou from "./pages/ThankYou"
 import RecruiterDashboard from "./pages/RecruiterDashboard"
 import RecruiterHub from "./pages/RecruiterHub"
@@ -25,10 +24,9 @@ export default function App() {
         <Route path="/challenge/4" element={<Challenge04 />} />
         <Route path="/challenge/5" element={<Challenge05 />} />
         <Route path="/challenge/6" element={<Challenge06 />} />
-        <Route path="/report/:id" element={<CandidateReport />} />
-        <Route path="/resultados" element={<CandidateReport finalView />} />
         <Route path="/gracias" element={<ThankYou />} />
-        <Route path="/mi-progreso" element={<CandidateProgress />} />
+        {/* Reporte y dashboard del recruiter — NO accesible para candidato */}
+        <Route path="/report/:id" element={<CandidateReport />} />
         <Route path="/dashboard" element={<RecruiterDashboard />} />
         <Route path="/recruiter" element={<RecruiterHub />} />
       </Routes>

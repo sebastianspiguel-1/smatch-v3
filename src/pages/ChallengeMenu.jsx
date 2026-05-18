@@ -290,10 +290,9 @@ export default function ChallengeMenu() {
               <div className="stat-value">{completedCount}/6</div>
               <div className="stat-label">Completados</div>
             </div>
-            <div className="stat-item stat-item-clickable" onClick={() => nav("/mi-progreso")}>
+            <div className="stat-item">
               <div className="stat-value">{completionPct}%</div>
               <div className="stat-label">Progreso</div>
-              <div className="stat-cta">Ver detalle →</div>
             </div>
           </div>
 

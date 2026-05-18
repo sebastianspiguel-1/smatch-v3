@@ -1,142 +1,58 @@
-/* Challenge Complete Overlay */
+/* ═══════════════════════════════════════════════════
+   CHALLENGE COMPLETE - sobrio, B2B, light theme
+   ═══════════════════════════════════════════════════ */
+
 .challenge-complete-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(15, 23, 42, 0.85);
-  backdrop-filter: blur(12px);
+  background: rgba(15, 23, 42, 0.40);
+  backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  animation: fadeIn 0.4s ease;
+  animation: fadeIn 0.3s ease;
+  padding: 20px;
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-/* Card */
+/* Card - blanca, sobria, sin gradient saturado */
 .challenge-complete-card {
-  background: linear-gradient(135deg, rgba(0, 212, 170, 0.95), rgba(5, 150, 105, 0.95));
-  border: 3px solid #00d4aa;
-  border-radius: 28px;
-  padding: 60px 50px;
-  max-width: 550px;
-  width: 90%;
-  text-align: center;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
-  animation: slideUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
   position: relative;
+  background: #ffffff;
+  border: 1.5px solid rgba(0, 212, 170, 0.20);
+  border-radius: 20px;
+  padding: 48px 40px 36px;
+  max-width: 480px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.25);
+  animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
+}
+
+/* Accent superior sutil */
+.challenge-complete-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #00d4aa, #059669);
 }
 
 @keyframes slideUp {
   from {
     opacity: 0;
-    transform: translateY(40px) scale(0.9);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-/* Checkmark animado */
-.complete-checkmark {
-  margin: 0 auto 32px;
-  width: 80px;
-  height: 80px;
-}
-
-.checkmark-svg {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  display: block;
-  stroke-width: 3;
-  stroke: #ffffff;
-  stroke-miterlimit: 10;
-  box-shadow: inset 0 0 0 #ffffff;
-  animation: fillCheckmark 0.4s ease-in-out 0.4s forwards, scaleCheckmark 0.3s ease-in-out 0.9s both;
-}
-
-.checkmark-circle {
-  stroke-dasharray: 166;
-  stroke-dashoffset: 166;
-  stroke-width: 3;
-  stroke-miterlimit: 10;
-  stroke: #ffffff;
-  fill: none;
-  animation: strokeCheckmark 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
-}
-
-.checkmark-check {
-  transform-origin: 50% 50%;
-  stroke-dasharray: 48;
-  stroke-dashoffset: 48;
-  animation: strokeCheckmark 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards;
-}
-
-@keyframes strokeCheckmark {
-  100% {
-    stroke-dashoffset: 0;
-  }
-}
-
-@keyframes scaleCheckmark {
-  0%, 100% {
-    transform: none;
-  }
-  50% {
-    transform: scale3d(1.1, 1.1, 1);
-  }
-}
-
-@keyframes fillCheckmark {
-  100% {
-    box-shadow: inset 0 0 0 50px #ffffff;
-  }
-}
-
-/* Textos */
-.complete-title {
-  font-size: 36px;
-  font-weight: 900;
-  color: #ffffff;
-  margin: 0 0 16px 0;
-  letter-spacing: -1px;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-  animation: fadeInText 0.6s ease 0.3s both;
-}
-
-.complete-challenge-name {
-  font-size: 18px;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.95);
-  margin: 0 0 12px 0;
-  animation: fadeInText 0.6s ease 0.4s both;
-}
-
-.complete-message {
-  font-size: 15px;
-  color: rgba(255, 255, 255, 0.85);
-  margin: 0 0 40px 0;
-  font-weight: 500;
-  animation: fadeInText 0.6s ease 0.5s both;
-}
-
-@keyframes fadeInText {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(20px);
   }
   to {
     opacity: 1;
@@ -144,85 +60,164 @@
   }
 }
 
-/* Botones */
+/* Checkmark - verde sobre fondo blanco, sin bouncy */
+.complete-checkmark {
+  margin: 0 auto 24px;
+  width: 64px;
+  height: 64px;
+}
+
+.checkmark-svg {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: block;
+  stroke-width: 3;
+  stroke: #ffffff;
+  stroke-miterlimit: 10;
+  animation: fillCheckmark 0.3s ease-in-out 0.3s forwards;
+  box-shadow: 0 4px 16px rgba(0, 212, 170, 0.15);
+}
+
+.checkmark-circle {
+  stroke-dasharray: 166;
+  stroke-dashoffset: 166;
+  stroke-width: 3;
+  stroke-miterlimit: 10;
+  stroke: #00d4aa;
+  fill: none;
+  animation: strokeCheckmark 0.5s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+}
+
+.checkmark-check {
+  transform-origin: 50% 50%;
+  stroke-dasharray: 48;
+  stroke-dashoffset: 48;
+  animation: strokeCheckmark 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.5s forwards;
+}
+
+@keyframes strokeCheckmark {
+  100% { stroke-dashoffset: 0; }
+}
+
+@keyframes fillCheckmark {
+  100% {
+    box-shadow: inset 0 0 0 32px #00d4aa, 0 4px 16px rgba(0, 212, 170, 0.25);
+  }
+}
+
+/* Textos - navy sobre fondo blanco */
+.complete-title {
+  font-size: 26px;
+  font-weight: 800;
+  color: #0a1f44;
+  margin: 0 0 10px 0;
+  letter-spacing: -0.6px;
+  animation: fadeInText 0.4s ease 0.4s both;
+}
+
+.complete-challenge-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: #475569;
+  margin: 0 0 8px 0;
+  animation: fadeInText 0.4s ease 0.5s both;
+}
+
+.complete-message {
+  font-size: 14px;
+  color: #64748b;
+  margin: 0 0 32px 0;
+  font-weight: 500;
+  animation: fadeInText 0.4s ease 0.6s both;
+}
+
+@keyframes fadeInText {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Botones - sobrios, no uppercase, accent teal solo en primary */
 .complete-actions {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  animation: fadeInText 0.6s ease 0.6s both;
+  gap: 10px;
+  animation: fadeInText 0.4s ease 0.7s both;
 }
 
 .complete-btn {
-  padding: 18px 32px;
-  border-radius: 14px;
-  font-size: 15px;
-  font-weight: 900;
+  padding: 14px 24px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.25s ease;
   font-family: inherit;
-  letter-spacing: 0.3px;
+  letter-spacing: 0.2px;
   border: none;
-  text-transform: none;
 }
 
 .complete-btn-primary {
   background: linear-gradient(135deg, #00d4aa, #059669);
   color: #ffffff;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px rgba(0, 212, 170, 0.25);
 }
 
 .complete-btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
-  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(0, 212, 170, 0.35);
 }
 
 .complete-btn-secondary {
-  background: rgba(255, 255, 255, 0.15);
-  color: #ffffff;
-  border: 2px solid rgba(255, 255, 255, 0.25);
-  backdrop-filter: blur(10px);
+  background: transparent;
+  color: #475569;
+  border: 1.5px solid rgba(15, 23, 42, 0.12);
 }
 
 .complete-btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.25);
-  border-color: rgba(255, 255, 255, 0.4);
-  transform: translateY(-2px);
+  background: rgba(15, 23, 42, 0.04);
+  border-color: rgba(15, 23, 42, 0.20);
+  color: #0a1f44;
 }
 
 /* Responsive */
 @media (max-width: 768px) {
   .challenge-complete-card {
-    padding: 50px 32px;
-    max-width: 90%;
+    padding: 40px 28px 28px;
+    border-radius: 16px;
   }
 
   .complete-checkmark {
-    width: 70px;
-    height: 70px;
+    width: 56px;
+    height: 56px;
   }
 
   .checkmark-svg {
-    width: 70px;
-    height: 70px;
+    width: 56px;
+    height: 56px;
   }
 
   .complete-title {
-    font-size: 30px;
+    font-size: 22px;
   }
 
   .complete-challenge-name {
-    font-size: 16px;
+    font-size: 14px;
   }
 
   .complete-message {
-    font-size: 14px;
-    margin-bottom: 32px;
+    font-size: 13px;
+    margin-bottom: 24px;
   }
 
   .complete-btn {
-    padding: 16px 28px;
-    font-size: 14px;
+    padding: 13px 20px;
+    font-size: 13px;
   }
 }

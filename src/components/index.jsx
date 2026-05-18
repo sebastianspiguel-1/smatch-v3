@@ -8,7 +8,6 @@ export { default as ProgressBar } from "./ProgressBar"
 export { default as TopBar } from "./TopBar"
 export { default as FeedbackToast } from "./FeedbackToast"
 export { default as FeedbackTimeline } from "./FeedbackTimeline"
-export { default as SuccessModal } from "./SuccessModal"
 
 // ─── Avatar ───
 export function Avatar({ member, size = 24 }) {
