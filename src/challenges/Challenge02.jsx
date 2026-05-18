@@ -433,28 +433,28 @@ export default function Challenge02() {
               disabled={actionsCompleted.identify}
               className={`action-btn primary ${actionsCompleted.identify ? 'completed' : ''}`}
             >
-              {actionsCompleted.identify ? '✓ Identificado' : '🎯 Identificar Bloqueador'}
+              {actionsCompleted.identify ? 'Acción realizada' : '🎯 Identificar bloqueador'}
             </button>
             <button
               onClick={handleFlagWIP}
               disabled={actionsCompleted.flagWIP}
               className={`action-btn warning ${actionsCompleted.flagWIP ? 'completed' : ''}`}
             >
-              {actionsCompleted.flagWIP ? '✓ WIP Flagged' : '⚠️ Flag WIP Limit'}
+              {actionsCompleted.flagWIP ? 'WIP flag enviado' : '⚠️ Flag WIP limit'}
             </button>
             <button
               onClick={handleSuggestPair}
               disabled={actionsCompleted.pair}
               className={`action-btn ${actionsCompleted.pair ? 'completed' : ''}`}
             >
-              {actionsCompleted.pair ? '✓ Pair Sugerido' : '🤝 Sugerir Pair Programming'}
+              {actionsCompleted.pair ? 'Sugerencia enviada' : '🤝 Sugerir pair programming'}
             </button>
             <button
               onClick={handleEscalate}
               disabled={actionsCompleted.escalate}
               className={`action-btn danger ${actionsCompleted.escalate ? 'completed' : ''}`}
             >
-              {actionsCompleted.escalate ? '✓ Escalado' : '📢 Escalar a Platform'}
+              {actionsCompleted.escalate ? 'Escalado enviado' : '📢 Escalar a Platform'}
             </button>
           </div>
 

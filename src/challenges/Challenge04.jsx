@@ -209,9 +209,9 @@ function TshirtTool({ onComplete, onReaction }) {
         </div>
       )}
       {step === 3 && (
-        <div style={{ padding: 11, borderRadius: 11, background: choice === "extremes" ? "#eafaf1" : "#fdedec", border: `1px solid ${choice === "extremes" ? "#27ae60" : "#e74c3c"}40`, marginTop: 8 }}>
-          <div style={{ fontSize: 14, fontWeight: 700, color: choice === "extremes" ? "#27ae60" : "#e74c3c" }}>
-            {choice === "extremes" ? "✅ Correcta! Los extremos explican → el equipo converge." : choice === "revote" ? "⚠️ Regular. Sin discusión el revote repite el mismo resultado." : choice === "average" ? "❌ Promediar no es estimar. Se pierde la discusión." : "❌ Si decide uno solo, no es estimación en equipo."}
+        <div style={{ padding: 11, borderRadius: 11, background: "#f8fafc", border: "1px solid rgba(15,23,42,0.10)", marginTop: 8 }}>
+          <div style={{ fontSize: 13, color: "#475569", lineHeight: 1.5 }}>
+            Decisión registrada.
           </div>
         </div>
       )}
@@ -437,10 +437,7 @@ export default function Challenge04() {
         currentStep={currentStep}
         totalSteps={totalSteps}
         timer={{ display: `${mm}:${ss}`, warning: timer < 300 }}
-        score={score}
       />
-
-      {newAch && <div style={{ position: "fixed", top: 84, left: "50%", transform: "translateX(-50%)", zIndex: 999, background: T.panel, border: `3px solid ${T.orange}`, borderRadius: 20, padding: "14px 28px", display: "flex", alignItems: "center", gap: 14, boxShadow: `0 8px 24px rgba(234,88,12,0.20), 0 0 56px rgba(234,88,12,0.15)` }}><span style={{ fontSize: 39 }}>{newAch.icon}</span><div><div style={{ fontSize: 11, fontWeight: 700, color: T.orange, letterSpacing: 2 }}>LOGRO</div><div style={{ fontSize: 18, fontWeight: 800, color: T.text }}>{newAch.label}</div></div></div>}
 
       {popups.map((evt, idx) => (
         <div key={evt.id} onClick={() => catchEvent(evt.id)} style={{

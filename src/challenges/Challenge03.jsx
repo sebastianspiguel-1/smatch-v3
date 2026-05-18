@@ -368,11 +368,6 @@ export default function Challenge03() {
                     </div>
                   ))}
                 </div>
-                {selectedMetric.redFlag && (
-                  <div className="metric-red-flag">
-                    <strong>🚨 Red Flag:</strong> {selectedMetric.redFlag}
-                  </div>
-                )}
               </div>
             </div>
           </div>
@@ -431,12 +426,6 @@ export default function Challenge03() {
           {/* Outcome Resolution (if reached) */}
           {conversationOutcome ? (
             <div className="conversation-outcome">
-              <div className={`outcome-badge ${conversationOutcome.outcome}`}>
-                {conversationOutcome.outcome === "expert" ? "🌟 Excelente Approach" :
-                 conversationOutcome.outcome === "competent" ? "✓ Buen Approach" :
-                 conversationOutcome.outcome === "developing" ? "⚠️ Approach Mejorable" :
-                 "🚨 Approach Problemático"}
-              </div>
               <div className="outcome-narration">
                 {conversationOutcome.narration}
               </div>
@@ -481,7 +470,7 @@ export default function Challenge03() {
                 {branch.options.map(option => (
                   <button
                     key={option.id}
-                    className={`option-card approach-${option.approach}`}
+                    className="option-card"
                     onClick={() => handleConversationChoice(option.id)}
                   >
                     <div className="option-text">"{option.text}"</div>
@@ -536,8 +525,6 @@ export default function Challenge03() {
                     />
                     <div className="action-content">
                       <span className="action-text">{action.text}</span>
-                      {action.recommended && <span className="action-recommended">✓ Recomendado</span>}
-                      {action.impact === 'negative' && <span className="action-warning">⚠️ Riesgoso</span>}
                     </div>
                   </label>
                 ))}

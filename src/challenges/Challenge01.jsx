@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom"
 import { T } from "../theme"
 import { callAI, buildFormatPrompt, buildInterventionPrompt, computeScores, getGrade } from "../engine/ai"
 import { saveResult } from "../engine/supabase"
-import { Avatar, StickyCard, ChatBubble, MiniBoard, TopBar, ProgressBar, FeedbackToast, FeedbackTimeline } from "../components"
+import { Avatar, StickyCard, ChatBubble, MiniBoard, TopBar, ProgressBar } from "../components"
 import TeamPanel from "../components/TeamPanel"
 import ChallengeComplete from "../components/ChallengeComplete"
 import { markChallengeComplete, isLastChallenge } from "../utils/progressTracker"
@@ -26,8 +26,6 @@ export default function Challenge01() {
   const [waiting, setWaiting] = useState(false)
   const [prompt, setPrompt] = useState("")
   const [evaling, setEvaling] = useState(false)
-  const [currentToast, setCurrentToast] = useState(null)
-  const [showTimeline, setShowTimeline] = useState(false)
   const [startTime] = useState(Date.now())
   const chatRef = useRef(null)
   const inputRef = useRef(null)
@@ -51,9 +49,8 @@ export default function Challenge01() {
       const feedbackData = { phase: "Elección de formato", ...res }
       setAllScores(s => [...s, res.scores])
       setAllFeedback(f => [...f, feedbackData])
-      setCurrentToast(feedbackData)
     }
-    // Proceed automatically after feedback
+    // Proceed automatically
     setTimeout(() => proceedToBoard(), 1500)
   }
 
@@ -92,9 +89,6 @@ export default function Challenge01() {
       setAllScores(s => [...s, vs])
       setAllFeedback(f => [...f, feedbackData])
       if (mo.newStickies) setStickies(p => [...p, ...mo.newStickies])
-
-      // Show feedback toast
-      setCurrentToast(feedbackData)
     }
     // Continue automatically after short delay
     setTimeout(() => continueToNextMoment(), 1500)
@@ -350,22 +344,6 @@ export default function Challenge01() {
             )
           })}
         </div>
-        <button
-          onClick={() => setShowTimeline(!showTimeline)}
-          style={{
-            padding: "6px 14px",
-            fontSize: 12,
-            fontWeight: 700,
-            background: showTimeline ? T.teal : T.card,
-            color: showTimeline ? "#fff" : T.teal,
-            border: `1.5px solid ${showTimeline ? T.teal : T.border}`,
-            borderRadius: 6,
-            cursor: "pointer",
-            transition: "all 0.15s"
-          }}
-        >
-          {showTimeline ? "◀ Ocultar Feedback" : "Ver Feedback ▶"}
-        </button>
       </div>
       <div style={{ flex: 1, display: "flex", overflow: "hidden" }}>
         {/* Board */}
@@ -478,7 +456,7 @@ export default function Challenge01() {
           )}
         </div>
         {/* Chat */}
-        <div style={{ width: 340, display: "flex", flexDirection: "column", flexShrink: 0, borderRight: showTimeline ? `1px solid ${T.border}` : "none" }}>
+        <div style={{ width: 340, display: "flex", flexDirection: "column", flexShrink: 0 }}>
           <div ref={chatRef} style={{ flex: 1, overflowY: "auto", padding: "6px 8px" }}>
             {chat.map((msg, i) => <ChatBubble key={i} msg={msg} memberMap={MEMBER_MAP} />)}
             {loading && <div style={{ padding: "8px", fontSize: 10, color: T.dim, fontStyle: "italic" }}><span style={{ animation: "pulse 1s ease infinite", display: "inline-block" }}>El equipo está reaccionando...</span></div>}
@@ -507,43 +485,7 @@ export default function Challenge01() {
           </div>
         </div>
 
-        {/* Feedback Timeline Sidebar */}
-        {showTimeline && (
-          <div style={{
-            width: 300,
-            background: T.panel,
-            display: "flex",
-            flexDirection: "column",
-            flexShrink: 0,
-            animation: "slideInRight 0.3s ease-out"
-          }}>
-            <div style={{
-              padding: "10px 12px",
-              borderBottom: `1px solid ${T.border}`,
-              background: T.card
-            }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: T.teal, letterSpacing: 1 }}>
-                📊 HISTORIAL DE FEEDBACK
-              </div>
-              <div style={{ fontSize: 9, color: T.dim, marginTop: 2 }}>
-                {allFeedback.length} evaluacion{allFeedback.length !== 1 ? "es" : ""}
-              </div>
-            </div>
-            <div style={{ flex: 1, overflowY: "auto", padding: "0 8px" }}>
-              <FeedbackTimeline feedbackList={allFeedback} phaseLabels={phaseLabels} />
-            </div>
-          </div>
-        )}
       </div>
-
-      {/* Global Feedback Toast */}
-      {currentToast && (
-        <FeedbackToast
-          feedback={currentToast}
-          onDismiss={() => setCurrentToast(null)}
-          duration={4000}
-        />
-      )}
     </div>
   )
 }

@@ -260,13 +260,11 @@ export default function Challenge05() {
             <h2>📝 Preparar Argumentos</h2>
             <div className="arguments-list">
               {PREPARATION_ARGUMENTS.map(arg => (
-                <label key={arg.id} className={`argument-card ${arg.impact} ${preparedArguments.includes(arg.id) ? 'selected' : ''}`}>
+                <label key={arg.id} className={`argument-card ${preparedArguments.includes(arg.id) ? 'selected' : ''}`}>
                   <input type="checkbox" checked={preparedArguments.includes(arg.id)} onChange={() => toggleArgumentSelection(arg.id)} />
                   <div className="argument-content">
                     <div className="argument-header">
                       <span>{arg.title}</span>
-                      {arg.recommended && <span className="argument-recommended">✓</span>}
-                      {arg.impact === "negative" && <span className="argument-warning">⚠️</span>}
                     </div>
                     <p>{arg.text}</p>
                   </div>
@@ -292,18 +290,6 @@ export default function Challenge05() {
       <div className="challenge05-container">
         <TopBar title="📊 La presión de velocidad" subtitle="Fase 2: Meeting con Paula" currentStep={currentStep} totalSteps={totalSteps} timer={{ display: `${mm}:${ss}`, warning: timer < 180 }} />
         <div className="meeting-phase">
-          <div className="stakeholder-meters">
-            <div className="meter-group">
-              <div>Presión de Paula</div>
-              <div className="meter-bar"><div className="meter-fill" style={{ width: `${paulaMood.pressure}%`, background: paulaMood.pressure > 70 ? "#dc2626" : "#10b981" }} /></div>
-              <div>{paulaMood.pressure}/100</div>
-            </div>
-            <div className="meter-group">
-              <div>Satisfacción de Paula</div>
-              <div className="meter-bar"><div className="meter-fill" style={{ width: `${paulaMood.satisfaction}%`, background: "#3b82f6" }} /></div>
-              <div>{paulaMood.satisfaction}/100</div>
-            </div>
-          </div>
           <div className="meeting-message">
             {stage.narration && <div className="meeting-narration">{stage.narration}</div>}
             <div className="paula-message">
@@ -316,7 +302,6 @@ export default function Challenge05() {
           </div>
           {meetingOutcome ? (
             <div className="meeting-outcome">
-              <div className={`outcome-badge ${meetingOutcome.outcome}`}>{meetingOutcome.outcome === "expert" ? "🌟 Excelente" : meetingOutcome.outcome === "competent" ? "✓ Aceptable" : "🚨 Problemático"}</div>
               <div className="paula-final-message">
                 <Avatar member={STAKEHOLDER_MAP.paula} size={40} />
                 <div className="message-bubble"><div>{meetingOutcome.paulaFinalMessage}</div></div>

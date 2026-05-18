@@ -256,16 +256,9 @@ export default function Challenge06() {
           <div className="board-grid">
             {BOARD_SECTIONS.map(section => {
               const progress = getSectionProgress(section)
-              const isComplete = progress.filled === progress.total
 
               return (
                 <div key={section} className="board-section" data-section={section}>
-                  {isComplete && (
-                    <div className="section-complete-badge">
-                      ✓ COMPLETO
-                    </div>
-                  )}
-
                   <div className="section-header">
                     <div className="section-icon">{sectionIcons[section]}</div>
                     <div className="section-header-content">
