@@ -58,6 +58,76 @@ export const TEAM_QUESTIONS = [
   { id: "q5", from: "gian", text: "¿Cómo definimos qué es más importante? ¿Valor de negocio o complejidad técnica?", delay: 70000 },
 ]
 
+// ─── DOCK TOOLS (estaciones de coaching: el SM las usa + las explica) ───
+export const DOCK_ITEMS = [
+  { id: "postit", label: "📝 Post-it", desc: "Nota libre", type: "postit" },
+  { id: "textbox", label: "📄 Nota libre", desc: "Explicá algo extenso", type: "textbox" },
+  { id: "div0", type: "divider" },
+  { id: "poker5", label: "🃏 5 pasos Poker", desc: "Procesos de PP", type: "challenge", color: "#e84393" },
+  { id: "fib", label: "🔢 Fibonacci", desc: "Por qué la secuencia", type: "challenge", color: "#00b894" },
+  { id: "relabs", label: "⚖️ Rel vs Abs", desc: "Estimación relativa", type: "challenge", color: "#0984e3" },
+  { id: "tshirt", label: "👕 T-shirt sizing", desc: "Facilitá desacuerdo", type: "challenge", color: "#6c5ce7" },
+  { id: "div1", type: "divider" },
+  { id: "kano", label: "🏨 Modelo Kano", desc: "Clasificá features", type: "challenge", color: "#f39c12" },
+  { id: "moscow", label: "🎯 MoSCoW", desc: "Priorizá el backlog", type: "challenge", color: "#e74c3c" },
+  { id: "div2", type: "divider" },
+  { id: "poker_start", label: "🃏 Iniciar Planning Poker", desc: "Estimar historias en vivo", type: "action" },
+]
+
+// ─── KANO ITEMS (no hay respuesta única correcta — el SM clasifica y EXPLICA) ───
+export const KANO_ITEMS = [
+  { id: "k1", text: "Login funciona" },
+  { id: "k2", text: "Búsqueda rápida" },
+  { id: "k3", text: "Dark mode" },
+  { id: "k4", text: "Se puede pagar" },
+  { id: "k5", text: "Referidos" },
+  { id: "k6", text: "Filtros avanzados" },
+]
+
+// ─── REL/ABS ITEMS ───
+export const RELABS_ITEMS = [
+  { id: "r1", text: "Story Points" },
+  { id: "r2", text: "Horas" },
+  { id: "r3", text: "Comparación entre items" },
+  { id: "r4", text: "Días en el calendario" },
+  { id: "r5", text: "Equipo decide juntos" },
+  { id: "r6", text: "Varía según la persona" },
+]
+
+// ─── T-SHIRT votes (simulan desacuerdo, el SM facilita) ───
+// Cada voto tiene una RAZÓN realista que el SM necesita conocer para facilitar.
+// Esto le da material concreto para el coaching.
+export const TSHIRT_TEAM_VOTES = {
+  eric: "M",
+  david: "L",
+  gian: "L",
+  nacho: "XL",
+  alan: "M",
+}
+
+export const TSHIRT_PBI_INFO = {
+  id: "SL-201",
+  title: "Login y registro",
+  scope: "Registro de usuarios (artistas y venues), login con JWT, recuperar contraseña por email, y validación básica.",
+}
+
+export const TSHIRT_VOTE_REASONS = {
+  eric:  "Ya implementé JWT en una startup anterior. No le veo complejidad real, son flujos conocidos.",
+  david: "Pago tiene login propio. Si esto rompe, mi módulo cae también. Lo siento más arriesgado.",
+  gian:  "Hay edge cases de QA: emails inválidos, contraseñas viejas, expiración de token. Necesita tiempo de testing.",
+  nacho: "Es la primera vez que armo flujo de auth en mobile. Lo siento enorme, no sé por dónde empezar.",
+  alan:  "En mobile he hecho login varias veces. Tirando de librerías estándar, no es taaan grave.",
+}
+
+// ─── POKER STEPS prompts (sin keyword matching, el SM completa libre) ───
+export const POKER_STEPS_PROMPTS = [
+  "El PO ______ el PBI al equipo",
+  "El equipo ______ dudas",
+  "Cada uno ______ su carta individualmente",
+  "Se ______ todas las cartas al mismo tiempo",
+  "Los ______ explican por qué votaron distinto",
+]
+
 // ─── SCORING DIMENSIONS ───
 // Challenge identity: Scrum process mastery + Estimation coaching + Bias detection
 export const DIMENSIONS = [
