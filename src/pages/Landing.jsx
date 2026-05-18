@@ -62,9 +62,9 @@ export default function Landing() {
       setLoginOpen(false)
       nav("/challenges")
     } else {
-      // Recruiter login - instant access to dashboard
+      // Recruiter login - instant access to hub
       setLoginOpen(false)
-      nav("/dashboard")
+      nav("/recruiter")
     }
   }
 
@@ -90,21 +90,17 @@ export default function Landing() {
             <li><a href="#como-funciona" onClick={(e) => { e.preventDefault(); scrollTo("como-funciona") }}>Cómo funciona</a></li>
             <li><a href="#experiencias" onClick={(e) => { e.preventDefault(); scrollTo("experiencias") }}>Experiencias</a></li>
             <li><a href="#contacto" onClick={(e) => { e.preventDefault(); scrollTo("contacto") }}>Contacto</a></li>
-            <li className="dropdown">
-              <a href="#" className="dropdown-toggle" onClick={(e) => e.preventDefault()}>
-                Login <span className="arrow">▼</span>
-              </a>
-              <div className="dropdown-menu">
-                <button className="dropdown-item" onClick={() => { setLoginTab("recruiter"); setLoginOpen(true); setMobileOpen(false) }}>
-                  Login as Recruiter
-                </button>
-                <button className="dropdown-item" onClick={() => { setLoginTab("candidate"); setLoginOpen(true); setMobileOpen(false) }}>
-                  Login as Candidate
-                </button>
-              </div>
+            <li>
+              <button className="nav-login-btn nav-login-recruiter" onClick={() => { setLoginTab("recruiter"); setLoginOpen(true); setMobileOpen(false) }}>
+                Recruiter Login
+              </button>
+            </li>
+            <li>
+              <button className="nav-login-btn nav-login-candidate" onClick={() => { setLoginTab("candidate"); setLoginOpen(true); setMobileOpen(false) }}>
+                Candidate Login
+              </button>
             </li>
             <li><a href="https://calendly.com" target="_blank" rel="noreferrer" className="nav-btn-secondary">Schedule Demo</a></li>
-            <li><a href="#" className="nav-cta" onClick={handleStartAssessment}>Start Assessment →</a></li>
           </ul>
           <button className={`mobile-menu-toggle ${mobileOpen ? "active" : ""}`} onClick={() => setMobileOpen(!mobileOpen)}>
             <span /><span /><span />
@@ -120,11 +116,11 @@ export default function Landing() {
           <div className="shape shape-3" />
         </div>
         <div className="hero-content">
-          <h1>Contrata <span className="gradient-text">Scrum Masters</span> que generen impacto real</h1>
-          <p>Identifica el talento ágil correcto con evaluaciones prácticas y objetivas. Reduce el riesgo de contrataciones equivocadas con data real de desempeño.</p>
+          <h1>Contratá <span className="gradient-text">Scrum Masters</span> que generen impacto real</h1>
+          <p>Identificá el talento ágil correcto con evaluaciones prácticas y objetivas. Reducí el riesgo de contrataciones equivocadas con data real de desempeño.</p>
           <div className="hero-ctas">
-            <a href="#contacto" className="btn btn-primary" onClick={(e) => { e.preventDefault(); scrollTo("contacto") }}>Probar Gratis</a>
-            <a href="#como-funciona" className="btn btn-secondary" onClick={(e) => { e.preventDefault(); scrollTo("como-funciona") }}>Ver Demo</a>
+            <a href="#contacto" className="btn btn-primary" onClick={(e) => { e.preventDefault(); scrollTo("contacto") }}>Probar gratis</a>
+            <a href="#como-funciona" className="btn btn-secondary" onClick={(e) => { e.preventDefault(); scrollTo("como-funciona") }}>Ver demo</a>
           </div>
         </div>
       </section>
@@ -140,11 +136,11 @@ export default function Landing() {
             </div>
             <div className="feature-visual">
               <div className="visual-card">
-                <h3>Assessment Validado</h3>
-                {[["Facilitación", "95%"], ["Resolución de Conflictos", "88%"], ["Stakeholder Management", "92%"], ["Agilidad Real", "91%"]].map(([l, v]) => (
-                  <div className="metric-row" key={l}>
-                    <span className="metric-label">{l}</span>
-                    <span className="metric-value">{v}</span>
+                <h3>Dimensiones que evaluamos</h3>
+                {["Facilitación", "Resolución de conflictos", "Stakeholder management", "Pensamiento sistémico", "Coaching empático", "Decisión bajo presión"].map(dim => (
+                  <div className="metric-row" key={dim}>
+                    <span className="metric-label">{dim}</span>
+                    <span className="metric-value metric-check">✓</span>
                   </div>
                 ))}
               </div>
@@ -180,11 +176,16 @@ export default function Landing() {
           <div className="feature-section">
             <div className="feature-visual">
               <div className="visual-card">
-                <h3>El Marketplace de Talento Ágil</h3>
-                {[["Candidatos Validados", "1,247"], ["Empresas Activas", "89"], ["Tasa de Match", "94%"], ["Tiempo de Contratación", "-67%"]].map(([l, v]) => (
+                <h3>Lo que ve el recruiter</h3>
+                {[
+                  ["Score por dimensión", "Radar chart"],
+                  ["Comparativa de candidatos", "Side-by-side"],
+                  ["Red flags detectados", "Auto-flagged"],
+                  ["Recomendación de seniority", "Junior → Lead"],
+                ].map(([l, v]) => (
                   <div className="metric-row" key={l}>
                     <span className="metric-label">{l}</span>
-                    <span className="metric-value">{v}</span>
+                    <span className="metric-value metric-tag">{v}</span>
                   </div>
                 ))}
               </div>
@@ -206,11 +207,11 @@ export default function Landing() {
         </div>
         <div className="timeline">
           {[
-            { icon: "📝", title: "Level 1: Publish", desc: "Publica tu Posición. Crea tu oferta en minutos y define el perfil que buscas." },
-            { icon: "📬", title: "Level 2: Screen", desc: "Candidatos aplican. Una vez terminado el screening inicial, se procede a enviar los assessments." },
-            { icon: "🎮", title: "Assessment Gamificado", desc: "Simulación de 60 minutos. Evaluación de impacto real en equipos con diferentes escenarios." },
-            { icon: "📊", title: "Scoreboard", desc: "Recibe métricas claras, ranking objetivo y video completo del assessment. Compara candidatos con data real." },
-            { icon: "💡", title: "Hire", desc: "Toma la decisión basada en datos y necesidades reales del producto. Disminuyendo riesgo, tiempos y errores de contratación." },
+            { icon: "📝", title: "1. Publicá", desc: "Creá tu oferta en minutos y definí el perfil que buscás." },
+            { icon: "📬", title: "2. Screening", desc: "Los candidatos aplican. Una vez terminado el screening inicial, les enviás el assessment." },
+            { icon: "🎮", title: "3. Assessment gamificado", desc: "Simulación de 60-90 minutos. Evaluación de impacto real en equipos a través de escenarios accionables." },
+            { icon: "📊", title: "4. Scoreboard", desc: "Recibís métricas claras, ranking objetivo y video del assessment. Comparás candidatos con data real." },
+            { icon: "💡", title: "5. Decidís", desc: "Tomás la decisión basada en datos y necesidades reales del producto. Menos riesgo, menos tiempo, menos errores." },
           ].map((t, i) => (
             <div className="timeline-item" key={i}>
               <div className="timeline-number">{t.icon}</div>
@@ -223,27 +224,26 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ═══ EXPERIENCES ═══ */}
+      {/* ═══ PRINCIPLES ═══ */}
       <section id="experiencias" className="experiences-section">
         <div className="section-header">
-          <h2>Lo que dicen nuestros clientes</h2>
+          <h2>Por qué Smatch funciona</h2>
+          <p>Diseñado por SMs y PMs senior con experiencia real en hiring ágil</p>
         </div>
         <div className="experiences-grid">
           {[
-            { avatar: "👩‍💼", name: "María González", role: "Head of Engineering @ TechCorp", text: "Finalmente pudimos ver a los candidatos en acción. El assessment reveló habilidades que nunca detectamos en entrevistas tradicionales. Contratamos a nuestra mejor Scrum Master en años." },
-            { avatar: "👨‍💻", name: "Carlos Ramírez", role: "CTO @ StartupX", text: "Reducimos el tiempo de contratación de 8 semanas a 3. Y lo mejor: la tasa de retención subió al 95%. Los datos objetivos hacen toda la diferencia." },
-            { avatar: "👩‍🔬", name: "Ana Torres", role: "VP of Product @ ScaleUp", text: "El dashboard nos permitió comparar 12 candidatos objetivamente. Identificamos red flags que habrían pasado desapercibidos. SMatch es game-changing." },
-          ].map(t => (
-            <div className="testimonial-card" key={t.name}>
+            { icon: "🎯", title: "Escenarios reales, no teoría", text: "Cada challenge está construido desde situaciones que ocurren todos los días en equipos ágiles: bloqueos no escalados, devs apagados, scope creep, presión de management. Si el candidato sabe navegar esto, sabe hacer el trabajo." },
+            { icon: "🤖", title: "La IA es evaluada, no prohibida", text: "Mientras Codility y otros prohíben IA durante el test, Smatch trackea cómo la usa el candidato. Saber usar IA bien es una competencia en sí misma — y la medimos." },
+            { icon: "📊", title: "Output diseñado para decidir rápido", text: "El reporte del recruiter no es un dump de números. Mostramos seniority inferida, dimensiones fuertes, red flags accionables y recomendación clara. Decisión en 5 minutos, no 5 entrevistas." },
+          ].map(p => (
+            <div className="testimonial-card" key={p.title}>
               <div className="testimonial-header">
-                <div className="testimonial-avatar">{t.avatar}</div>
+                <div className="testimonial-avatar">{p.icon}</div>
                 <div className="testimonial-info">
-                  <h4>{t.name}</h4>
-                  <p>{t.role}</p>
+                  <h4>{p.title}</h4>
                 </div>
               </div>
-              <div className="testimonial-text">"{t.text}"</div>
-              <div className="rating">⭐⭐⭐⭐⭐</div>
+              <div className="testimonial-text">{p.text}</div>
             </div>
           ))}
         </div>
@@ -252,7 +252,7 @@ export default function Landing() {
       {/* ═══ STATS ═══ */}
       <section className="stats-section">
         <div className="stats-row">
-          {[["1,200+", "Candidatos Validados"], ["94%", "Tasa de Match"], ["85+", "Empresas Confían"], ["-67%", "Reducción en Tiempo de Hiring"]].map(([n, l]) => (
+          {[["6", "Challenges situacionales"], ["8", "Dimensiones evaluadas"], ["60-90", "Minutos por candidato"], ["AI", "Scoring automático"]].map(([n, l]) => (
             <div className="stat" key={l}>
               <div className="stat-number">{n}</div>
               <div className="stat-label">{l}</div>
@@ -314,27 +314,22 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ═══ TRUSTED BY ═══ */}
+      {/* ═══ EARLY ACCESS ═══ */}
       <section className="trusted-by-section">
         <div className="trusted-container">
-          <p className="trusted-label">Empresas que confían en SMatch</p>
-          <div className="logos-grid">
-            {["TechCorp", "StartupX", "ScaleUp", "AgileCo", "DevTeam", "InnovaSoft"].map(company => (
-              <div key={company} className="company-logo">{company}</div>
-            ))}
-          </div>
+          <p className="trusted-label">En este momento</p>
           <div className="trust-stats">
             <div className="trust-stat">
-              <span className="trust-number">1,200+</span>
-              <span className="trust-text">Scrum Masters evaluados</span>
+              <span className="trust-number">🚀</span>
+              <span className="trust-text">Early access · primeras empresas seleccionadas</span>
             </div>
             <div className="trust-stat">
-              <span className="trust-number">85+</span>
-              <span className="trust-text">Empresas activas</span>
+              <span className="trust-number">🔧</span>
+              <span className="trust-text">Diseñado en colaboración con SMs/PMs senior</span>
             </div>
             <div className="trust-stat">
-              <span className="trust-number">94%</span>
-              <span className="trust-text">Tasa de match</span>
+              <span className="trust-number">📨</span>
+              <span className="trust-text">Onboarding 1-1 con cada empresa que entra</span>
             </div>
           </div>
         </div>
@@ -406,7 +401,7 @@ export default function Landing() {
                 <p className="login-hint">💡 <strong>Para la demo:</strong> Email: test@test.com | Password: test</p>
               )}
               {loginTab === "recruiter" && (
-                <p className="login-hint">💡 <strong>Demo instantáneo:</strong> Hacé click en "Entrar" para acceder al dashboard con 8 candidatos de ejemplo.</p>
+                <p className="login-hint">💡 <strong>Demo instantáneo:</strong> Dejá los campos vacíos y hacé click en "Entrar" para acceder al hub del recruiter.</p>
               )}
             </div>
           </div>

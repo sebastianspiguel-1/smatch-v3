@@ -6,8 +6,9 @@ import { RadarChartComponent } from "../components"
 import { getChallengeById } from "../data/challengesMetadata"
 import "./CandidateReport.css"
 
-export default function CandidateReport() {
-  const { id } = useParams()
+export default function CandidateReport({ finalView = false }) {
+  const params = useParams()
+  const id = finalView ? "test@test.com" : params.id
   const nav = useNavigate()
   const [results, setResults] = useState([])
   const [loading, setLoading] = useState(true)
@@ -254,21 +255,33 @@ export default function CandidateReport() {
         {/* Header */}
         <div className="report-header">
           <div className="back-buttons">
-            <button onClick={() => nav("/dashboard")} className="back-btn">
-              ← Dashboard
-            </button>
-            <button onClick={() => nav("/challenges")} className="back-btn secondary">
-              Menú de Challenges
-            </button>
+            {finalView ? (
+              <button onClick={() => nav("/")} className="back-btn">
+                ← Volver al inicio
+              </button>
+            ) : (
+              <>
+                <button onClick={() => nav("/dashboard")} className="back-btn">
+                  ← Dashboard
+                </button>
+                <button onClick={() => nav("/challenges")} className="back-btn secondary">
+                  Menú de Challenges
+                </button>
+              </>
+            )}
           </div>
 
           <div className="candidate-info">
             <div className="candidate-avatar">
-              {id.charAt(0).toUpperCase()}
+              {finalView ? "🎉" : id.charAt(0).toUpperCase()}
             </div>
             <div>
-              <h1 className="candidate-name">{id}</h1>
-              <p className="candidate-subtitle">Scrum Master Assessment Report</p>
+              <h1 className="candidate-name">
+                {finalView ? "¡Assessment completado!" : id}
+              </h1>
+              <p className="candidate-subtitle">
+                {finalView ? "Acá están tus resultados consolidados" : "Scrum Master Assessment Report"}
+              </p>
             </div>
           </div>
 

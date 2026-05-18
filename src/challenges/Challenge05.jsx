@@ -3,7 +3,10 @@ import { useNavigate } from "react-router-dom"
 import { T } from "../theme"
 import { computeScores, getGrade } from "../engine/ai"
 import { saveResult } from "../engine/supabase"
-import { Avatar, RadarChartComponent, TopBar, SuccessModal } from "../components"
+import { Avatar, TopBar } from "../components"
+import ChallengeComplete from "../components/ChallengeComplete"
+import TeamPanel from "../components/TeamPanel"
+import { markChallengeComplete, isLastChallenge } from "../utils/progressTracker"
 import {
   TEAM,
   MEMBER_MAP,
@@ -30,7 +33,6 @@ export default function Challenge05() {
   const [meetingOutcome, setMeetingOutcome] = useState(null)
   const [allScores, setAllScores] = useState([])
   const [timer, setTimer] = useState(1200)
-  const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [startTime] = useState(Date.now())
 
   useEffect(() => {
@@ -38,10 +40,6 @@ export default function Challenge05() {
       const interval = setInterval(() => setTimer(t => Math.max(0, t - 1)), 1000)
       return () => clearInterval(interval)
     }
-  }, [phase])
-
-  useEffect(() => {
-    if (phase === "results") setTimeout(() => setShowSuccessModal(true), 800)
   }, [phase])
 
   const mm = String(Math.floor(timer / 60)).padStart(2, "0")
@@ -106,7 +104,7 @@ export default function Challenge05() {
           systemic: outcome.outcome === "expert" ? 85 : 60
         }])
 
-        setTimeout(() => setPhase("results"), 4000)
+        setTimeout(() => { markChallengeComplete(5); setPhase("results") }, 4000)
       } else {
         setCurrentStage(option.next)
       }
@@ -190,6 +188,9 @@ export default function Challenge05() {
               ))}
             </div>
             <div style={{ fontSize: 14, color: "#dc2626", fontWeight: 700, textAlign: "center" }}>↓ -35% · EM demanda: +30%</div>
+          </div>
+          <div style={{ marginBottom: 24 }}>
+            <TeamPanel title="Equipo Setlist" showStakeholder={false} />
           </div>
           <button onClick={startInvestigation} style={{ width: "100%", padding: "20px 0", background: "linear-gradient(135deg, #dc2626, #b91c1c)", color: "#ffffff", fontWeight: 900, fontSize: 16, border: "none", borderRadius: 12, cursor: "pointer", textTransform: "uppercase" }}>Iniciar Challenge →</button>
         </div>
@@ -355,34 +356,14 @@ export default function Challenge05() {
 
   if (phase === "results") {
     return (
-      <div style={{ background: T.bg, minHeight: "100vh", color: T.text }}>
-        <TopBar title="📊 La presión de velocidad" subtitle="Resultados" currentStep={currentStep} totalSteps={totalSteps} score={Math.round(gradeData.avg)} />
-        <div style={{ maxWidth: 520, margin: "0 auto", padding: "20px 16px" }}>
-          <div style={{ textAlign: "center", marginBottom: 16 }}>
-            <div style={{ fontSize: 52, fontWeight: 900, color: gradeData.color }}>{gradeData.letter}</div>
-            <div>{gradeData.label}</div>
-          </div>
-          <div style={{ background: T.panel, borderRadius: 10, padding: 14, marginBottom: 14 }}>
-            <RadarChartComponent data={finalScores} height={220} />
-          </div>
-          <div>{finalScores.map(s => (
-            <div key={s.dimension} style={{ marginBottom: 7 }}>
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span>{s.dimension}</span>
-                <span style={{ fontWeight: 700, color: s.score >= 75 ? T.green : s.score >= 50 ? T.blue : T.red }}>{s.score}%</span>
-              </div>
-              <div style={{ height: 4, background: T.card, borderRadius: 2 }}>
-                <div style={{ height: "100%", width: `${s.score}%`, background: s.score >= 75 ? T.green : s.score >= 50 ? T.blue : T.red }} />
-              </div>
-            </div>
-          ))}</div>
-          <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
-            <button onClick={() => nav("/challenges")} style={{ flex: 1, padding: "13px 0", background: T.card, color: "#dc2626", border: "1px solid #dc2626", borderRadius: 9, cursor: "pointer", fontWeight: 700 }}>VOLVER</button>
-            <button onClick={() => nav("/report/test@test.com")} style={{ flex: 1, padding: "13px 0", background: "#dc2626", color: T.bg, border: "none", borderRadius: 9, cursor: "pointer", fontWeight: 700 }}>REPORTE →</button>
-          </div>
-        </div>
-        {showSuccessModal && <SuccessModal grade={gradeData.letter} score={Math.round(gradeData.avg)} onClose={() => setShowSuccessModal(false)} onShareLinkedIn={() => window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${window.location.origin}/report/test@test.com`, '_blank')} onDownloadBadge={() => alert('Próximamente!')} candidateId="test@test.com" />}
-      </div>
+      <ChallengeComplete
+        challengeTitle="La presión de velocidad"
+        challengeNumber={5}
+        accentColor="#dc2626"
+        gradientStart="rgba(220, 38, 38, 0.85)"
+        gradientEnd="rgba(185, 28, 28, 0.80)"
+        isLastChallenge={isLastChallenge(5)}
+      />
     )
   }
 

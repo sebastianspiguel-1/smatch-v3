@@ -247,68 +247,6 @@
   transform: translateX(4px);
 }
 
-/* CTA Button Pulse Animation */
-@keyframes cta-pulse {
-  0%, 100% {
-    box-shadow:
-      0 4px 16px rgba(5,150,105,0.35),
-      0 0 24px rgba(5,150,105,0.20);
-  }
-  50% {
-    box-shadow:
-      0 6px 20px rgba(5,150,105,0.45),
-      0 0 32px rgba(5,150,105,0.28);
-  }
-}
-
-.nav-cta {
-  background: linear-gradient(135deg, #059669, #047857);
-  color: #ffffff !important;
-  padding: 1rem 2rem;
-  border-radius: 16px;
-  font-weight: 900;
-  transition: all var(--t);
-  border: 2px solid rgba(5,150,105,0.8);
-  box-shadow:
-    0 4px 16px rgba(5,150,105,0.35),
-    0 0 24px rgba(5,150,105,0.20);
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  position: relative;
-  overflow: visible;
-  letter-spacing: 0.5px;
-  font-size: 1.1rem;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.5), 0 1px 2px rgba(0,0,0,0.3);
-  animation: cta-pulse 3s ease-in-out infinite;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-.nav-cta::after {
-  content: '→';
-  margin-left: 2px;
-  transition: transform 0.3s ease;
-  display: inline-block;
-  font-size: 1.3rem;
-}
-
-.nav-cta:hover::after {
-  transform: translateX(6px);
-}
-
-.nav-cta:hover {
-  transform: translateY(-4px) scale(1.05);
-  box-shadow:
-    0 8px 24px rgba(5,150,105,0.45),
-    0 0 36px rgba(5,150,105,0.28);
-  background: linear-gradient(135deg, #047857, #059669);
-  border-color: rgba(5,150,105,1);
-  animation: none;
-}
-
 .nav-btn-secondary {
   background: rgba(0,212,170,0.08);
   border: 1px solid rgba(0,212,170,0.20);
@@ -327,6 +265,48 @@
   border-color: rgba(0,212,170,0.35);
   color: var(--navy) !important;
   transform: translateY(-1px);
+}
+
+/* Split Login Buttons */
+.nav-login-btn {
+  padding: 0.7rem 1.4rem;
+  border-radius: 16px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all var(--t);
+  font-family: inherit;
+  backdrop-filter: blur(12px);
+  display: inline-block;
+  letter-spacing: 0.2px;
+}
+
+.nav-login-recruiter {
+  background: rgba(124, 58, 237, 0.08);
+  border: 1px solid rgba(124, 58, 237, 0.25);
+  color: #7c3aed;
+}
+
+.nav-login-recruiter:hover {
+  background: rgba(124, 58, 237, 0.15);
+  border-color: rgba(124, 58, 237, 0.45);
+  color: #6d28d9;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.15);
+}
+
+.nav-login-candidate {
+  background: linear-gradient(135deg, #00d4aa, #059669);
+  border: 1px solid rgba(0, 212, 170, 0.40);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 212, 170, 0.20);
+}
+
+.nav-login-candidate:hover {
+  background: linear-gradient(135deg, #00e1b4, #069b6f);
+  border-color: rgba(0, 212, 170, 0.60);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0, 212, 170, 0.35);
 }
 
 /* Mobile menu toggle */
@@ -1509,8 +1489,8 @@
     width: 100%;
   }
 
-  .nav-cta,
-  .nav-btn-secondary {
+  .nav-btn-secondary,
+  .nav-login-btn {
     width: 100%;
     text-align: center;
   }

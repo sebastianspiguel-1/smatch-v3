@@ -1,6 +1,15 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { TEAM } from "../data/challenge01"
+import TeamPanel from "../components/TeamPanel"
+import {
+  isChallengeUnlocked,
+  isChallengeCompleted,
+  getCompletedCount,
+  getCompletionPercentage,
+  resetProgress,
+  markChallengeComplete,
+  CHALLENGE_ORDER,
+} from "../utils/progressTracker"
 import "./ChallengeMenu.css"
 
 const CHALLENGES = [
@@ -80,6 +89,14 @@ export default function ChallengeMenu() {
     return !localStorage.getItem("smatch_onboarding_seen")
   })
 
+  // Dynamic progress from localStorage
+  const completedCount = getCompletedCount()
+  const completionPct = getCompletionPercentage()
+  const allCompleted = completedCount >= 6
+
+  // Popup automático cuando todos están completados
+  const [showFinishModal, setShowFinishModal] = useState(allCompleted)
+
   const handleCloseOnboarding = () => {
     localStorage.setItem("smatch_onboarding_seen", "true")
     setShowOnboarding(false)
@@ -141,31 +158,10 @@ export default function ChallengeMenu() {
 
             {/* Team & Stakeholders */}
             <div className="intro-section">
-              <div className="people-card">
-                <h2>El Equipo & Stakeholders</h2>
-                <div className="people-grid">
-                  {TEAM.map((member) => (
-                    <div key={member.id} className="person-item">
-                      <div className="person-avatar" style={{ background: member.color }}>
-                        {member.init}
-                      </div>
-                      <div className="person-info">
-                        <h4>{member.name}</h4>
-                        <p>{member.role}</p>
-                      </div>
-                    </div>
-                  ))}
-                  <div className="person-item stakeholder">
-                    <div className="person-avatar" style={{ background: "#8b5cf6" }}>
-                      SI
-                    </div>
-                    <div className="person-info">
-                      <h4>Simon</h4>
-                      <p>Lollapalooza · Stakeholder</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <TeamPanel
+                title="El Equipo & Stakeholders"
+                showStakeholder={true}
+              />
             </div>
 
             {/* Your Role */}
@@ -220,6 +216,40 @@ export default function ChallengeMenu() {
     <div className="challenge-journey">
       <div className="journey-bg"></div>
 
+      {/* Finish Challenge Modal - aparece automáticamente cuando completaste los 6 */}
+      {showFinishModal && (
+        <div className="finish-modal-overlay" onClick={() => setShowFinishModal(false)}>
+          <div className="finish-modal" onClick={(e) => e.stopPropagation()}>
+            <button
+              className="finish-modal-close"
+              onClick={() => setShowFinishModal(false)}
+              aria-label="Cerrar"
+            >
+              ×
+            </button>
+
+            <div className="finish-modal-emoji">🎉</div>
+            <div className="finish-modal-badge">¡COMPLETASTE TODOS LOS CHALLENGES!</div>
+            <h2 className="finish-modal-title">¡Felicitaciones!</h2>
+            <p className="finish-modal-text">
+              Acabás de terminar las 6 situaciones del equipo Setlist.
+            </p>
+
+            <button
+              className="finish-modal-btn"
+              onClick={() => nav("/gracias")}
+            >
+              <span>Terminar Setlist Challenge</span>
+              <span className="arrow">→</span>
+            </button>
+
+            <p className="finish-modal-hint">
+              Tu reporte va a ser evaluado por el equipo de recruiting
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Onboarding Modal */}
       {showOnboarding && (
         <div className="onboarding-overlay" onClick={handleCloseOnboarding}>
@@ -257,73 +287,169 @@ export default function ChallengeMenu() {
 
           <div className="journey-stats">
             <div className="stat-item">
-              <div className="stat-value">4/6</div>
+              <div className="stat-value">{completedCount}/6</div>
               <div className="stat-label">Completados</div>
             </div>
             <div className="stat-item stat-item-clickable" onClick={() => nav("/mi-progreso")}>
-              <div className="stat-value">67%</div>
+              <div className="stat-value">{completionPct}%</div>
               <div className="stat-label">Progreso</div>
               <div className="stat-cta">Ver detalle →</div>
             </div>
           </div>
+
+          {/* Botón "Terminar Setlist Challenge" cuando todos están completados */}
+          {allCompleted && (
+            <div className="finish-challenge-section">
+              <div className="finish-challenge-badge">🎉 ¡COMPLETASTE TODOS LOS CHALLENGES!</div>
+              <button
+                className="finish-challenge-btn"
+                onClick={() => nav("/gracias")}
+              >
+                <span>Terminar Setlist Challenge</span>
+                <span className="arrow">→</span>
+              </button>
+              <p className="finish-challenge-hint">
+                Tu reporte va a ser evaluado por el equipo de recruiting
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Journey Stepper - visualización compacta del progreso */}
+        <div className="journey-stepper">
+          <div className="stepper-track">
+            {CHALLENGES.map((c, idx) => {
+              const isCompleted = isChallengeCompleted(c.challengeFile)
+              const isUnlocked = isChallengeUnlocked(c.challengeFile)
+              const isNext = isUnlocked && !isCompleted && CHALLENGES.slice(0, idx).every(prev => isChallengeCompleted(prev.challengeFile))
+              const dotStatus = isCompleted ? "completed" : isNext ? "next" : isUnlocked ? "available" : "locked"
+
+              return (
+                <div key={c.id} className="stepper-step">
+                  <div className={`stepper-dot ${dotStatus}`}>
+                    {isCompleted ? "✓" : c.id}
+                  </div>
+                  <div className="stepper-label">{c.title.length > 22 ? c.title.slice(0, 20) + "…" : c.title}</div>
+                  {idx < CHALLENGES.length - 1 && (
+                    <div className={`stepper-line ${isCompleted ? "completed" : ""}`} />
+                  )}
+                </div>
+              )
+            })}
+          </div>
         </div>
 
         <div className="challenge-grid">
-          {CHALLENGES.map((c) => (
-            <div
-              key={c.id}
-              className={`challenge-card ${c.ready ? 'available' : 'locked'}`}
-              onClick={() => c.ready && nav(`/challenge/${c.challengeFile || c.id}`)}
-            >
-              {!c.ready && (
-                <div className="lock-overlay">
-                  <div className="lock-icon">🔒</div>
-                </div>
-              )}
+          {CHALLENGES.map((c, idx) => {
+            const isCompleted = isChallengeCompleted(c.challengeFile)
+            const isUnlocked = isChallengeUnlocked(c.challengeFile)
+            const isClickable = isUnlocked && !isCompleted
+            const isNext = isClickable && CHALLENGES.slice(0, idx).every(prev => isChallengeCompleted(prev.challengeFile))
+            const status = isCompleted ? "completed" : isNext ? "next" : isUnlocked ? "available" : "locked"
 
-              <div className="card-header">
-                <div className="header-top">
-                  <div className="card-number" style={{ color: c.accentColor, borderColor: c.accentColor, background: `${c.accentColor}15` }}>
+            return (
+              <div
+                key={c.id}
+                className={`challenge-card ${status}`}
+                onClick={() => isClickable && nav(`/challenge/${c.challengeFile || c.id}`)}
+              >
+                {isCompleted && (
+                  <div className="completed-badge">
+                    <span className="completed-badge-icon">✓</span>
+                    <span className="completed-badge-text">Completado</span>
+                  </div>
+                )}
+
+                {isNext && (
+                  <div className="next-badge">PRÓXIMO</div>
+                )}
+
+                {!isUnlocked && !isCompleted && (
+                  <div className="lock-badge">
+                    <span className="lock-badge-icon">🔒</span>
+                  </div>
+                )}
+
+                <div className="card-header">
+                  <div className="card-number">
                     #{String(c.id).padStart(2, "0")}
                   </div>
-                </div>
-                <h3 className="card-title" style={{ color: c.accentColor }}>{c.title}</h3>
-              </div>
-
-              <div className="card-content">
-
-                <div
-                  className="card-desc-box"
-                  style={{
-                    background: `linear-gradient(135deg, ${c.gradientStart}, ${c.gradientEnd})`,
-                    borderLeft: `4px solid ${c.accentColor}`
-                  }}
-                >
-                  <p className="card-desc-text">{c.desc}</p>
+                  <h3 className="card-title">{c.title}</h3>
                 </div>
 
-                <div className="card-footer">
-                  {c.ready ? (
-                    <div
-                      className="play-button"
-                      style={{
-                        background: `linear-gradient(135deg, ${c.gradientStart}, ${c.gradientEnd})`,
-                        borderColor: c.accentColor
-                      }}
-                    >
-                      <span>INICIAR CHALLENGE</span>
-                      <span className="arrow">→</span>
-                    </div>
-                  ) : (
-                    <div className="coming-soon">PRÓXIMAMENTE</div>
-                  )}
+                <div className="card-content">
+                  <div className="card-desc-box">
+                    <p className="card-desc-text">{c.desc}</p>
+                  </div>
+
+                  <div className="card-footer">
+                    {isClickable && (
+                      <div className="play-button">
+                        <span>Iniciar challenge</span>
+                        <span className="arrow">→</span>
+                      </div>
+                    )}
+                    {isCompleted && (
+                      <div className="completed-button">
+                        <span>✓ Completado</span>
+                      </div>
+                    )}
+                    {!isUnlocked && !isCompleted && (
+                      <div className="locked-button">
+                        <span>🔒 Bloqueado</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
-
-              {c.ready && <div className="card-glow"></div>}
-            </div>
-          ))}
+            )
+          })}
         </div>
+
+        {/* Dev buttons (only visible in dev mode) */}
+        {import.meta.env.DEV && (
+          <div style={{ textAlign: "center", marginTop: 40, display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
+            {completedCount > 0 && (
+              <button
+                onClick={() => { resetProgress(); window.location.reload() }}
+                style={{
+                  padding: "10px 20px",
+                  background: "rgba(220, 38, 38, 0.08)",
+                  color: "#dc2626",
+                  border: "1px solid rgba(220, 38, 38, 0.25)",
+                  borderRadius: 8,
+                  cursor: "pointer",
+                  fontSize: 12,
+                  fontWeight: 700,
+                  fontFamily: "inherit"
+                }}
+              >
+                🔄 Reset progress (dev only)
+              </button>
+            )}
+            {!allCompleted && (
+              <button
+                onClick={() => {
+                  CHALLENGE_ORDER.forEach(challengeFile => markChallengeComplete(challengeFile))
+                  setShowFinishModal(true)
+                }}
+                style={{
+                  padding: "10px 20px",
+                  background: "rgba(0, 212, 170, 0.08)",
+                  color: "#00d4aa",
+                  border: "1px solid rgba(0, 212, 170, 0.25)",
+                  borderRadius: 8,
+                  cursor: "pointer",
+                  fontSize: 12,
+                  fontWeight: 700,
+                  fontFamily: "inherit"
+                }}
+              >
+                ⚡ Mark all as completed (dev only)
+              </button>
+            )}
+          </div>
+        )}
       </div>
     </div>
   )

@@ -54,16 +54,12 @@ export function isChallengeCompleted(challengeFile) {
 // Check if a challenge is unlocked (can be played)
 export function isChallengeUnlocked(challengeFile) {
   const progress = getProgress()
-  const index = CHALLENGE_ORDER.indexOf(challengeFile)
 
-  // Si es el primer challenge, siempre está unlocked
-  if (index === 0) return true
-
-  // Si está completado, está locked (no se puede repetir)
+  // Si ya está completado, no se puede repetir (queda locked)
   if (progress.completed.includes(challengeFile)) return false
 
-  // Está unlocked si es el siguiente en la secuencia
-  return index === progress.currentIndex
+  // Todos los challenges están desbloqueados desde el inicio
+  return true
 }
 
 // Get next challenge file number

@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom"
+import { getCompletedCount } from "../utils/progressTracker"
 import "./ChallengeComplete.css"
 
 export default function ChallengeComplete({
@@ -7,29 +8,21 @@ export default function ChallengeComplete({
   accentColor,
   gradientStart,
   gradientEnd,
-  isLastChallenge = false
 }) {
   const nav = useNavigate()
 
-  // Challenge order: [6, 4, 1, 2, 3, 5]
-  const CHALLENGE_ORDER = [6, 4, 1, 2, 3, 5]
-  const currentIndex = CHALLENGE_ORDER.indexOf(challengeNumber)
-  const nextChallengeFile = currentIndex < CHALLENGE_ORDER.length - 1
-    ? CHALLENGE_ORDER[currentIndex + 1]
-    : null
+  // Detectar si es el último completado (count === 6)
+  const completedCount = getCompletedCount()
+  const isAllCompleted = completedCount >= 6
 
   function handleContinue() {
-    if (isLastChallenge || !nextChallengeFile) {
-      // Ir a página de resultados finales
-      nav("/resultados")
-    } else {
-      // Ir al siguiente challenge
-      nav(`/challenge/${nextChallengeFile}`)
-    }
+    // Siempre volver al menú para que elija el siguiente
+    nav("/challenges")
   }
 
-  function handleBackToMenu() {
-    nav("/challenges")
+  function handleFinishAll() {
+    // Ir a la página de gracias (mensaje final)
+    nav("/gracias")
   }
 
   return (
@@ -57,34 +50,37 @@ export default function ChallengeComplete({
 
         {/* Mensaje */}
         <p className="complete-message">
-          {isLastChallenge || !nextChallengeFile
+          {isAllCompleted
             ? "¡Completaste todos los challenges! 🎉"
-            : "Completado con éxito"
+            : `${completedCount}/6 challenges completados`
           }
         </p>
 
         {/* Botones */}
         <div className="complete-actions">
-          <button
-            className="complete-btn complete-btn-primary"
-            onClick={handleContinue}
-            style={{
-              background: `linear-gradient(135deg, ${gradientStart}, ${gradientEnd})`,
-              borderColor: accentColor
-            }}
-          >
-            {isLastChallenge || !nextChallengeFile
-              ? "Ver mis resultados →"
-              : "Continuar al siguiente →"
-            }
-          </button>
-
-          <button
-            className="complete-btn complete-btn-secondary"
-            onClick={handleBackToMenu}
-          >
-            Volver al menú principal
-          </button>
+          {isAllCompleted ? (
+            <button
+              className="complete-btn complete-btn-primary"
+              onClick={handleFinishAll}
+              style={{
+                background: `linear-gradient(135deg, ${gradientStart}, ${gradientEnd})`,
+                borderColor: accentColor
+              }}
+            >
+              Terminar Setlist Challenge →
+            </button>
+          ) : (
+            <button
+              className="complete-btn complete-btn-primary"
+              onClick={handleContinue}
+              style={{
+                background: `linear-gradient(135deg, ${gradientStart}, ${gradientEnd})`,
+                borderColor: accentColor
+              }}
+            >
+              Volver al menú →
+            </button>
+          )}
         </div>
       </div>
     </div>

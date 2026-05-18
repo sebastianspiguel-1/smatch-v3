@@ -3,7 +3,10 @@ import { useNavigate } from "react-router-dom"
 import { T } from "../theme"
 import { computeScores, getGrade } from "../engine/ai"
 import { saveResult } from "../engine/supabase"
-import { Avatar, RadarChartComponent, TopBar, SuccessModal } from "../components"
+import { Avatar, TopBar } from "../components"
+import ChallengeComplete from "../components/ChallengeComplete"
+import TeamPanel from "../components/TeamPanel"
+import { markChallengeComplete, isLastChallenge } from "../utils/progressTracker"
 import {
   TEAM, MEMBER_MAP, PBIS, FIBONACCI, TSHIRTS,
   POKER_VOTES, EVENTS, TEAM_QUESTIONS, ACHIEVEMENTS,
@@ -254,13 +257,11 @@ export default function Challenge04() {
   const [wrapUpText, setWrapUpText] = useState("")
   const [wrapUpSent, setWrapUpSent] = useState(false)
   const [firedQuestions, setFiredQuestions] = useState([])
-  const [showSuccessModal, setShowSuccessModal] = useState(false)
   const boardRef = useRef(null)
   const nextId = useRef(100)
   const startTime = useRef(null)
 
   useEffect(() => { if (phase === "play") { const t = setInterval(() => setTimer(v => Math.max(0, v - 1)), 1000); startTime.current = Date.now(); return () => clearInterval(t) } }, [phase])
-  useEffect(() => { if (phase === "results") { setTimeout(() => setShowSuccessModal(true), 800) } }, [phase])
   useEffect(() => { ACHIEVEMENTS.forEach(a => { if (!achievements.includes(a.id) && a.cond(stats)) { setAchievements(p => [...p, a.id]); setNewAch(a); setTimeout(() => setNewAch(null), 3000) } }) }, [stats, achievements])
   useEffect(() => {
     if (phase !== "play") return
@@ -353,7 +354,7 @@ export default function Challenge04() {
     else if (q >= 2) reactions.push(["gaby", "Fue útil. Podría haber sido más conciso."])
     else reactions.push(["gaby", "Sentí que faltó resumir mejor."])
     reactions.forEach(([from, text], i) => { setTimeout(() => bubble(from, text, 8000), (i + 1) * 1200) })
-    setTimeout(() => setPhase("results"), reactions.length * 1200 + 4000)
+    setTimeout(() => { markChallengeComplete(4); setPhase("results") }, reactions.length * 1200 + 4000)
   }
 
   // ─── Scoring for results ───
@@ -407,13 +408,8 @@ export default function Challenge04() {
           <div style={{ fontSize: 13, fontWeight: 700, letterSpacing: 2, color: T.orange, marginBottom: 8 }}>SITUACIÓN</div>
           <div style={{ fontSize: 15, color: T.sub, lineHeight: 1.6 }}>Equipo nuevo, nunca estimaron ni priorizaron juntos. Tenés un <strong style={{ color: T.teal }}>whiteboard</strong> con herramientas-desafío. Cada una evalúa si sabés facilitar. El equipo te va a hacer preguntas.</div>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 11, marginBottom: 25 }}>
-          {TEAM.map(m => (
-            <div key={m.id} style={{ background: T.panel, borderRadius: 14, padding: 14, display: "flex", alignItems: "center", gap: 11, border: `1px solid ${T.border}` }}>
-              <Avatar member={m} size={45} />
-              <div><div style={{ fontSize: 14, fontWeight: 700 }}>{m.name.split(" ")[0]}</div><div style={{ fontSize: 11, color: T.dim }}>{m.role}</div></div>
-            </div>
-          ))}
+        <div style={{ marginBottom: 25 }}>
+          <TeamPanel title="Equipo Setlist" showStakeholder={false} />
         </div>
         <button onClick={() => { setPhase("play"); setTimeout(() => bubble("gianfranco", "Hola, ¿qué vamos a hacer hoy?"), 2000); setTimeout(() => bubble("gaby", "Dale, ¿arrancamos?"), 5000) }} style={{ width: "100%", padding: "20px 0", background: T.teal, color: T.bg, fontWeight: 900, fontSize: 20, border: "none", borderRadius: 14, cursor: "pointer", letterSpacing: 1 }}>ABRIR WHITEBOARD →</button>
       </div>
@@ -422,63 +418,14 @@ export default function Challenge04() {
 
   // ═══════════════════ RESULTS ═══════════════════
   if (phase === "results") return (
-    <div style={{ background: T.bg, minHeight: "100vh", color: T.text, fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
-      <TopBar
-        title="📊 Estimación & Priorización"
-        subtitle="Resultados"
-        currentStep={currentStep}
-        totalSteps={totalSteps}
-        score={score}
-      />
-      <div style={{ maxWidth: 756, margin: "0 auto", padding: "28px 22px" }}>
-        <div style={{ textAlign: "center", marginBottom: 22 }}>
-          <div style={{ fontSize: 14, fontWeight: 700, letterSpacing: 3, color: T.teal }}>EVALUACIÓN COMPLETA</div>
-          <div style={{ fontSize: 73, fontWeight: 900, color: gradeData.color, marginTop: 8 }}>{gradeData.letter}</div>
-          <div style={{ fontSize: 18, color: T.sub }}>{gradeData.label}</div>
-          <div style={{ fontSize: 39, color: T.orange, marginTop: 6 }}>⭐ {score}</div>
-        </div>
-        <div style={{ background: T.panel, borderRadius: 14, padding: 20, marginBottom: 20, border: `1px solid ${T.border}` }}>
-          <RadarChartComponent data={finalScores} height={308} />
-        </div>
-        {finalScores.map(s => (
-          <div key={s.dimension} style={{ marginBottom: 10 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14, marginBottom: 3 }}>
-              <span style={{ color: T.sub }}>{s.dimension}</span>
-              <span style={{ fontWeight: 700, color: s.score >= 75 ? T.green : s.score >= 50 ? T.blue : s.score >= 25 ? T.orange : T.red }}>{s.score}%</span>
-            </div>
-            <div style={{ height: 6, background: T.card, borderRadius: 3, overflow: "hidden" }}>
-              <div style={{ height: "100%", borderRadius: 3, width: `${s.score}%`, background: s.score >= 75 ? T.green : s.score >= 50 ? T.blue : s.score >= 25 ? T.orange : T.red }} />
-            </div>
-          </div>
-        ))}
-        <div style={{ background: T.panel, borderRadius: 14, padding: 20, marginTop: 20, border: `1px solid ${T.border}` }}>
-          <div style={{ fontSize: 13, fontWeight: 700, letterSpacing: 2, color: T.dim, marginBottom: 11 }}>LOGROS ({achievements.length}/{ACHIEVEMENTS.length})</div>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>{ACHIEVEMENTS.map(a => { const got = achievements.includes(a.id); return <div key={a.id} style={{ display: "flex", alignItems: "center", gap: 7, padding: "7px 14px", borderRadius: 11, background: got ? T.tealDim : T.card, border: `1px solid ${got ? T.teal + "40" : T.border}`, opacity: got ? 1 : 0.3 }}><span style={{ fontSize: 22 }}>{a.icon}</span><span style={{ fontSize: 13, fontWeight: 600, color: got ? T.teal : T.dim }}>{a.label}</span></div> })}</div>
-        </div>
-        <div style={{ background: T.panel, borderRadius: 14, padding: 20, marginTop: 20, border: `1px solid ${T.border}` }}>
-          <div style={{ fontSize: 13, fontWeight: 700, letterSpacing: 2, color: T.dim, marginBottom: 11 }}>ESTADO FINAL</div>
-          <div style={{ display: "flex", justifyContent: "center", gap: 17 }}>{TEAM.map(m => <div key={m.id} style={{ textAlign: "center" }}><Avatar member={m} size={50} /><div style={{ fontSize: 25, marginTop: 3 }}>{moods[m.id]}</div><div style={{ fontSize: 11, color: T.dim }}>{m.name.split(" ")[0]}</div></div>)}</div>
-        </div>
-        <div style={{ display: "flex", gap: 14, marginTop: 25 }}>
-          <button onClick={() => nav("/challenges")} style={{ flex: 1, padding: "18px 0", background: T.card, color: T.teal, fontWeight: 800, fontSize: 18, border: `2px solid ${T.teal}`, borderRadius: 13, cursor: "pointer", letterSpacing: 1 }}>VOLVER AL MENÚ</button>
-          <button onClick={() => nav("/report/test@test.com")} style={{ flex: 1, padding: "18px 0", background: T.teal, color: T.bg, fontWeight: 800, fontSize: 18, border: "none", borderRadius: 13, cursor: "pointer", letterSpacing: 1 }}>VER REPORTE COMPLETO →</button>
-        </div>
-      </div>
-      {showSuccessModal && (
-        <SuccessModal
-          grade={gradeData.letter}
-          score={score}
-          onClose={() => setShowSuccessModal(false)}
-          onShareLinkedIn={() => {
-            window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.origin + '/report/test@test.com')}`, '_blank')
-          }}
-          onDownloadBadge={() => {
-            alert('Descarga de badge próximamente!')
-          }}
-          candidateId="test@test.com"
-        />
-      )}
-    </div>
+    <ChallengeComplete
+      challengeTitle="Estimación & Priorización"
+      challengeNumber={4}
+      accentColor="#0891b2"
+      gradientStart="rgba(8, 145, 178, 0.85)"
+      gradientEnd="rgba(6, 182, 212, 0.80)"
+      isLastChallenge={isLastChallenge(4)}
+    />
   )
 
   // ═══════════════════ MAIN GAME ═══════════════════

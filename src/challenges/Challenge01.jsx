@@ -3,7 +3,10 @@ import { useNavigate } from "react-router-dom"
 import { T } from "../theme"
 import { callAI, buildFormatPrompt, buildInterventionPrompt, computeScores, getGrade } from "../engine/ai"
 import { saveResult } from "../engine/supabase"
-import { Avatar, StickyCard, ChatBubble, MiniBoard, ScoreBadges, RadarChartComponent, TopBar, ProgressBar, FeedbackToast, FeedbackTimeline, SuccessModal } from "../components"
+import { Avatar, StickyCard, ChatBubble, MiniBoard, TopBar, ProgressBar, FeedbackToast, FeedbackTimeline } from "../components"
+import TeamPanel from "../components/TeamPanel"
+import ChallengeComplete from "../components/ChallengeComplete"
+import { markChallengeComplete, isLastChallenge } from "../utils/progressTracker"
 import { TEAM, MEMBER_MAP, SPRINT_CONTEXT, SPRINT_STATS, SPRINT_SIGNALS, TEAM_DESC, FORMATS, STICKIES, MOMENTS, DIMENSIONS } from "../data/challenge01"
 import "./Challenge01.css"
 
@@ -25,7 +28,6 @@ export default function Challenge01() {
   const [evaling, setEvaling] = useState(false)
   const [currentToast, setCurrentToast] = useState(null)
   const [showTimeline, setShowTimeline] = useState(false)
-  const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [startTime] = useState(Date.now())
   const chatRef = useRef(null)
   const inputRef = useRef(null)
@@ -33,7 +35,6 @@ export default function Challenge01() {
 
   useEffect(() => { if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight }, [chat, waiting, loading])
   useEffect(() => { if (phase === "board") { timerRef.current = setInterval(() => setTimer(t => Math.max(0, t - 1)), 1000); return () => clearInterval(timerRef.current) } }, [phase])
-  useEffect(() => { if (phase === "results") { setTimeout(() => setShowSuccessModal(true), 800) } }, [phase])
 
   const mm = String(Math.floor(timer / 60)).padStart(2, "0")
   const ss = String(timer % 60).padStart(2, "0")
@@ -63,7 +64,7 @@ export default function Challenge01() {
   }
 
   function triggerMoment(idx) {
-    if (idx >= MOMENTS.length) { clearInterval(timerRef.current); setPhase("results"); return }
+    if (idx >= MOMENTS.length) { clearInterval(timerRef.current); markChallengeComplete(1); setPhase("results"); return }
     const mo = MOMENTS[idx]
     setChat(p => [...p, { narration: true, text: mo.narration }, ...mo.chat.map(c => ({ from: c.from, text: c.text }))])
     setPrompt(mo.prompt)
@@ -166,18 +167,7 @@ export default function Challenge01() {
         </div>
 
         <div className="team-section">
-          <div className="team-header">EQUIPO FENIX</div>
-          <div className="team-members">
-            {TEAM.map(m => (
-              <div key={m.id} className="team-member">
-                <Avatar member={m} size={32} />
-                <div>
-                  <div className="team-member-name">{m.name}</div>
-                  <div className="team-member-role">{m.role}</div>
-                </div>
-              </div>
-            ))}
-          </div>
+          <TeamPanel title="Equipo Setlist" showStakeholder={false} compact />
         </div>
 
         <div className="signals-section">
@@ -260,68 +250,14 @@ export default function Challenge01() {
 
   // ═══════════════════════ RESULTS ═══════════════════════
   if (phase === "results") return (
-    <div style={{ background: T.bg, minHeight: "100vh", color: T.text, fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
-      <div style={{ maxWidth: 520, margin: "0 auto", padding: "20px 16px" }}>
-        <div style={{ textAlign: "center", marginBottom: 16 }}>
-          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 3, color: T.teal }}>EVALUACIÓN COMPLETA</div>
-          <div style={{ fontSize: 52, fontWeight: 900, color: gradeData.color, marginTop: 6 }}>{gradeData.letter}</div>
-          <div style={{ fontSize: 13, color: T.sub }}>{gradeData.label}</div>
-          <div style={{ fontSize: 10, color: T.dim }}>Puntaje general: {Math.round(gradeData.avg)}%</div>
-        </div>
-        <div style={{ background: T.panel, borderRadius: 10, padding: 14, marginBottom: 14, border: `1px solid ${T.border}` }}>
-          <RadarChartComponent data={finalScores} height={200} />
-        </div>
-        <div style={{ marginBottom: 14 }}>
-          {finalScores.map(s => (
-            <div key={s.dimension} style={{ marginBottom: 7 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, marginBottom: 2 }}>
-                <span style={{ color: T.sub }}>{s.dimension}</span>
-                <span style={{ fontWeight: 700, color: s.score >= 75 ? T.green : s.score >= 50 ? T.blue : s.score >= 25 ? T.orange : T.red }}>{s.score}%</span>
-              </div>
-              <div style={{ height: 4, background: T.card, borderRadius: 2, overflow: "hidden" }}>
-                <div style={{ height: "100%", borderRadius: 2, width: `${s.score}%`, background: s.score >= 75 ? T.green : s.score >= 50 ? T.blue : s.score >= 25 ? T.orange : T.red, transition: "width 0.8s" }} />
-              </div>
-            </div>
-          ))}
-        </div>
-        <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 2, color: T.teal, marginBottom: 6 }}>ANÁLISIS DE INTERVENCIONES</div>
-        {allFeedback.map((fb, i) => {
-          const qc = fb.quality === "expert" ? T.green : fb.quality === "competent" ? T.blue : fb.quality === "developing" ? T.orange : T.red
-          return (
-            <div key={i} style={{ background: T.panel, borderRadius: 7, padding: 10, marginBottom: 6, border: `1px solid ${T.border}` }}>
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
-                <span style={{ fontSize: 9, fontWeight: 700, color: T.dim, textTransform: "uppercase" }}>{phaseLabels[fb.phase] || fb.phase}</span>
-                <span style={{ fontSize: 9, fontWeight: 700, color: qc }}>{fb.quality?.toUpperCase()}</span>
-              </div>
-              <div style={{ fontSize: 11, color: T.sub, lineHeight: 1.35 }}>{fb.feedback}</div>
-              {fb.scores && <ScoreBadges scores={fb.scores} />}
-            </div>
-          )
-        })}
-        <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
-          <button onClick={() => nav("/challenges")} style={{ flex: 1, padding: "13px 0", background: T.card, color: T.teal, fontWeight: 700, fontSize: 13, border: `1px solid ${T.teal}`, borderRadius: 9, cursor: "pointer" }}>
-            VOLVER AL MENÚ
-          </button>
-          <button onClick={() => nav("/report/test@test.com")} style={{ flex: 1, padding: "13px 0", background: T.teal, color: T.bg, fontWeight: 700, fontSize: 13, border: "none", borderRadius: 9, cursor: "pointer" }}>
-            VER REPORTE COMPLETO →
-          </button>
-        </div>
-      </div>
-      {showSuccessModal && (
-        <SuccessModal
-          grade={gradeData.letter}
-          score={Math.round(gradeData.avg)}
-          onClose={() => setShowSuccessModal(false)}
-          onShareLinkedIn={() => {
-            window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.origin + '/report/test@test.com')}`, '_blank')
-          }}
-          onDownloadBadge={() => {
-            alert('Descarga de badge próximamente!')
-          }}
-          candidateId="test@test.com"
-        />
-      )}
-    </div>
+    <ChallengeComplete
+      challengeTitle="La retro que parece perfecta"
+      challengeNumber={1}
+      accentColor="#00d4aa"
+      gradientStart="rgba(0, 212, 170, 0.85)"
+      gradientEnd="rgba(5, 150, 105, 0.80)"
+      isLastChallenge={isLastChallenge(1)}
+    />
   )
 
   // ═══════════════════════ BOARD ═══════════════════════

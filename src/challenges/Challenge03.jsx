@@ -3,7 +3,10 @@ import { useNavigate } from "react-router-dom"
 import { T } from "../theme"
 import { computeScores, getGrade } from "../engine/ai"
 import { saveResult } from "../engine/supabase"
-import { Avatar, RadarChartComponent, TopBar, SuccessModal } from "../components"
+import { Avatar, TopBar } from "../components"
+import ChallengeComplete from "../components/ChallengeComplete"
+import TeamPanel from "../components/TeamPanel"
+import { markChallengeComplete, isLastChallenge } from "../utils/progressTracker"
 import {
   TEAM,
   MEMBER_MAP,
@@ -42,7 +45,6 @@ export default function Challenge03() {
   // Scoring
   const [allScores, setAllScores] = useState([])
   const [timer, setTimer] = useState(1200) // 20 minutes
-  const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [startTime] = useState(Date.now())
 
   // Timer
@@ -50,12 +52,6 @@ export default function Challenge03() {
     if (phase !== "context" && phase !== "results") {
       const interval = setInterval(() => setTimer(t => Math.max(0, t - 1)), 1000)
       return () => clearInterval(interval)
-    }
-  }, [phase])
-
-  useEffect(() => {
-    if (phase === "results") {
-      setTimeout(() => setShowSuccessModal(true), 800)
     }
   }, [phase])
 
@@ -185,6 +181,7 @@ export default function Challenge03() {
       systemic: systemicScore
     }])
 
+    markChallengeComplete(3)
     setPhase("results")
   }
 
@@ -275,22 +272,8 @@ export default function Challenge03() {
           </div>
 
           {/* Team */}
-          <div style={{ background: T.panel, borderRadius: 16, padding: 24, marginBottom: 32, border: `2px solid ${T.border}`, boxShadow: "0 2px 8px rgba(15, 23, 42, 0.06)" }}>
-            <div style={{ fontSize: 12, fontWeight: 900, letterSpacing: 3, color: "#ff8a80", marginBottom: 20, display: "flex", alignItems: "center", gap: 8 }}>
-              <span style={{ fontSize: 20 }}>👥</span>
-              EQUIPO SETLIST
-            </div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 12 }}>
-              {TEAM.map(m => (
-                <div key={m.id} style={{ display: "flex", alignItems: "center", gap: 10, background: T.card, borderRadius: 12, padding: "12px 14px", border: `1px solid ${m.id === "alan" ? "#f472b6" : T.border}` }}>
-                  <Avatar member={m} size={32} />
-                  <div>
-                    <div style={{ fontSize: 14, fontWeight: 700, color: T.text }}>{m.name}</div>
-                    <div style={{ fontSize: 12, color: T.dim, marginTop: 2 }}>{m.role}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
+          <div style={{ marginBottom: 32 }}>
+            <TeamPanel title="Equipo Setlist" showStakeholder={false} />
           </div>
 
           <button onClick={startDashboard} style={{ width: "100%", padding: "20px 0", background: "linear-gradient(135deg, #ff8a80, #fa8072)", color: "#ffffff", fontWeight: 900, fontSize: 16, border: "2px solid rgba(255, 138, 128, 0.8)", borderRadius: 12, cursor: "pointer", letterSpacing: 1.5, boxShadow: "0 4px 16px rgba(255, 138, 128, 0.25)", transition: "all 0.3s", textTransform: "uppercase" }}>
@@ -585,59 +568,14 @@ export default function Challenge03() {
 
   if (phase === "results") {
     return (
-      <div style={{ background: T.bg, minHeight: "100vh", color: T.text, fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}>
-        <TopBar
-          title="🔥 El dev que se está apagando"
-          subtitle="Resultados"
-          currentStep={currentStep}
-          totalSteps={totalSteps}
-          score={Math.round(gradeData.avg)}
-        />
-        <div style={{ maxWidth: 520, margin: "0 auto", padding: "20px 16px" }}>
-          <div style={{ textAlign: "center", marginBottom: 16 }}>
-            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 3, color: "#ff8a80" }}>EVALUACIÓN COMPLETA</div>
-            <div style={{ fontSize: 52, fontWeight: 900, color: gradeData.color, marginTop: 6 }}>{gradeData.letter}</div>
-            <div style={{ fontSize: 13, color: T.sub }}>{gradeData.label}</div>
-            <div style={{ fontSize: 10, color: T.dim }}>Puntaje general: {Math.round(gradeData.avg)}%</div>
-          </div>
-
-          <div style={{ background: T.panel, borderRadius: 10, padding: 14, marginBottom: 14, border: `1px solid ${T.border}` }}>
-            <RadarChartComponent data={finalScores} height={220} />
-          </div>
-
-          <div style={{ marginBottom: 14 }}>
-            {finalScores.map(s => (
-              <div key={s.dimension} style={{ marginBottom: 7 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, marginBottom: 2 }}>
-                  <span style={{ color: T.sub }}>{s.dimension}</span>
-                  <span style={{ fontWeight: 700, color: s.score >= 75 ? T.green : s.score >= 50 ? T.blue : s.score >= 25 ? T.orange : T.red }}>{s.score}%</span>
-                </div>
-                <div style={{ height: 4, background: T.card, borderRadius: 2, overflow: "hidden" }}>
-                  <div style={{ height: "100%", borderRadius: 2, width: `${s.score}%`, background: s.score >= 75 ? T.green : s.score >= 50 ? T.blue : s.score >= 25 ? T.orange : T.red, transition: "width 0.8s" }} />
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
-            <button onClick={() => nav("/challenges")} style={{ flex: 1, padding: "13px 0", background: T.card, color: "#ff8a80", fontWeight: 700, fontSize: 13, border: "1px solid #ff8a80", borderRadius: 9, cursor: "pointer" }}>VOLVER AL MENÚ</button>
-            <button onClick={() => nav("/report/test@test.com")} style={{ flex: 1, padding: "13px 0", background: "#ff8a80", color: T.bg, fontWeight: 700, fontSize: 13, border: "none", borderRadius: 9, cursor: "pointer" }}>VER REPORTE →</button>
-          </div>
-        </div>
-
-        {showSuccessModal && (
-          <SuccessModal
-            grade={gradeData.letter}
-            score={Math.round(gradeData.avg)}
-            onClose={() => setShowSuccessModal(false)}
-            onShareLinkedIn={() => {
-              window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.origin + '/report/test@test.com')}`, '_blank')
-            }}
-            onDownloadBadge={() => alert('Descarga próximamente!')}
-            candidateId="test@test.com"
-          />
-        )}
-      </div>
+      <ChallengeComplete
+        challengeTitle="El dev que se está apagando"
+        challengeNumber={3}
+        accentColor="#ff8a80"
+        gradientStart="rgba(255, 138, 128, 0.85)"
+        gradientEnd="rgba(250, 128, 114, 0.80)"
+        isLastChallenge={isLastChallenge(3)}
+      />
     )
   }
 

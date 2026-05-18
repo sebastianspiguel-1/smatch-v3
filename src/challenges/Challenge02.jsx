@@ -5,6 +5,7 @@ import { callAI, computeScores, getGrade, buildBlockerChallengePrompt } from "..
 import { saveResult } from "../engine/supabase"
 import { Avatar, TopBar } from "../components"
 import ChallengeComplete from "../components/ChallengeComplete"
+import TeamPanel from "../components/TeamPanel"
 import { markChallengeComplete, isLastChallenge } from "../utils/progressTracker"
 import {
   TEAM,
@@ -361,22 +362,8 @@ export default function Challenge02() {
             </div>
           </div>
 
-          <div style={{ background: T.panel, borderRadius: 16, padding: 24, marginBottom: 32, border: `2px solid ${T.border}`, boxShadow: "0 2px 8px rgba(15, 23, 42, 0.06)" }}>
-            <div style={{ fontSize: 12, fontWeight: 900, letterSpacing: 3, color: "#fb923c", marginBottom: 20, display: "flex", alignItems: "center", gap: 8 }}>
-              <span style={{ fontSize: 20 }}>👥</span>
-              EQUIPO FENIX
-            </div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 12 }}>
-              {TEAM.map(m => (
-                <div key={m.id} style={{ display: "flex", alignItems: "center", gap: 10, background: T.card, borderRadius: 12, padding: "12px 14px", border: `1px solid ${T.border}`, transition: "all 0.3s" }}>
-                  <Avatar member={m} size={32} />
-                  <div>
-                    <div style={{ fontSize: 14, fontWeight: 700, color: T.text }}>{m.name}</div>
-                    <div style={{ fontSize: 12, color: T.dim, marginTop: 2 }}>{m.role}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
+          <div style={{ marginBottom: 32 }}>
+            <TeamPanel title="Equipo Setlist" showStakeholder={false} />
           </div>
 
           <button onClick={startChallenge} style={{ width: "100%", padding: "20px 0", background: "linear-gradient(135deg, #fb923c, #f59e0b)", color: "#ffffff", fontWeight: 900, fontSize: 16, border: "2px solid rgba(251, 146, 60, 0.8)", borderRadius: 12, cursor: "pointer", letterSpacing: 1.5, boxShadow: "0 4px 16px rgba(251, 146, 60, 0.25)", transition: "all 0.3s", textTransform: "uppercase" }}>
