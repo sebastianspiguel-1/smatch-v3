@@ -151,8 +151,8 @@ export const MOMENTS = [
 // ─── DIMENSIONES EVALUADAS EN ESTE CHALLENGE ───
 export const DIMENSIONS = [
   ["facilitation", "Facilitación"],
-  ["systems", "Pensamiento Sistémico"],
   ["safety", "Seguridad Psicológica"],
-  ["coaching", "Coaching"],
   ["process", "Diseño de Procesos"],
+  ["systems_thinking", "Pensamiento Sistémico"],
+  ["ai_fluency", "Uso de IA"],
 ]

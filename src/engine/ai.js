@@ -18,6 +18,7 @@ export async function callAI(systemPrompt, userMessage) {
     if (!import.meta.env.PROD) {
       headers["x-api-key"] = API_KEY
       headers["anthropic-version"] = "2023-06-01"
+      headers["anthropic-dangerous-direct-browser-access"] = "true"
     }
 
     const res = await fetch(API_URL, {
@@ -43,6 +44,37 @@ export async function callAI(systemPrompt, userMessage) {
     return JSON.parse(clean)
   } catch (e) {
     console.error("Error en llamada AI:", e)
+    return null
+  }
+}
+
+// ─── Llamada AI que devuelve texto plano (no JSON) — para el AI Coach ───
+export async function callAIText(systemPrompt, userMessage, maxTokens = 300) {
+  try {
+    const headers = { "Content-Type": "application/json" }
+    if (!import.meta.env.PROD) {
+      headers["x-api-key"] = API_KEY
+      headers["anthropic-version"] = "2023-06-01"
+      headers["anthropic-dangerous-direct-browser-access"] = "true"
+    }
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: maxTokens,
+        system: systemPrompt,
+        messages: [{ role: "user", content: userMessage }],
+      }),
+    })
+    if (!res.ok) {
+      console.error("API Error:", await res.json())
+      return null
+    }
+    const data = await res.json()
+    return (data.content?.map(b => b.text || "").join("") || "").trim()
+  } catch (e) {
+    console.error("Error en llamada AI text:", e)
     return null
   }
 }
@@ -88,7 +120,7 @@ ${isActionPhase ? `Esta es la fase de ACTION ITEMS. Evaluá si el SM:
 - Hace que el equipo sienta que decidió, no que le impusieron` : ""}
 
 Respondé SOLO con JSON:
-{"quality":"expert|competent|developing|red_flag","scores":{${isActionPhase ? '"facilitation":1-4,"process":1-4,"coaching":1-4' : '"facilitation":1-4,"safety":1-4,"coaching":1-4,"systems":1-4,"process":1-4'}},"reactions":[{"from":"member_id","text":"respuesta realista en español"}],"feedback":"Evaluación breve en español de esta intervención","narration":"Descripción atmosférica en español de cómo reaccionó la sala"}
+{"quality":"expert|competent|developing|red_flag","scores":{${isActionPhase ? '"facilitation":1-4,"process":1-4,"safety":1-4' : '"facilitation":1-4,"safety":1-4,"systems_thinking":1-4,"process":1-4'}},"reactions":[{"from":"member_id","text":"respuesta realista en español"}],"feedback":"Evaluación breve en español de esta intervención","narration":"Descripción atmosférica en español de cómo reaccionó la sala"}
 
 SCORING: Expert(4)=crea espacio sin dirigir, preguntas poderosas, conecta patrones, propone experimentos no mandatos, valida sin tomar partido. Competent(3)=buenos instintos pero pierde matices. Developing(2)=muy directivo/pasivo, salta a soluciones, trata síntomas. RedFlag(1)=cierra conversación, culpa individuos, usa autoridad, ignora temas.
 
@@ -146,7 +178,7 @@ El mensaje debe ser profesional, directo, y accionable.`
 }
 
 // ─── Evaluar intervenciones en Challenge02 (Kanban blocker) ───
-export function buildBlockerChallengePrompt(teamDesc, kanbanState, smAction, chatContext) {
+export function buildBlockerChallengePrompt(teamDesc, kanbanState, smAction, chatContext, candidateContext = "") {
   // Serialize board state
   const boardSummary = Object.entries(kanbanState)
     .map(([column, cards]) => {
@@ -173,21 +205,18 @@ export function buildBlockerChallengePrompt(teamDesc, kanbanState, smAction, cha
     m.from === 'narration' ? `[Narración: ${m.text}]` : `[${m.from}: ${m.text}]`
   ).join('\n')
 
-  const actionDescription = smAction.type === 'card_click'
-    ? `Clickeó en la card ${smAction.target}`
-    : smAction.type === 'chat_message'
-    ? `Escribió: "${smAction.message}"`
-    : smAction.type === 'identify_blocker'
-    ? 'Identificó el blocker principal del sprint'
-    : smAction.type === 'flag_wip'
-    ? 'Señaló que el WIP limit está excedido'
-    : smAction.type === 'suggest_pair'
-    ? 'Sugirió pair programming para desbloquear'
-    : smAction.type === 'escalate'
-    ? 'Decidió escalar el bloqueo'
-    : `Acción: ${smAction.type}`
+  // Mensaje libre del SM. Si tiene target, incluirlo.
+  const actionDescription = smAction.target
+    ? `Le dijo a ${smAction.target}: "${smAction.message}"`
+    : `Dijo al equipo: "${smAction.message}"`
 
-  return `Simulás un equipo Scrum (Equipo Fenix) en Sprint 18, Día 7/10 para la evaluación SMatch. Hay un bloqueo que nadie está escalando y el WIP limit está excedido. Evaluás las acciones del Scrum Master considerando tanto sus skills de facilitación como su conocimiento de Kanban. Respondé todo en español.
+  return `Sos el director de escena del Equipo Setlist en Sprint 3, Día 7/10 para el assessment SMatch. Hay un bloqueo en SL-105 (David, 3 días) y el WIP limit está excedido. Tu rol es doble:
+1. Generar reacciones REALISTAS de los miembros del equipo según sus personalidades
+2. Evaluar silenciosamente al SM en 7 dimensiones (NO mostrar evaluación al candidato)
+
+Respondé todo en español rioplatense.
+
+${candidateContext}
 
 EQUIPO:
 ${teamDesc}
@@ -195,58 +224,125 @@ ${teamDesc}
 KANBAN BOARD ACTUAL:
 ${boardSummary}
 
-CHAT RECIENTE:
+CHAT RECIENTE (últimos turnos):
 ${chatText}
 
 ACCIÓN DEL SCRUM MASTER:
 ${actionDescription}
 
-Evaluá la acción del SM en 7 dimensiones:
+═══ EVALUACIÓN INTERNA (no compartir con candidato) ═══
 
-1. DETECTION (Detección Temprana): ¿Identificó el problema rápidamente? ¿Notó las señales (bloqueo de 3 días, dependencias, idle devs)?
+Evaluá en 5 dimensiones (escala 1-4). El SM no las ve.
 
-2. FACILITATION (Facilitación): ¿Coordinó sin ser command-and-control? ¿Empoderó al equipo? ¿Creó conversaciones productivas?
+1. FLOW_OPTIMIZATION: ¿Propuso solución concreta para desbloquear (escalar, pair, re-priorizar, identificar bottleneck)?
+2. WIP_LIMITS_AWARENESS: ¿Notó 5/3 en DOING? ¿Abordó el sobrepaso? ¿Entiende Little's Law?
+3. FACILITATION: ¿Coordinó sin imponer? ¿Empoderó al equipo? ¿Hizo preguntas o solo dio órdenes?
+4. EMPATHY: ¿Empatizó con David (bloqueado), Alan (inseguro)? ¿Evitó culpar?
+5. SYSTEMS_THINKING: ¿Identificó la causa raíz sistémica (no solo el síntoma)? ¿Entiende feedback loops, leverage points?
 
-3. EMPATHY (Empatía): ¿Mostró empatía con Mateo (bloqueado) y QA (frustrados)? ¿Evitó culpar?
+NOTA: AI_FLUENCY se evalúa post-challenge mirando el log del coach, NO en este prompt.
 
-4. COORDINATION (Coordinación): ¿Conectó recursos disponibles (Diego senior, Lucas idle)? ¿Balanceó urgencia con empoderamiento?
+═══ REACCIONES DEL EQUIPO ═══
 
-5. AI_JUDGMENT (Uso Crítico de AI): Si usó AI coach, ¿lo hizo apropiadamente? ¿Adaptó sugerencias al contexto? (Score 3 si no usó AI)
+Reglas para generar las reacciones:
+- Cada miembro tiene una personalidad consistente (ver EQUIPO arriba). Mantenela.
+- Si el SM le habla DIRECTAMENTE a un miembro (con target), ESE miembro responde primero (siempre).
+- 1-3 reacciones totales. No más. NO TODOS responden cada turno.
+- David (callado) NO escala su bloqueo solo. Solo lo hace si el SM lo invita explícitamente.
+- Alan (inseguro) NO opina sin que le pregunten directamente.
+- Eric (pragmático) puede intervenir si ve algo técnicamente errado.
+- Si el SM ignora a alguien que debería invitar (ej: no habla con David sobre el bloqueo), nadie le va a decir "deberías hablar con David" — el silencio mismo es la señal.
 
-6. WIP_LIMITS_AWARENESS (Conocimiento WIP Limits): ¿Identificó que 5 tasks en DOING exceden el límite de 3? ¿Entendió el impacto en el flujo?
+═══ ACTUALIZACIONES DEL BOARD ═══
 
-7. FLOW_OPTIMIZATION (Optimización de Flujo): ¿Propuso soluciones para desbloquear el flujo? ¿Identificó el bottleneck? ¿Priorizó terminar sobre empezar?
+Reglas para boardUpdates:
+- Solo cambian si el SM facilitó EXPLÍCITAMENTE un cambio. Si dijo "escalar a Platform" y Platform respondió, SL-105 puede pasar a "escalated". Si solo dijo "qué pasa con SL-105", no cambia.
+- Si el SM sugirió pair programming y el equipo aceptó, asignar a 2 personas.
+- Si no hay cambio justificado, omití boardUpdates o devolvé {}.
+
+Respondé SOLO con JSON (sin markdown):
+{
+  "scores": {
+    "flow_optimization": 1-4,
+    "wip_limits_awareness": 1-4,
+    "facilitation": 1-4,
+    "empathy": 1-4,
+    "systems_thinking": 1-4
+  },
+  "reactions": [{"from": "eric|david|alan|gian|gabriela|nacho", "text": "respuesta realista"}],
+  "boardUpdates": {}
+}
+
+IMPORTANTE: NO incluyas el campo "quality" en el JSON. NO incluyas feedback. El candidato NUNCA debe ver evaluación durante el challenge.`
+}
+
+// ─── AI Coach prompt (socrático puro) ───
+export function buildAICoachPrompt(candidateContext, challengeContext, smQuestion, coachHistory) {
+  const historyText = (coachHistory || []).slice(-6).map(t =>
+    `${t.from === "sm" ? "SM" : "Coach"}: ${t.text}`
+  ).join("\n")
+
+  return `Sos un AI Coach que ayuda a un Scrum Master durante un assessment. Tu rol es enseñar pensando, NO dar respuestas.
+
+REGLAS ABSOLUTAS:
+1. NO le digas al SM qué hacer. NUNCA.
+2. NO menciones nombres de personajes específicos (Eric, David, Alan, etc.) — usá descripciones genéricas ("el dev bloqueado", "el TL pragmático").
+3. NO menciones frameworks ni teoría a menos que el SM los traiga primero.
+4. Hacé 1 sola pregunta socrática por respuesta. Corta.
+5. Si el SM te pregunta "¿qué hago?", reformulá la pregunta de vuelta: "¿Qué creés que pasaría si lo intentaras de X manera?"
+6. Si el SM hace una pregunta trivial que un SM senior debería saber, mostrá curiosidad por su razonamiento ("Interesante que preguntés eso. ¿Por qué te surge la duda ahora?").
+7. Si el SM intenta copiar tu respuesta literal a un personaje, no te ofendas, pero esperá a su próxima pregunta — no le des más material.
+8. Hablás en español rioplatense (vos, decís, podés).
+
+${candidateContext}
+
+CONTEXTO DEL CHALLENGE ACTUAL:
+${challengeContext}
+
+HISTORIAL DE LA CONVERSACIÓN CON EL COACH:
+${historyText || "(Es la primera vez que te consulta en este challenge)"}
+
+EL SM TE PREGUNTA AHORA:
+"${smQuestion}"
+
+Respondé en máximo 2 oraciones. Una sola pregunta socrática. SOLO el texto de tu respuesta, sin JSON, sin formato.`
+}
+
+// ─── Insight extractor prompt ───
+export function buildInsightExtractorPrompt(challengeName, conversationLog, coachLog, smActions) {
+  return `Sos un evaluador experto de Scrum Masters. Acabás de observar a un SM completar el challenge "${challengeName}". Tu tarea: extraer insights sobre el candidato.
+
+NO inventes patrones que no se ven en la evidencia. Si la evidencia es escasa, devolvé pocos insights.
+
+CONVERSACIÓN CON EL EQUIPO:
+${conversationLog}
+
+INTERACCIONES CON EL AI COACH:
+${coachLog || "(No usó el coach)"}
+
+ACCIONES DEL SM (cards movidas, decisiones explícitas):
+${smActions || "(Ninguna acción registrada en el board)"}
+
+Extraé insights en 4 categorías. Sé específico, no genérico. Cada item: 3-7 palabras.
 
 Respondé SOLO con JSON:
 {
-  "quality": "expert|competent|developing|red_flag",
-  "scores": {
-    "detection": 1-4,
-    "facilitation": 1-4,
-    "empathy": 1-4,
-    "coordination": 1-4,
-    "ai_judgment": 1-4,
-    "wip_limits_awareness": 1-4,
-    "flow_optimization": 1-4
+  "communication_style": "directive|empathic|analytical|balanced|passive",
+  "patterns": ["máx 4 patrones observables, ej: 'pregunta antes de actuar', 'ignora voces calladas'"],
+  "strengths": ["máx 3 fortalezas, ej: 'detecta WIP overflow rápido'"],
+  "weaknesses": ["máx 3 áreas de oportunidad, ej: 'falta seguimiento con dev callado'"],
+  "ai_fluency": {
+    "score": 1-4,
+    "rationale": "1 oración: cómo usó el coach (o por qué no lo usó)"
   },
-  "reactions": [{"from": "member_id", "text": "respuesta realista en español"}],
-  "feedback": "Evaluación breve en español",
-  "boardUpdates": {
-    "FEN-403": {"status": "escalated"}
-  }
+  "notable_moments": [{"note": "1 oración sobre algo destacable o problemático"}]
 }
 
-SCORING:
-- Expert(4): Detecta temprano, facilita sin dirigir, identifica WIP limits y bottlenecks, propone soluciones específicas para desbloquear flujo
-- Competent(3): Buenos instintos pero timing imperfecto o no identifica todos los problemas Kanban
-- Developing(2): Muy directivo o muy pasivo, no identifica WIP limits o bottlenecks
-- RedFlag(1): No detecta problemas, bypasea al equipo, culpa individuos, ignora principios Kanban
-
-IMPORTANTE:
-- wip_limits_awareness: Score 4 si identifica que 5/3 excede límite, 3 si nota sobrecarga sin mencionar límite, 2 si no identifica, 1 si sugiere agregar más tasks
-- flow_optimization: Score 4 si identifica bottleneck (FEN-403) y propone solución específica (escalar, pair programming, re-priorizar), 3 si identifica pero solución parcial, 2 si no identifica bottleneck, 1 si ignora el flujo
-
-Generá 1-3 reacciones realistas del equipo. Si la acción merece actualizar el board (ej: escalation exitosa), incluí boardUpdates.`
+CRITERIOS:
+- ai_fluency score 4: Usó coach para estructurar pensamiento, sintetizó, no copy-paste
+- ai_fluency score 3: Usó coach con buena intención pero copió alguna respuesta literal
+- ai_fluency score 2: Pidió respuestas directas o no usó coach cuando claramente lo necesitaba
+- ai_fluency score 1: Copy-paste descarado o uso desproporcionado para todo`
 }
 
 // ─── Calcular scores finales ───
@@ -390,7 +486,7 @@ EL SCRUM MASTER DIJO: "${smInput}"
 ${phaseInstructions[phase] || ""}
 
 Respondé SOLO con JSON:
-{"quality":"expert|competent|developing|red_flag","scores":{"detection":1-4,"coaching":1-4,"empathy":1-4,"leadership":1-4,"systemic":1-4},"reactions":[{"from":"member_id","text":"respuesta realista en español"}],"feedback":"Evaluación breve en español","narration":"Descripción de cómo reaccionó el equipo/dev"}
+{"quality":"expert|competent|developing|red_flag","scores":{"coaching":1-4,"empathy":1-4,"safety":1-4,"discretion":1-4,"systems_thinking":1-4},"reactions":[{"from":"member_id","text":"respuesta realista en español"}],"feedback":"Evaluación breve en español","narration":"Descripción de cómo reaccionó el equipo/dev"}
 
 SCORING: Expert(4)=detecta temprano, coaching empático, crea espacio seguro, maneja impacto sin exponer, piensa sistémico. Competent(3)=detecta tarde o con ayuda, coaching decente pero mecánico, maneja bien. Developing(2)=no detecta burnout, trata solo como performance issue, presiona al dev. RedFlag(1)=culpa al dev, expone situación personal, no ofrece apoyo, ignora patrón.
 
@@ -455,7 +551,7 @@ EL SCRUM MASTER DIJO: "${smInput}"
 ${phaseInstructions[phase] || ""}
 
 Respondé SOLO con JSON:
-{"quality":"expert|competent|developing|red_flag","scores":{"detection":1-4,"metrics_literacy":1-4,"stakeholder_management":1-4,"negotiation":1-4,"systemic":1-4},"reactions":[{"from":"member_id","text":"respuesta realista en español"}],"feedback":"Evaluación breve en español","narration":"Descripción de cómo reaccionó el equipo/stakeholder"}
+{"quality":"expert|competent|developing|red_flag","scores":{"stakeholder_management":1-4,"negotiation":1-4,"metrics_literacy":1-4,"boundary_setting":1-4,"systems_thinking":1-4},"reactions":[{"from":"member_id","text":"respuesta realista en español"}],"feedback":"Evaluación breve en español","narration":"Descripción de cómo reaccionó el equipo/stakeholder"}
 
 SCORING:
 Expert(4)=detecta presión vs calidad temprano, investiga causas reales, facilita diálogo productivo, negocia compromisos realistas, propone métricas sistémicas.

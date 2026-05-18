@@ -1,12 +1,19 @@
 import { useState, useEffect, useRef, useMemo } from "react"
 import { useNavigate } from "react-router-dom"
 import { T } from "../theme"
-import { callAI, computeScores, getGrade, buildBlockerChallengePrompt } from "../engine/ai"
+import { callAI, computeScores, getGrade, buildBlockerChallengePrompt, buildInsightExtractorPrompt } from "../engine/ai"
 import { saveResult } from "../engine/supabase"
 import { Avatar, TopBar } from "../components"
 import ChallengeComplete from "../components/ChallengeComplete"
 import TeamPanel from "../components/TeamPanel"
+import AICoach from "../components/AICoach"
 import { markChallengeComplete, isLastChallenge } from "../utils/progressTracker"
+import {
+  buildAIContextString,
+  updateProfile,
+  getProfile,
+  DEFAULT_CANDIDATE_ID,
+} from "../engine/candidateProfile"
 import {
   TEAM,
   MEMBER_MAP,
@@ -31,14 +38,13 @@ export default function Challenge02() {
   const [allFeedback, setAllFeedback] = useState([])
   const [timer, setTimer] = useState(1200) // 20 minutes
   const [startTime] = useState(Date.now())
-  const [actionsCompleted, setActionsCompleted] = useState({
-    identify: false,
-    flagWIP: false,
-    pair: false,
-    escalate: false
-  })
   const [draggedCard, setDraggedCard] = useState(null)
   const [draggedFromColumn, setDraggedFromColumn] = useState(null)
+  // ─── Chat composer state (new) ───
+  const [smInput, setSmInput] = useState("")
+  const [replyTarget, setReplyTarget] = useState(null)
+  const [loading, setLoading] = useState(false)
+  const [actionCount, setActionCount] = useState(0)
 
   const chatRef = useRef(null)
   const timerRef = useRef(null)
@@ -105,66 +111,25 @@ export default function Challenge02() {
     })
   }
 
-  function handleIdentifyBlocker() {
-    setActionsCompleted(prev => ({ ...prev, identify: true }))
-    triggerChatReaction("on_identify_blocker")
-    evaluateAction({
-      type: "identify_blocker",
-      target: "FEN-403",
-      message: "Identifiqué FEN-403 como el bloqueador principal"
-    })
-  }
+  // ─── Handler unificado: el SM escribe en su input libre ───
+  async function handleSMMessage(message, targetMemberId = null) {
+    if (!message.trim() || loading) return
 
-  function handleFlagWIP() {
-    setActionsCompleted(prev => ({ ...prev, flagWIP: true }))
-    triggerChatReaction("on_flag_wip")
-    evaluateAction({
-      type: "flag_wip",
-      target: "DOING",
-      message: "El WIP limit está excedido (5/3)"
-    })
-  }
+    // Show SM's message immediately in chat
+    setChat(p => [...p, {
+      isYou: true,
+      text: message,
+      targetName: targetMemberId ? MEMBER_MAP[targetMemberId]?.name : null
+    }])
+    setLoading(true)
 
-  function handleSuggestPair() {
-    setActionsCompleted(prev => ({ ...prev, pair: true }))
-    triggerChatReaction("on_suggest_pair")
-    evaluateAction({
-      type: "suggest_pair",
-      target: null,
-      message: "Propongo pair programming para desbloquear"
-    })
-  }
-
-  function handleEscalate() {
-    setActionsCompleted(prev => ({ ...prev, escalate: true }))
-    triggerChatReaction("on_escalate")
-    evaluateAction({
-      type: "escalate",
-      target: "Platform",
-      message: "Voy a escalar al equipo Platform"
+    await evaluateAction({
+      type: "chat_message",
+      target: targetMemberId,
+      message: message
     })
 
-    // UPDATE BOARD VISUALLY
-    setKanbanState(prev => {
-      const newState = { ...prev }
-      // Find FEN-403 and update it
-      Object.keys(newState).forEach(column => {
-        const cardIndex = newState[column].findIndex(c => c.id === "FEN-403")
-        if (cardIndex !== -1) {
-          newState[column][cardIndex] = {
-            ...newState[column][cardIndex],
-            status: "escalated",
-            blockedDays: 0
-          }
-        }
-      })
-      return newState
-    })
-
-    // Simulate resolution after escalation
-    setTimeout(() => {
-      triggerChatReaction("on_resolution")
-    }, 2000)
+    setLoading(false)
   }
 
   // Drag and Drop handlers
@@ -210,14 +175,22 @@ export default function Challenge02() {
   }
 
   async function evaluateAction(action) {
-    const boardSummary = serializeBoard()
     const chatContext = chat.slice(-10).map(c =>
-      c.narration ? `[Narración: ${c.text}]` :
-      c.isYou ? `[SM: ${c.text}]` :
-      `[${MEMBER_MAP[c.from]?.name}: ${c.text}]`
-    ).join("\n")
+      c.narration ? { from: 'narration', text: c.text } :
+      c.isYou ? { from: 'sm', text: c.text } :
+      { from: MEMBER_MAP[c.from]?.name || c.from, text: c.text }
+    )
 
-    const sys = buildBlockerChallengePrompt(TEAM_DESC, kanbanState, action, chatContext)
+    // Inject candidate profile context (vacío en primer challenge)
+    const candidateContext = buildAIContextString(DEFAULT_CANDIDATE_ID)
+
+    // Use member name as target if specified
+    const actionForPrompt = {
+      ...action,
+      target: action.target ? MEMBER_MAP[action.target]?.name : null
+    }
+
+    const sys = buildBlockerChallengePrompt(TEAM_DESC, kanbanState, actionForPrompt, chatContext, candidateContext)
     const res = await callAI(sys, action.message || "Action evaluation")
 
     if (res) {
@@ -227,21 +200,22 @@ export default function Challenge02() {
         setChat(p => [...p, ...newMsgs])
       }
 
-      // Store scores
+      // Store scores SILENTLY (candidato no las ve)
       const vs = {}
       if (res.scores) Object.entries(res.scores).forEach(([k, v]) => { if (v > 0) vs[k] = v })
 
       setAllScores(s => [...s, vs])
+      // Solo guardar la acción + scores para el reporte del recruiter.
+      // NO guardar quality/feedback (estaban en versiones anteriores como leak).
       setAllFeedback(f => [...f, {
         action: action.type,
         target: action.target,
-        quality: res.quality,
-        feedback: res.feedback,
+        message: action.message,
         scores: vs
       }])
 
       // Update board if needed
-      if (res.boardUpdates) {
+      if (res.boardUpdates && Object.keys(res.boardUpdates).length > 0) {
         applyBoardUpdates(res.boardUpdates)
       }
 
@@ -279,10 +253,86 @@ export default function Challenge02() {
     })
   }
 
-  function finishChallenge() {
+  async function finishChallenge() {
     clearInterval(timerRef.current)
-    markChallengeComplete(2) // Challenge 2 file number
+    markChallengeComplete(2)
+
+    // ─── Insight Extraction: corre antes de mostrar resultados
+    // para que ai_fluency aparezca en el radar final ───
+    setLoading(true)
+    await extractAndSaveInsights()
+    setLoading(false)
+
     setPhase("results")
+  }
+
+  // ─── Extract insights post-challenge y guardar en profile ───
+  async function extractAndSaveInsights() {
+    try {
+      // Build conversation log for the extractor
+      const conversationLog = chat
+        .filter(c => !c.narration)
+        .map(c => c.isYou
+          ? `SM: "${c.text}"${c.targetName ? ` (a ${c.targetName})` : ''}`
+          : `${MEMBER_MAP[c.from]?.name || c.from}: "${c.text}"`
+        ).join("\n")
+
+      // Coach log (read from profile)
+      const profile = getProfile(DEFAULT_CANDIDATE_ID)
+      const thisChallengeCoachLog = (profile.ai_coach_usage.interactions || [])
+        .filter(i => i.challenge === "El bloqueo que nadie escala")
+        .map(i => `SM pregunta: "${i.sm_question}"\nCoach responde: "${i.coach_response}"`)
+        .join("\n\n")
+
+      // Actions log (board changes + actions taken)
+      const actionsLog = allFeedback
+        .map(fb => `${fb.action}${fb.target ? ` → ${fb.target}` : ''}: "${fb.message || ''}"`)
+        .join("\n")
+
+      const prompt = buildInsightExtractorPrompt(
+        "El bloqueo que nadie escala (C02)",
+        conversationLog,
+        thisChallengeCoachLog,
+        actionsLog
+      )
+
+      const insights = await callAI(prompt, "Extraé insights del candidato")
+      if (!insights) {
+        console.warn("Insight extractor returned null")
+        return
+      }
+
+      // Inyectar ai_fluency en allScores → aparece en el radar final
+      const aiFluencyScore = insights.ai_fluency?.score
+      if (aiFluencyScore && aiFluencyScore > 0) {
+        setAllScores(s => [...s, { ai_fluency: aiFluencyScore }])
+      }
+
+      // Save to profile
+      updateProfile(DEFAULT_CANDIDATE_ID, {
+        communication_style: insights.communication_style,
+        insights: {
+          patterns: insights.patterns || [],
+          strengths: insights.strengths || [],
+          weaknesses: insights.weaknesses || [],
+          notable_moments: (insights.notable_moments || []).map(m => ({
+            challenge: "C02",
+            note: m.note || m,
+          })),
+        },
+        challenge_history: [{
+          challenge: "C02",
+          challenge_name: "El bloqueo que nadie escala",
+          completed_at: new Date().toISOString(),
+          ai_fluency_score: aiFluencyScore,
+          ai_fluency_rationale: insights.ai_fluency?.rationale,
+        }],
+      })
+
+      console.log("📊 Insights extraídos:", insights)
+    } catch (e) {
+      console.error("Error en insight extraction:", e)
+    }
   }
 
   const finalScores = useMemo(() => {
@@ -299,7 +349,7 @@ export default function Challenge02() {
     if (phase === "results" && finalScores.length > 0) {
       const timeUsed = Math.floor((Date.now() - startTime) / 1000)
       saveResult({
-        candidateId: "test@test.com",
+        candidateId: DEFAULT_CANDIDATE_ID,
         challengeId: 2,
         scores: finalScores,
         feedback: allFeedback,
@@ -426,37 +476,6 @@ export default function Challenge02() {
             </div>
           </div>
 
-          {/* Action Buttons */}
-          <div className="action-buttons">
-            <button
-              onClick={handleIdentifyBlocker}
-              disabled={actionsCompleted.identify}
-              className={`action-btn primary ${actionsCompleted.identify ? 'completed' : ''}`}
-            >
-              {actionsCompleted.identify ? 'Acción realizada' : '🎯 Identificar bloqueador'}
-            </button>
-            <button
-              onClick={handleFlagWIP}
-              disabled={actionsCompleted.flagWIP}
-              className={`action-btn warning ${actionsCompleted.flagWIP ? 'completed' : ''}`}
-            >
-              {actionsCompleted.flagWIP ? 'WIP flag enviado' : '⚠️ Flag WIP limit'}
-            </button>
-            <button
-              onClick={handleSuggestPair}
-              disabled={actionsCompleted.pair}
-              className={`action-btn ${actionsCompleted.pair ? 'completed' : ''}`}
-            >
-              {actionsCompleted.pair ? 'Sugerencia enviada' : '🤝 Sugerir pair programming'}
-            </button>
-            <button
-              onClick={handleEscalate}
-              disabled={actionsCompleted.escalate}
-              className={`action-btn danger ${actionsCompleted.escalate ? 'completed' : ''}`}
-            >
-              {actionsCompleted.escalate ? 'Escalado enviado' : '📢 Escalar a Platform'}
-            </button>
-          </div>
 
           {/* Kanban Board */}
           <div className="board-columns">
@@ -580,8 +599,8 @@ export default function Challenge02() {
         {/* Right: Chat */}
         <div className="kanban-chat">
           <div className="chat-header">
-            <h3 className="chat-title">💬 Team Chat</h3>
-            <p className="chat-subtitle">El equipo está reaccionando a tus acciones</p>
+            <h3 className="chat-title">💬 Daily Standup</h3>
+            <p className="chat-subtitle">Hablale al equipo. Click en un avatar para dirigir tu mensaje.</p>
           </div>
 
           <div className="chat-messages" ref={chatRef}>
@@ -596,7 +615,9 @@ export default function Challenge02() {
               if (msg.isYou) {
                 return (
                   <div key={i} className="chat-message user">
-                    <div className="chat-message-author">Tú (SM)</div>
+                    <div className="chat-message-author">
+                      Tú (SM){msg.targetName ? ` → ${msg.targetName}` : ''}
+                    </div>
                     <div className="chat-message-text">{msg.text}</div>
                   </div>
                 )
@@ -604,7 +625,7 @@ export default function Challenge02() {
               const m = MEMBER_MAP[msg.from]
               if (!m) return null
               return (
-                <div key={i} className="chat-message team">
+                <div key={i} className="chat-message team" onClick={() => setReplyTarget(msg.from)} style={{ cursor: "pointer" }}>
                   <Avatar member={m} size={28} />
                   <div>
                     <div className="chat-message-author" style={{ color: m.color }}>{m.name}</div>
@@ -613,10 +634,90 @@ export default function Challenge02() {
                 </div>
               )
             })}
+            {loading && (
+              <div className="chat-message narration" style={{ fontStyle: "italic", opacity: 0.7 }}>
+                <div className="chat-message-text">El equipo está procesando…</div>
+              </div>
+            )}
           </div>
 
+          {/* ─── Chat Composer ─── */}
+          <div className="chat-composer">
+            {replyTarget && MEMBER_MAP[replyTarget] && (
+              <div className="reply-target-bar">
+                <span>Respondiendo a <strong style={{ color: MEMBER_MAP[replyTarget].color }}>{MEMBER_MAP[replyTarget].name}</strong></span>
+                <button onClick={() => setReplyTarget(null)} className="reply-target-clear" aria-label="Quitar destinatario">×</button>
+              </div>
+            )}
+            <div className="team-avatar-row">
+              {TEAM.map(m => (
+                <button
+                  key={m.id}
+                  className={`team-avatar-pick ${replyTarget === m.id ? 'active' : ''}`}
+                  onClick={() => setReplyTarget(replyTarget === m.id ? null : m.id)}
+                  title={`Hablar a ${m.name}`}
+                  style={{ borderColor: replyTarget === m.id ? m.color : 'transparent' }}
+                >
+                  <Avatar member={m} size={28} />
+                </button>
+              ))}
+            </div>
+            <div className="composer-input-row">
+              <textarea
+                className="composer-input"
+                value={smInput}
+                onChange={(e) => setSmInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault()
+                    if (smInput.trim() && !loading) {
+                      const msg = smInput
+                      const target = replyTarget
+                      setSmInput("")
+                      setReplyTarget(null)
+                      handleSMMessage(msg, target)
+                    }
+                  }
+                }}
+                placeholder={
+                  replyTarget && MEMBER_MAP[replyTarget]
+                    ? `Hablale a ${MEMBER_MAP[replyTarget].name}...`
+                    : "Hablale al equipo... (Enter para enviar)"
+                }
+                rows={2}
+                disabled={loading}
+              />
+              <button
+                className="composer-send"
+                disabled={!smInput.trim() || loading}
+                onClick={() => {
+                  const msg = smInput
+                  const target = replyTarget
+                  setSmInput("")
+                  setReplyTarget(null)
+                  handleSMMessage(msg, target)
+                }}
+              >
+                Enviar
+              </button>
+            </div>
+            {actionCount >= 4 && (
+              <button
+                className="composer-finish-btn"
+                onClick={finishChallenge}
+              >
+                Cerrar daily →
+              </button>
+            )}
+          </div>
         </div>
       </div>
+
+      {/* AI Coach flotante */}
+      <AICoach
+        challengeName="El bloqueo que nadie escala"
+        challengeContext="El SM está en un daily standup. Hay un dev bloqueado hace 3 días, el WIP limit está excedido, y el equipo está esperando que el SM facilite."
+      />
     </div>
   )
 }

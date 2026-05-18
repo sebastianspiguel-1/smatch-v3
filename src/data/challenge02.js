@@ -162,14 +162,14 @@ export const CHAT_TRIGGERS = {
 }
 
 // ─── DIMENSIONES EVALUADAS EN ESTE CHALLENGE ───
+// Challenge identity: Flow management + Escalation + Decision under pressure
 export const DIMENSIONS = [
-  ["detection", "Detección Temprana"],
+  ["flow_optimization", "Optimización de Flujo"],
+  ["wip_limits_awareness", "WIP Limits / Kanban"],
   ["facilitation", "Facilitación"],
   ["empathy", "Empatía"],
-  ["coordination", "Coordinación"],
-  ["ai_judgment", "Uso Crítico de AI"],
-  ["wip_limits_awareness", "WIP Limits"],       // NEW - Kanban knowledge
-  ["flow_optimization", "Optimización de Flujo"] // NEW - Kanban knowledge
+  ["systems_thinking", "Pensamiento Sistémico"],
+  ["ai_fluency", "Uso de IA"],
 ]
 
 // ─── CARD DETAILS (additional info shown when clicking) ───

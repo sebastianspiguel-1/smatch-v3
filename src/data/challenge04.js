@@ -96,10 +96,11 @@ export const CHAT_RESPONSES = {
 }
 
 // ─── SCORING DIMENSIONS ───
+// Challenge identity: Scrum process mastery + Estimation coaching + Bias detection
 export const DIMENSIONS = [
-  ["coaching", "Coaching"],
-  ["maturity", "Madurez Scrum"],
+  ["process_mastery", "Process Mastery (Scrum)"],
+  ["bias_coaching", "Coaching de Sesgos"],
   ["facilitation", "Facilitación"],
-  ["systems", "Pensamiento Sistémico"],
-  ["safety", "Seguridad Psicológica"],
+  ["systems_thinking", "Pensamiento Sistémico"],
+  ["ai_fluency", "Uso de IA"],
 ]

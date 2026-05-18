@@ -394,12 +394,14 @@ export const INITIAL_CHARACTER_STATE = {
 }
 
 // ─── DIMENSIONES EVALUADAS ───
+// Challenge identity: Coaching 1-1 + Emotional intelligence + Discretion
 export const DIMENSIONS = [
-  ["detection", "Detección de Señales"],
-  ["coaching", "Coaching Empático"],
+  ["coaching", "Coaching 1-1"],
   ["empathy", "Empatía"],
-  ["leadership", "Liderazgo"],
-  ["systemic", "Pensamiento Sistémico"],
+  ["safety", "Seguridad Psicológica"],
+  ["discretion", "Discreción / Boundary"],
+  ["systems_thinking", "Pensamiento Sistémico"],
+  ["ai_fluency", "Uso de IA"],
 ]
 
 // ─── BOARD STATE (usado en dashboard) ───

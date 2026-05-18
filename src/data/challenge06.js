@@ -140,10 +140,12 @@ export const TEAM_PROPOSALS = [
 ]
 
 // ─── DIMENSIONES EVALUADAS EN ESTE CHALLENGE ───
+// Challenge identity: Team formation (Tuckman) + Consensus building + Inclusivity
 export const DIMENSIONS = [
   ["facilitation", "Facilitación"],
   ["consensus_building", "Construcción de Consenso"],
   ["inclusivity", "Inclusividad"],
-  ["clarity", "Claridad de Acuerdos"],
+  ["team_formation", "Team Formation (Tuckman)"],
   ["systems_thinking", "Pensamiento Sistémico"],
+  ["ai_fluency", "Uso de IA"],
 ]

@@ -383,10 +383,12 @@ export const TEAM_DESC = `- Eric (Tech Lead) — reflexivo, basado en datos. Cre
 - Paula Ríos (Engineering Manager) — bajo presión del CEO. Mira solo números (velocity), no contexto. Cree que "más foco" = más velocity. No entiende métricas ágiles ni causas sistémicas. Pero es razonable si le presentás datos bien.`
 
 // ─── DIMENSIONES EVALUADAS ───
+// Challenge identity: Stakeholder management + Negotiation + Metrics literacy
 export const DIMENSIONS = [
-  ["detection", "Detección de Presión"],
-  ["metrics_literacy", "Literacy de Métricas"],
   ["stakeholder_management", "Gestión de Stakeholders"],
   ["negotiation", "Negociación"],
-  ["systemic", "Pensamiento Sistémico"],
+  ["metrics_literacy", "Literacy de Métricas"],
+  ["boundary_setting", "Protección del Equipo"],
+  ["systems_thinking", "Pensamiento Sistémico"],
+  ["ai_fluency", "Uso de IA"],
 ]
