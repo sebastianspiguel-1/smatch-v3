@@ -58,43 +58,6 @@ export const TEAM_QUESTIONS = [
   { id: "q5", from: "gian", text: "¿Cómo definimos qué es más importante? ¿Valor de negocio o complejidad técnica?", delay: 70000 },
 ]
 
-// ─── ACHIEVEMENTS ───
-export const ACHIEVEMENTS = [
-  { id: "first_tool", label: "Primer Desafío", icon: "🔧", cond: s => s.toolsCompleted >= 1 },
-  { id: "board_master", label: "Board Master", icon: "📋", cond: s => s.toolsCompleted >= 4 },
-  { id: "detective", label: "Detective", icon: "🕵️", cond: s => s.detected >= 1 },
-  { id: "eagle", label: "Ojo de Águila", icon: "🦅", cond: s => s.detected >= 3 },
-  { id: "coach", label: "Coach", icon: "🎓", cond: s => s.goodReplies >= 2 },
-  { id: "estimator", label: "Estimador", icon: "🃏", cond: s => s.estimated >= 2 },
-  { id: "noter", label: "Post-it King", icon: "📝", cond: s => s.notes >= 3 },
-]
-
-// ─── DOCK TOOLS ───
-export const DOCK_ITEMS = [
-  { id: "postit", label: "📝 Post-it", desc: "Nota libre", type: "postit" },
-  { id: "textbox", label: "📄 Texto libre", desc: "Explicá algo", type: "textbox" },
-  { id: "div0", type: "divider" },
-  { id: "poker5", label: "🃏 5 Pasos Poker", desc: "Completá los pasos", type: "challenge" },
-  { id: "fib", label: "🔢 Fibonacci", desc: "Ordená la secuencia", type: "challenge" },
-  { id: "relabs", label: "⚖️ Rel vs Abs", desc: "Clasificá conceptos", type: "challenge" },
-  { id: "tshirt", label: "👕 T-Shirt Sizing", desc: "Facilitá el desacuerdo", type: "challenge" },
-  { id: "div1", type: "divider" },
-  { id: "kano", label: "🏨 Kano", desc: "Clasificá features", type: "challenge" },
-  { id: "moscow", label: "🎯 MoSCoW", desc: "Priorizá el backlog", type: "challenge" },
-  { id: "div2", type: "divider" },
-  { id: "poker_start", label: "🃏 Iniciar Poker", desc: "Estimar historias", type: "action" },
-]
-
-export const MOSCOW_MUSTS = ["SL-201", "SL-202", "SL-203", "SL-204"]
-
-// ─── CHAT RESPONSES ───
-export const CHAT_RESPONSES = {
-  nacho: { keywords: ["relativ", "compar", "complejidad", "no son hora", "story point"], text: "Ahh! No son horas, es comparación. Creo que entiendo!", mood: "💡" },
-  alan: { keywords: ["independ", "sesgo", "propi", "anclaje"], text: "Tenés razón, debería pensar por mi cuenta.", mood: "😐" },
-  gabriela: { keywords: ["velocity", "no es fecha", "proyect", "no es compromiso"], text: "Entiendo, con velocity proyectamos pero no prometemos.", mood: "💡" },
-  david: { keywords: ["complejidad", "del item", "técnic"], text: "Cierto, estimo complejidad no mi situación.", mood: "✅" },
-}
-
 // ─── SCORING DIMENSIONS ───
 // Challenge identity: Scrum process mastery + Estimation coaching + Bias detection
 export const DIMENSIONS = [

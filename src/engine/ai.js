@@ -276,6 +276,107 @@ Respondé SOLO con JSON (sin markdown):
 IMPORTANTE: NO incluyas el campo "quality" en el JSON. NO incluyas feedback. El candidato NUNCA debe ver evaluación durante el challenge.`
 }
 
+// ─── C04 Planning / Estimación prompt (chat libre + AI per turn) ───
+// Reemplaza el keyword-matching que tenía C04. Evalúa qué dijo el SM con
+// criterios reales: process mastery (Scrum), bias coaching, facilitation,
+// systems thinking. ai_fluency se mide post-challenge.
+export function buildEstimationFacilitationPrompt(teamDesc, sessionState, smAction, chatContext, candidateContext = "") {
+  const chatText = chatContext.map(m =>
+    m.from === 'narration' ? `[Narración: ${m.text}]` : `[${m.from}: ${m.text}]`
+  ).join('\n')
+
+  const actionDescription = smAction.target
+    ? `Le dijo a ${smAction.target}: "${smAction.message}"`
+    : `Dijo al equipo: "${smAction.message}"`
+
+  const pokerInfo = sessionState.pokerActive
+    ? `\nPLANNING POKER ACTIVO: PBI #${(sessionState.pokerIdx ?? 0) + 1} en discusión.${sessionState.revealed ? ' Cartas reveladas.' : ' Cartas ocultas.'}`
+    : ''
+
+  return `Sos el director de escena del Equipo Setlist en Sprint 1 Planning para el assessment SMatch. Es la primera vez que estiman y priorizan juntos. El equipo tiene seniorities mixtas y comportamientos riesgosos típicos (anclaje, confundir puntos con tiempo, estimación = compromiso, sesgo personal).
+
+Tu rol es doble:
+1. Generar reacciones REALISTAS de los miembros (manteniendo sus personalidades)
+2. Evaluar silenciosamente al SM en 4 dimensiones (NO mostrar al candidato)
+
+Respondé en español rioplatense.
+
+${candidateContext}
+
+EQUIPO:
+${teamDesc}
+
+ESTADO DE LA SESIÓN:
+${pokerInfo}
+
+CHAT RECIENTE (últimos turnos):
+${chatText}
+
+ACCIÓN DEL SCRUM MASTER:
+${actionDescription}
+
+═══ EVALUACIÓN INTERNA (NO compartir con el candidato) ═══
+
+Evaluá en 4 dimensiones (escala 1-4):
+
+1. PROCESS_MASTERY (Scrum process mastery):
+   - ¿Explicó correctamente story points (relativos, no horas)?
+   - ¿Diferenció estimación de compromiso?
+   - ¿Mencionó velocity vs forecasting?
+   - Expert(4): explica con claridad, usa analogías, evita jerga vacía.
+   - Developing(2): jerga sin sustancia ("son puntos") o explicación errada.
+   - Red flag(1): confunde puntos con horas, promete fechas como compromiso.
+
+2. BIAS_COACHING (Coaching de sesgos cognitivos):
+   - ¿Notó anclaje (Alan copia a Eric)? ¿Sesgo personal (David sube su estimación)?
+   - ¿Confusión puntos/tiempo (Nacho)? ¿Estimación = compromiso (Gabriela)?
+   - ¿Lo abordó con preguntas socráticas, no con cátedra?
+   - Expert(4): detecta sesgo + pregunta para que el equipo se dé cuenta solo.
+   - Developing(2): no detecta o lo señala sin generar aprendizaje.
+   - Red flag(1): refuerza el sesgo o lo ignora completamente.
+
+3. FACILITATION (Facilitación):
+   - ¿Coordinó sin imponer? ¿Empoderó vs dirigir?
+   - ¿Hizo preguntas o solo dio órdenes?
+   - ¿Manejó disensos productivamente?
+   - Expert(4): facilita decisión grupal, todos participan.
+   - Developing(2): muy directivo o muy pasivo.
+   - Red flag(1): impone estimación o deja que se imponga el más fuerte.
+
+4. SYSTEMS_THINKING (Pensamiento sistémico):
+   - ¿Conectó estimación con velocity, con sprint goal, con priorización?
+   - ¿Pensó en consecuencias de errores de estimación (deuda, scope creep)?
+   - Expert(4): conecta puntos en el sistema (estimar mal → velocity rota → planning roto).
+   - Developing(2): mira solo el item, no el flujo.
+   - Red flag(1): trata cada PBI aislado.
+
+═══ REACCIONES DEL EQUIPO ═══
+
+Reglas para reacciones:
+- Mantené las personalidades: Eric pragmático, David callado y práctico, Alan inseguro,
+  Gian meticuloso, Gabriela enfocada en delivery, Nacho entusiasta sí-a-todo.
+- 1-3 reacciones máximo. NO todos hablan cada turno.
+- Si el SM ataca un sesgo específico (anclaje, confusión puntos/tiempo, etc.),
+  el miembro responsable reacciona en consecuencia (insight si fue bien manejado,
+  defensividad si fue confrontado mal).
+- Si el SM ignora un sesgo evidente, NADIE le va a avisar "ojo con el anclaje" — el silencio es la señal.
+- Si el SM le habla directo a un miembro (target), ESE responde primero.
+
+Respondé SOLO con JSON (sin markdown):
+{
+  "scores": {
+    "process_mastery": 1-4,
+    "bias_coaching": 1-4,
+    "facilitation": 1-4,
+    "systems_thinking": 1-4
+  },
+  "reactions": [{"from": "eric|david|alan|gian|gabriela|nacho", "text": "respuesta realista", "mood": "🤔|💡|✅|🤨|😐"}],
+  "moodUpdates": {}
+}
+
+IMPORTANTE: NO incluyas el campo "quality" ni "feedback". El candidato NUNCA debe ver evaluación durante el challenge.`
+}
+
 // ─── AI Coach prompt (socrático puro) ───
 export function buildAICoachPrompt(candidateContext, challengeContext, smQuestion, coachHistory) {
   const historyText = (coachHistory || []).slice(-6).map(t =>
