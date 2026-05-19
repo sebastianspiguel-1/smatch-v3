@@ -12,7 +12,39 @@ export const TEAM = [
 
 export const MEMBER_MAP = Object.fromEntries(TEAM.map(t => [t.id, t]))
 
-export const SESSION_CONTEXT = "Equipo Setlist, Sprint 1, Día 1 — Planning Session. Es la primera vez que el equipo estima y prioriza juntos. 12 PBIs en el backlog inicial. Velocity proyectada: ~30 puntos para un sprint de 10 días. La meta del Sprint 1: tener un MVP usable con flujo end-to-end (banda crea show → fan sugiere canciones → banda elige setlist)."
+export const SESSION_CONTEXT = "Equipo Setlist, Sprint 1, Día 1 — Kickoff + Planning. Es la primera vez que el equipo trabaja junto y la primera vez que estiman y priorizan en común. La sesión tiene dos partes: PARTE 1 — Team Agreements rápidos (3 acuerdos básicos para arrancar bien); PARTE 2 — Planning Session (estimar y priorizar 12 PBIs con velocity proyectada ~30 pts). La meta del Sprint 1: MVP usable con flujo end-to-end (banda crea show → fan sugiere canciones → banda elige setlist)."
+
+// ─── TEAM AGREEMENT TOPICS (Parte 1 del Día 1) ───
+// 3 acuerdos básicos que el SM facilita antes de arrancar el Planning.
+// NO son los 6 temas profundos del workshop tradicional — son LOS QUE
+// IMPORTAN AHORA para que el Planning fluya bien. Cada uno tiene una
+// "tensión" real que el SM debe resolver con el equipo.
+export const TEAM_AGREEMENT_TOPICS = [
+  {
+    id: "communication",
+    icon: "💬",
+    title: "Comunicación & Working Hours",
+    question: "¿Cómo se comunica el equipo durante el sprint? ¿Slack? ¿Daily? ¿Horarios respetados?",
+    tension: "Eric vive online y responde de noche. Alan trabaja 9-18 y no le gusta que le pinguen tarde. Gabriela mete asks urgentes a las 22hs.",
+    prompt: "Escribí el acuerdo que vas a proponer al equipo (1-2 frases)."
+  },
+  {
+    id: "dor",
+    icon: "📋",
+    title: "Definition of Ready",
+    question: "¿Cuándo un PBI está LISTO para entrar al Planning? ¿Qué info mínima necesita?",
+    tension: "Gabriela mete PBIs sin criterio de aceptación claro. Después el equipo descubre el alcance real en pleno desarrollo. Hoy: 'Buscar canción' parece simple, pero ¿incluye autocompletado? ¿soporta búsqueda por álbum?",
+    prompt: "¿Qué condiciones debe cumplir un PBI antes de entrar al sprint? Escribilas como acuerdo del equipo."
+  },
+  {
+    id: "estimation",
+    icon: "🃏",
+    title: "Cómo estimamos",
+    question: "¿Story points o tiempo? ¿Quién vota? ¿Qué hacemos con los desacuerdos?",
+    tension: "Nacho viene del mundo freelance y estima en horas. Eric quiere usar story points relativos. Alan no se anima a estimar fuerte por inseguridad.",
+    prompt: "Proponé cómo va a estimar el equipo — esto se va a usar inmediatamente en el Planning Poker."
+  }
+]
 
 // ─── PRODUCT BACKLOG ITEMS — Setlist MVP Sprint 1 ───
 // Producto: app mobile donde bandas + fans co-crean setlists de shows.

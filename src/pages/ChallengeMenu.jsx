@@ -17,9 +17,9 @@ const CHALLENGES = [
   {
     id: 1,
     challengeFile: 4, // Maps to Challenge04 component
-    title: "Día 1 · Sprint Planning",
+    title: "Día 1 · Kickoff & Planning",
     sprintDay: "Día 1",
-    desc: "Es el primer Planning del equipo. Hay que estimar y priorizar las primeras features de Setlist. Las seniorities son mixtas y algunos no manejan los frameworks. Facilitá la sesión.",
+    desc: "Primer día del equipo trabajando juntos. Sesión 2 en 1: primero facilitás 3 team agreements básicos (comunicación, DoR, cómo estimamos), después arrancás el Planning con las herramientas de estimación. Lo que acuerdes en la Parte 1 se va a poner a prueba en la Parte 2.",
     ready: true,
     icon: "■",
     accentColor: "#0891b2",
@@ -167,7 +167,7 @@ export default function ChallengeMenu() {
                   Vas a vivir <strong>los 5 momentos clave del Sprint 1</strong> con el equipo Setlist. Un sprint completo de 10 días, contado en los 5 puntos donde más se necesita un buen Scrum Master.
                 </p>
                 <div className="situations-preview">
-                  <div className="situation-badge">Día 1 · Planning Session</div>
+                  <div className="situation-badge">Día 1 · Kickoff + Planning</div>
                   <div className="situation-badge">Día 3 · 1-1 con un dev callado</div>
                   <div className="situation-badge">Día 5 · Daily con bloqueo crítico</div>
                   <div className="situation-badge">Día 7 · Tu Engineering Manager exige +30%</div>
