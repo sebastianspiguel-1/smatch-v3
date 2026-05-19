@@ -28,12 +28,12 @@ export const SETLIST_TEAM = [
   {
     id: "david",
     name: "David",
-    role: "Dev de Pagos",
+    role: "Dev Backend / APIs",
     color: "#34d399",
     init: "DV",
     emoji: "🔇",
     tagline: "Callado y práctico, no escala bloqueos",
-    bio: "Práctico, callado, no le gustan las discusiones filosóficas. Quiere acuerdos concretos y accionables. Tiende a no escalar bloqueos rápido y se traba solo en lugar de pedir ayuda. Buena ética de trabajo pero le cuesta comunicar."
+    bio: "Práctico, callado, no le gustan las discusiones filosóficas. Responsable de las APIs y las integraciones externas (Spotify search, auth, push). Tiende a no escalar bloqueos rápido y se traba solo en lugar de pedir ayuda. Buena ética de trabajo pero le cuesta comunicar."
   },
   {
     id: "alan",
@@ -82,14 +82,41 @@ export const SETLIST_TEAM_MAP = Object.fromEntries(
   SETLIST_TEAM.map(m => [m.id, m])
 )
 
-// Stakeholder externo (Lollapalooza)
+// Stakeholders externos del producto
 export const SETLIST_STAKEHOLDER = {
   id: "simon",
   name: "Simon",
-  role: "Lollapalooza · Stakeholder",
+  role: "Productor · Lollapalooza",
   color: "#8b5cf6",
   init: "SI",
-  emoji: "📅",
-  tagline: "Externo, pregunta por avances cada 2 días",
-  bio: "Organizador del Lollapalooza 2026. Quiere asegurar que Setlist va a estar listo para el festival en 6 semanas. Pregunta por avances frecuentemente y agrega presión externa al equipo."
+  emoji: "🎪",
+  tagline: "Quiere usar Setlist como piloto del festival 2026",
+  bio: "Productor del Lollapalooza 2026. Negoció con Mateo usar Setlist como piloto oficial del festival: 60 bandas indies van a estrenar la app en vivo. Pregunta por avances cada 2 días. Genera la presión externa más fuerte sobre el equipo."
 }
+
+// Founder/CEO de Setlist — voz del producto
+export const SETLIST_FOUNDER = {
+  id: "mateo",
+  name: "Mateo",
+  role: "Founder & CEO · Setlist",
+  color: "#a855f7",
+  init: "MA",
+  emoji: "🚀",
+  tagline: "Visión del producto, le prometió a Simon el piloto",
+  bio: "Fundador de Setlist. Le prometió a Simon que el MVP estaría listo para Lollapalooza. Está obsesionado con la experiencia del fan. Voz del producto: define la dirección estratégica pero deja la ejecución al equipo."
+}
+
+// Engineering Manager — jefa directa del SM
+export const SETLIST_EM = {
+  id: "paula",
+  name: "Paula",
+  role: "Engineering Manager",
+  color: "#dc2626",
+  init: "PA",
+  emoji: "👔",
+  tagline: "Jefa del SM, presiona por velocity",
+  bio: "Engineering Manager. Es la jefa directa del Scrum Master y reporta a Mateo. Le prometió a Mateo +30% de velocity para Sprint 2. Pragmática, data-driven, puede ser dura cuando los números no cierran. Aparece en el assessment cuando el equipo va lento."
+}
+
+// Todos los stakeholders en un solo array para iterar fácil
+export const SETLIST_STAKEHOLDERS = [SETLIST_STAKEHOLDER, SETLIST_FOUNDER, SETLIST_EM]

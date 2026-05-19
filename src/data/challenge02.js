@@ -3,12 +3,12 @@ import { T } from "../theme"
 // ─── EQUIPO SETLIST + CONTACTO EXTERNO ───
 export const TEAM = [
   { id: "eric", name: "Eric", role: "Tech Lead", color: "#60a5fa", init: "ER" },
-  { id: "david", name: "David", role: "Dev de Pagos", color: "#34d399", init: "DV" },
+  { id: "david", name: "David", role: "Dev Backend / APIs", color: "#34d399", init: "DV" },
   { id: "alan", name: "Alan", role: "Dev Mobile", color: "#f472b6", init: "AL" },
   { id: "gian", name: "Gian", role: "QA", color: "#fb923c", init: "GI" },
   { id: "gabriela", name: "Gabriela", role: "Product Owner", color: "#a78bfa", init: "GA" },
   { id: "nacho", name: "Nacho", role: "Dev Frontend", color: "#fbbf24", init: "NA" },
-  { id: "simon", name: "Simon (Lollapalooza)", role: "Contacto externo", color: "#8b5cf6", init: "SI" },
+  { id: "simon", name: "Simon (Lollapalooza)", role: "Productor festival", color: "#8b5cf6", init: "SI" },
 ]
 
 export const MEMBER_MAP = Object.fromEntries(TEAM.map(t => [t.id, t]))
@@ -22,70 +22,70 @@ export const KANBAN_COLUMNS = [
   { id: "DONE", label: "Done", wipLimit: null, color: "#10b981" }
 ]
 
-// ─── INITIAL KANBAN STATE (Sprint 3, Day 7) ───
+// ─── INITIAL KANBAN STATE (Sprint 1, Day 5 — MID-SPRINT) ───
+// Producto Setlist: app donde bandas + fans co-crean setlists.
+// SL-105 (Buscar canción / Spotify API) está bloqueada hace 2 días.
 export const INITIAL_KANBAN_STATE = {
   "TODO": [
-    { id: "SL-110", title: "Refactorizar editor de setlists para mejor UX", assignee: null, priority: "low", status: "ok", points: 3 },
-    { id: "SL-111", title: "Actualizar documentación onboarding artistas", assignee: null, priority: "low", status: "ok", points: 2 },
-    { id: "SL-112", title: "Crear widgets dashboard para venues", assignee: null, priority: "medium", status: "ok", points: 5 }
+    { id: "SL-109", title: "Notificación push 'Setlist listo'", assignee: null, priority: "medium", status: "ok", points: 5 },
+    { id: "SL-110", title: "Galería de fotos post-show", assignee: null, priority: "low", status: "ok", points: 8 },
+    { id: "SL-111", title: "Perfil de banda", assignee: null, priority: "low", status: "ok", points: 3 }
   ],
   "DOING": [
-    { id: "SL-101", title: "Implementar rate limiting en endpoints de API", assignee: "eric", priority: "high", status: "ok", days: 2, points: 5 },
-    { id: "SL-105", title: "Integrar procesamiento de pagos con Mercado Pago", assignee: "david", priority: "high", status: "blocked", blockedDays: 3, dependencies: ["API keys Finance team"], points: 8 },
-    { id: "SL-103", title: "Implementar firma digital de contratos artista-venue", assignee: "nacho", priority: "high", status: "ok", days: 1, points: 5 },
-    { id: "SL-104", title: "Configurar notificaciones push para iOS y Android", assignee: "nacho", priority: "medium", status: "ok", days: 1, points: 3 },
-    { id: "SL-109", title: "Habilitar carga de fotos de perfil de artistas", assignee: "alan", priority: "low", status: "ok", days: 1, points: 2 }
+    { id: "SL-101", title: "Crear show", assignee: "eric", priority: "high", status: "ok", days: 2, points: 5 },
+    { id: "SL-105", title: "Buscar canción (Spotify Search API)", assignee: "david", priority: "high", status: "blocked", blockedDays: 2, dependencies: ["Aprobación Spotify Developer API"], points: 8 },
+    { id: "SL-103", title: "Compartir link de show", assignee: "nacho", priority: "high", status: "ok", days: 1, points: 3 },
+    { id: "SL-104", title: "RSVP del fan (mobile)", assignee: "alan", priority: "high", status: "ok", days: 1, points: 3 },
+    { id: "SL-102", title: "Login y registro (backend)", assignee: "david", priority: "high", status: "ok", days: 1, points: 5 }
   ],
   "IN_REVIEW": [
-    { id: "SL-106", title: "Desarrollar flujo completo de pago en app mobile", assignee: "alan", priority: "high", status: "waiting", dependencies: ["SL-105"], points: 5 },
-    { id: "SL-107", title: "Crear tests E2E para flujo de transacciones", assignee: "gian", priority: "high", status: "waiting", dependencies: ["SL-105"], points: 3 }
+    { id: "SL-106", title: "Sugerir canción al show", assignee: "alan", priority: "high", status: "waiting", dependencies: ["SL-105"], points: 5 },
+    { id: "SL-107", title: "Tests E2E de búsqueda y sugerencias", assignee: "gian", priority: "high", status: "waiting", dependencies: ["SL-105"], points: 3 }
   ],
   "BLOCKED": [],
   "DONE": [
-    { id: "SL-100", title: "Desarrollar CRUD básico del módulo de shows", assignee: "alan", priority: "medium", status: "completed", points: 3 },
-    { id: "SL-102", title: "Implementar validación de perfiles de artistas", assignee: "eric", priority: "high", status: "completed", points: 3 },
-    { id: "SL-108", title: "Configurar pipeline CI/CD con GitHub Actions", assignee: "eric", priority: "medium", status: "completed", points: 2 },
-    { id: "SL-113", title: "Auditar y aplicar security headers en backend", assignee: "david", priority: "high", status: "completed", points: 5 }
+    { id: "SL-100", title: "Setup inicial del proyecto (repos, CI)", assignee: "eric", priority: "medium", status: "completed", points: 3 },
+    { id: "SL-108", title: "Setlist final público (frontend)", assignee: "nacho", priority: "medium", status: "completed", points: 3 }
   ]
 }
 
 // Sprint summary
 export const SPRINT_SUMMARY = {
-  sprint: 3,
-  day: 7,
+  sprint: 1,
+  day: 5,
   totalDays: 10,
-  committed: 38,
-  done: 21,
-  inProgress: 23, // Cards in DOING
+  committed: 30,
+  done: 6,
+  inProgress: 24, // Cards in DOING
   blocked: 8,     // SL-105
   atRisk: 16,     // SL-105(8) + SL-106(5) + SL-107(3)
-  velocity: "55%"
+  velocity: "20%"
 }
 
-export const SPRINT_CONTEXT = "Equipo Setlist, Sprint 3, día 7/10. CONTEXT PREVIO: En Sprint 2, Nacho entregó SL-103 TARDE sin avisar. Alan hizo trabajo extra para cubrir pero NO lo mencionó en la retro. Simon (Lollapalooza) preguntó por el módulo de pagos y el equipo PROMETIÓ tenerlo en Sprint 3. HOY: Sprint 3 está en riesgo. SL-105 (integración Mercado Pago, 8 pts) bloqueado hace 3 días esperando API keys. David escribió al Finance team pero no escaló. Gian lo mencionó en el daily del día 5 pero nadie actuó. Alan y Gian están bloqueados esperando (16 puntos en riesgo, 42% del sprint). Simon mandó WhatsApp esta mañana preguntando por el estado. Nadie escaló hasta hoy."
+export const SPRINT_CONTEXT = "Equipo Setlist, Sprint 1, día 5/10. Es la primera vez que el equipo trabaja juntos en un sprint completo. PRODUCTO: Setlist es una app mobile donde bandas indie + fans co-crean los setlists de shows. La meta del sprint: MVP usable end-to-end (banda crea show → fan sugiere canciones → banda elige setlist). HOY: SL-105 (Buscar canción, integración con Spotify Search API, 8 pts) está bloqueada hace 2 días esperando aprobación de Spotify Developer API. David escribió a Spotify el día 2 y 4 pero NO ESCALÓ a Mateo (founder/CEO). Sin SL-105, todo el flujo de 'sugerir canción' está bloqueado: Alan no puede testear su UI (SL-106), Gian no puede armar tests E2E (SL-107). 16 puntos en riesgo (53% del sprint). Simon (Lollapalooza) mandó WhatsApp a Gabriela esta mañana preguntando por el progreso del piloto."
 
 // ─── TEAM DESCRIPTION (para prompts de AI) ───
-export const TEAM_DESC = `Equipo de Setlist — startup de app mobile para artistas independientes latinoamericanos.
+export const TEAM_DESC = `Equipo de Setlist — app mobile donde bandas indie + fans co-crean los setlists de shows. Sprint 1, día 5/10. Mid-sprint.
 
-Eric (Tech Lead): brillante y directo, a veces cortante. Construyó el backend casi solo. Se siente DEFENSIVO porque no sabía que SL-105 era tan crítico. "¿Por qué nadie me dijo?" Podría ayudar a David técnicamente pero no se ofreció porque nadie le pidió.
+Eric (Tech Lead): brillante y directo, a veces cortante. Construyó el backend casi solo. Se siente DEFENSIVO porque no sabía que SL-105 era tan crítico. "¿Por qué nadie me dijo?" Podría ayudar a David técnicamente con la integración Spotify pero no se ofreció porque nadie le pidió.
 
-David (Dev de Pagos): sólido y callado. Siempre entrega, pero está ASUSTADO de escalar porque teme decepcionar al equipo y eso lo paraliza. Bloqueado hace 3 días en SL-105 esperando API keys. Escribió al Finance team el día 4 y 6 pero NO ESCALÓ al CTO porque "no quería molestar".
+David (Dev Backend / APIs): sólido y callado. Siempre entrega, pero está ASUSTADO de escalar porque teme decepcionar al equipo y eso lo paraliza. Bloqueado hace 2 días en SL-105 esperando aprobación de Spotify Developer API. Escribió a Spotify el día 2 y 4 pero NO ESCALÓ a Mateo (founder/CEO) porque "no quería molestar".
 
-Alan (Dev Mobile): creativo y preciso. Está FRUSTRADO porque tiene SL-106 listo para testear hace días pero nadie ve su trabajo. Dijo "cuando David termine" en el daily pero asumió que todos lo escucharon. En Sprint 2 hizo trabajo extra cuando Nacho entregó tarde, pero no lo mencionó en la retro.
+Alan (Dev Mobile): creativo y preciso. Está FRUSTRADO porque tiene SL-106 (sugerir canción - UI mobile) listo para testear hace días pero depende de la API de búsqueda. Dijo "cuando David termine" en el daily pero asumió que todos lo escucharon.
 
-Gian (QA): meticuloso y FURIOSO. Detecta problemas antes que nadie pero raramente le hacen caso hasta que algo falla en producción. MENCIONÓ el bloqueo de SL-105 en el daily del día 5 pero nadie actuó. Se siente invisible en el equipo.
+Gian (QA): meticuloso y FURIOSO. Detecta problemas antes que nadie pero raramente le hacen caso hasta que algo falla. MENCIONÓ el bloqueo de SL-105 en el daily del día 3 pero nadie actuó. Se siente invisible en el equipo.
 
-Gabriela (Product Owner): conecta bien con artistas y venues pero genera scope creep constantemente. Recibió un WhatsApp de Simon (Lollapalooza) esta mañana preguntando por el módulo de pagos. Está preocupada porque el equipo PROMETIÓ tenerlo en Sprint 3.
+Gabriela (Product Owner): conecta bien con bandas y founders pero genera scope creep constantemente. Recibió un WhatsApp de Simon (Lollapalooza) esta mañana preguntando por el progreso del piloto. Está preocupada porque la meta del Sprint 1 era un MVP usable.
 
-Nacho (Dev Frontend): entusiasta y rápido, pero sobreestima su velocidad. Tiene 2 tickets en DOING (SL-103 y SL-104), contribuyendo al WIP limit excedido. En Sprint 2 entregó SL-103 TARDE, obligando a Alan a hacer trabajo extra.
+Nacho (Dev Frontend): entusiasta y rápido, pero sobreestima su velocidad. Tiene 2 tickets en DOING (SL-103 link de show y SL-104 RSVP mobile), contribuyendo al WIP limit excedido.
 
-Simon (Contacto Lollapalooza): organizador del festival, contacto externo. Le mandó WhatsApp a Gabriela esta mañana preguntando por el estado del módulo de pagos. El piloto es en 5 semanas y está preocupado.`
+Simon (Productor Lollapalooza): le mandó WhatsApp a Gabriela esta mañana. Quiere usar Setlist como piloto oficial del festival 2026: 60 bandas indies usando la app en vivo. El piloto es en 5 semanas y está preocupado por el avance.`
 
 // ─── CHAT TRIGGERS (reactions based on SM actions) ───
 export const CHAT_TRIGGERS = {
   // Initial board view
   on_board_view: [
-    { from: "narration", text: "Es día 7 del Sprint 3. Abrís el Kanban board para el daily standup. Algo no se ve bien..." }
+    { from: "narration", text: "Es día 5 del Sprint 1 — mid-sprint. Abrís el Kanban board para el daily standup. Algo no se ve bien..." }
   ],
 
   // Click on blocked card SL-105

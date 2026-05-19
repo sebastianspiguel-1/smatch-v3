@@ -12,23 +12,14 @@ import {
 } from "../utils/progressTracker"
 import "./ChallengeMenu.css"
 
+// ─── Los 5 challenges del Sprint 1 (orden cronológico real) ───
 const CHALLENGES = [
   {
     id: 1,
-    challengeFile: 6, // Maps to Challenge06 component
-    title: "Team Agreements Workshop",
-    desc: "Sprint 0. El equipo necesita establecer acuerdos de trabajo. Facilitá la sesión para poder llegar a un consenso de equipo sobre diversos temas centrales.",
-    ready: true,
-    icon: "□",
-    accentColor: "#7c3aed",
-    gradientStart: "rgba(124, 58, 237, 0.85)",
-    gradientEnd: "rgba(109, 40, 217, 0.80)"
-  },
-  {
-    id: 2,
     challengeFile: 4, // Maps to Challenge04 component
-    title: "Estimación & Priorización",
-    desc: "El equipo tiene diferentes seniorities. Muchos no saben de estimación y priorización. Facilitá una sesión para que el equipo tenga claro todo lo necesario a la hora de estimar y priorizar.",
+    title: "Día 1 · Sprint Planning",
+    sprintDay: "Día 1",
+    desc: "Es el primer Planning del equipo. Hay que estimar y priorizar las primeras features de Setlist. Las seniorities son mixtas y algunos no manejan los frameworks. Facilitá la sesión.",
     ready: true,
     icon: "■",
     accentColor: "#0891b2",
@@ -36,32 +27,11 @@ const CHALLENGES = [
     gradientEnd: "rgba(6, 182, 212, 0.80)"
   },
   {
-    id: 3,
-    challengeFile: 1, // Maps to Challenge01 component
-    title: "La retro que parece perfecta",
-    desc: "Retrospectiva del Sprint. Pareciese haber cierta tensión entre el equipo. Facilitá la Retro para poder sacar el mayor valor posible de la misma.",
-    ready: true,
-    icon: "◉",
-    accentColor: "#00d4aa",
-    gradientStart: "rgba(0, 212, 170, 0.85)",
-    gradientEnd: "rgba(5, 150, 105, 0.80)"
-  },
-  {
-    id: 4,
-    challengeFile: 2, // Maps to Challenge02 component
-    title: "El bloqueo que nadie escala",
-    desc: "El equipo comenzó a utilizar un tablero kanban, pero pareciese que no está funcionando como esperaba. Miembros del equipo bloqueados, poco escalamiento de riesgos, WIP excedidos... ¡Ayudá al equipo a avanzar!",
-    ready: true,
-    icon: "◆",
-    accentColor: "#f59e0b",
-    gradientStart: "rgba(245, 158, 11, 0.85)",
-    gradientEnd: "rgba(217, 119, 6, 0.80)"
-  },
-  {
-    id: 5,
+    id: 2,
     challengeFile: 3, // Maps to Challenge03 component
-    title: "El dev que se está apagando",
-    desc: "Un miembro del equipo con buen historial está performando mal sin razón aparente. Generá un espacio seguro para una conversación difícil de coaching 1-1.",
+    title: "Día 3 · 1-1 con Alan",
+    sprintDay: "Día 3",
+    desc: "Alan estuvo callado en el Planning. Sus métricas vienen cayendo desde antes. Convocás un 1-1. Generá un espacio seguro para una conversación de coaching difícil.",
     ready: true,
     icon: "⬢",
     accentColor: "#ff8a80",
@@ -69,15 +39,40 @@ const CHALLENGES = [
     gradientEnd: "rgba(250, 128, 114, 0.80)"
   },
   {
-    id: 6,
+    id: 3,
+    challengeFile: 2, // Maps to Challenge02 component
+    title: "Día 5 · Daily con bloqueo",
+    sprintDay: "Día 5",
+    desc: "Mid-sprint. David tiene una task bloqueada hace 2 días esperando aprobación de Spotify Developer API y no escaló. WIP excedido, sprint en riesgo. Facilitá el daily.",
+    ready: true,
+    icon: "◆",
+    accentColor: "#f59e0b",
+    gradientStart: "rgba(245, 158, 11, 0.85)",
+    gradientEnd: "rgba(217, 119, 6, 0.80)"
+  },
+  {
+    id: 4,
     challengeFile: 5, // Maps to Challenge05 component
-    title: "La presión de velocidad",
-    desc: "El Engineering Manager exige acelerar 30% la velocidad y muestra métricas de \"bajo rendimiento\". El equipo te mira esperando que los defiendas. ¿Cómo manejás la situación?",
+    title: "Día 7 · Reunión con Paula (EM)",
+    sprintDay: "Día 7",
+    desc: "Paula (Engineering Manager) escuchó que el sprint va lento. Te convoca a 1-1. Exige acelerar 30% para Sprint 2 con datos en mano. El equipo te mira. ¿Cómo manejás la situación?",
     ready: true,
     icon: "▲",
     accentColor: "#dc2626",
     gradientStart: "rgba(220, 38, 38, 0.85)",
     gradientEnd: "rgba(185, 28, 28, 0.80)"
+  },
+  {
+    id: 5,
+    challengeFile: 1, // Maps to Challenge01 component
+    title: "Día 10 · Retro del Sprint 1",
+    sprintDay: "Día 10",
+    desc: "Sprint 1 cierra: 22/30 puntos entregados (3 carry-overs por SL-105). Hay tensión entre Eric (velocidad) y Gian (calidad). En superficie todos están OK, pero hay algo no dicho. Facilitá la retro.",
+    ready: true,
+    icon: "◉",
+    accentColor: "#00d4aa",
+    gradientStart: "rgba(0, 212, 170, 0.85)",
+    gradientEnd: "rgba(5, 150, 105, 0.80)"
   },
 ]
 
@@ -131,26 +126,26 @@ export default function ChallengeMenu() {
                 <div className="mission-header">
                   <h2>🎸 El Producto</h2>
                   <p className="mission-tagline">
-                    Setlist es una app mobile que conecta artistas independientes con venues en toda Latinoamérica.
-                    Permite gestionar shows de principio a fin: desde el contacto inicial hasta el pago final.
+                    <strong>Setlist</strong> es una app mobile donde <strong>bandas indie + fans</strong> co-crean los setlists de los shows.
+                    El fan sugiere canciones; la banda vota y arma la lista final. Es la app que querés tener en cada recital.
                   </p>
                 </div>
                 <div className="mission-grid">
                   <div className="mission-item">
-                    <h3>✓ Listo</h3>
-                    <p>Gestión de shows, contratos digitales firmables desde el celu, notificaciones push.</p>
+                    <h3>🎯 La meta del Sprint 1</h3>
+                    <p>Tener un <strong>MVP usable end-to-end</strong>: banda crea show → fan sugiere canciones → banda elige setlist.</p>
                   </div>
                   <div className="mission-item">
-                    <h3>🔧 En desarrollo</h3>
-                    <p>Pagos online con Mercado Pago — <strong className="blocked">actualmente bloqueado hace 3 días</strong> esperando API keys.</p>
+                    <h3>🔧 Lo que se va a bloquear</h3>
+                    <p>La <strong>búsqueda de canciones (Spotify Search API)</strong> queda trabada esperando aprobación. Sin eso, no hay sugerencias.</p>
                   </div>
                   <div className="mission-item">
-                    <h3>🎯 La meta</h3>
-                    <p><strong>Lollapalooza 2026 en 6 semanas.</strong> 60 artistas van a usar Setlist en vivo durante el festival. Simon (organizador) pregunta por avances cada 2 días.</p>
+                    <h3>🎪 El compromiso externo</h3>
+                    <p><strong>Lollapalooza 2026 en 6 semanas.</strong> Simon (productor) quiere usar Setlist como piloto oficial — 60 bandas usando la app en vivo.</p>
                   </div>
                   <div className="mission-item">
-                    <h3>⚠️ El problema</h3>
-                    <p>Sprint 3, día 7/10. Bloqueos técnicos, presión externa, tensión interna que nadie nombra. El equipo nunca estableció acuerdos claros de trabajo.</p>
+                    <h3>⚠️ La presión interna</h3>
+                    <p>Es el <strong>primer sprint del equipo juntos</strong>. Paula (EM) escucha rumores de que va lento y ya le prometió a Mateo (CEO) +30% para Sprint 2.</p>
                   </div>
                 </div>
               </div>
@@ -169,18 +164,17 @@ export default function ChallengeMenu() {
               <div className="role-card">
                 <h2>🎯 Tu Rol como Scrum Master</h2>
                 <p className="role-description">
-                  Vas a enfrentar <strong>6 situaciones críticas</strong> del equipo Setlist. Algunas ocurren ahora (Sprint 3), otras son <strong>flashbacks</strong> que explican cómo llegamos hasta acá.
+                  Vas a vivir <strong>los 5 momentos clave del Sprint 1</strong> con el equipo Setlist. Un sprint completo de 10 días, contado en los 5 puntos donde más se necesita un buen Scrum Master.
                 </p>
                 <div className="situations-preview">
-                  <div className="situation-badge">Team Agreements que nunca hicieron</div>
-                  <div className="situation-badge">Coaching 1-1 con dev apagado</div>
-                  <div className="situation-badge">Planning Poker bajo presión</div>
-                  <div className="situation-badge">Management pidiendo más velocidad</div>
-                  <div className="situation-badge">Bloqueo que nadie escala</div>
-                  <div className="situation-badge">Retro donde nadie dice la verdad</div>
+                  <div className="situation-badge">Día 1 · Planning Session</div>
+                  <div className="situation-badge">Día 3 · 1-1 con un dev callado</div>
+                  <div className="situation-badge">Día 5 · Daily con bloqueo crítico</div>
+                  <div className="situation-badge">Día 7 · Tu Engineering Manager exige +30%</div>
+                  <div className="situation-badge">Día 10 · Retro con tensión real</div>
                 </div>
                 <p className="role-description">
-                  Cada situación evalúa diferentes skills: <strong>facilitación, coaching, coordinación, manejo de stakeholders, pensamiento sistémico.</strong> No hay respuestas únicas correctas — se evalúa tu proceso de pensamiento y decisiones.
+                  Cada situación evalúa diferentes skills: <strong>facilitación, coaching 1-1, gestión de stakeholders, navegación de conflictos, pensamiento sistémico.</strong> No hay respuestas únicas correctas — se evalúa tu proceso de pensamiento y decisiones.
                 </p>
                 <div className="role-format">
                   <div className="format-item">
@@ -232,7 +226,7 @@ export default function ChallengeMenu() {
             <div className="finish-modal-badge">¡COMPLETASTE TODOS LOS CHALLENGES!</div>
             <h2 className="finish-modal-title">¡Felicitaciones!</h2>
             <p className="finish-modal-text">
-              Acabás de terminar las 6 situaciones del equipo Setlist.
+              Acabás de vivir el Sprint 1 completo con el equipo Setlist.
             </p>
 
             <button
@@ -258,7 +252,7 @@ export default function ChallengeMenu() {
               <h2>👋 Bienvenido a tu Assessment</h2>
             </div>
             <div className="onboarding-content">
-              <p>Vas a completar <strong>6 challenges situacionales</strong> que simulan escenarios reales de un Scrum Master.</p>
+              <p>Vas a vivir <strong>los 5 momentos clave del Sprint 1</strong> con un equipo real. Un sprint completo, contado en 5 situaciones donde un buen SM marca la diferencia.</p>
               <ul className="onboarding-list">
                 <li>⏱️ <strong>60-90 minutos</strong> en total</li>
                 <li>🎯 <strong>Sin respuestas únicas correctas</strong> — se evalúa tu proceso de pensamiento</li>

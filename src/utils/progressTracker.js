@@ -3,8 +3,10 @@
 
 const STORAGE_KEY = "smatch_challenge_progress"
 
-// Challenge order (secuencial obligatorio)
-export const CHALLENGE_ORDER = [6, 4, 1, 2, 3, 5]
+// Challenge order — Sprint 1 cronológico (cómo funciona un equipo real)
+// C04 (Day 1 Planning) → C03 (Day 3 1-1) → C02 (Day 5 Daily) → C05 (Day 7 Stakeholder) → C01 (Day 10 Retro)
+// C06 (Team Agreements) removido — el equipo ya está formado en Sprint 1
+export const CHALLENGE_ORDER = [4, 3, 2, 5, 1]
 
 // Get progress from localStorage
 export function getProgress() {

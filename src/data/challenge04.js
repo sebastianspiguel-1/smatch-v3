@@ -12,22 +12,24 @@ export const TEAM = [
 
 export const MEMBER_MAP = Object.fromEntries(TEAM.map(t => [t.id, t]))
 
-export const SESSION_CONTEXT = "Equipo Setlist, Sprint 1. Nunca estimaron ni priorizaron juntos. 12 historias en backlog. Velocity estimada: ~30 puntos para sprint de 2 semanas."
+export const SESSION_CONTEXT = "Equipo Setlist, Sprint 1, Día 1 — Planning Session. Es la primera vez que el equipo estima y prioriza juntos. 12 PBIs en el backlog inicial. Velocity proyectada: ~30 puntos para un sprint de 10 días. La meta del Sprint 1: tener un MVP usable con flujo end-to-end (banda crea show → fan sugiere canciones → banda elige setlist)."
 
-// ─── PRODUCT BACKLOG ITEMS ───
+// ─── PRODUCT BACKLOG ITEMS — Setlist MVP Sprint 1 ───
+// Producto: app mobile donde bandas + fans co-crean setlists de shows.
+// SL-105 (Buscar canción) es la que se bloquea en C02 (esperando API Spotify).
 export const PBIS = [
-  { id: "SL-201", title: "Login y registro", desc: "Registro, login, JWT, recuperar contraseña.", pts: 8, category: "must" },
-  { id: "SL-202", title: "Listado shows", desc: "Lista paginada de shows, filtros, ordenamiento.", pts: 5, category: "must" },
-  { id: "SL-203", title: "Gestión de contratos", desc: "Crear, editar y firmar contratos digitales.", pts: 8, category: "must" },
-  { id: "SL-204", title: "Integración MercadoPago", desc: "Pasarela de pago, confirmación, recibo.", pts: 13, category: "must" },
-  { id: "SL-205", title: "Panel admin venues", desc: "CRUD venues, dashboard shows.", pts: 8, category: "should" },
-  { id: "SL-206", title: "Búsqueda de artistas", desc: "Búsqueda por texto, autocompletado.", pts: 5, category: "should" },
-  { id: "SL-207", title: "Notificaciones push", desc: "Confirmación show, recordatorios, cambios.", pts: 5, category: "should" },
-  { id: "SL-208", title: "Reviews de shows", desc: "Calificar shows, mostrar promedio.", pts: 5, category: "could" },
-  { id: "SL-209", title: "Setlist colaborativo", desc: "Co-crear setlists con fans, votación.", pts: 3, category: "could" },
-  { id: "SL-210", title: "Chat en vivo", desc: "Chat artista-venue en tiempo real.", pts: 13, category: "wont" },
-  { id: "SL-211", title: "Programa de referidos", desc: "Invitar artistas, descuento por referido.", pts: 8, category: "could" },
-  { id: "SL-212", title: "Dark mode", desc: "Tema oscuro, toggle, persistencia.", pts: 3, category: "could" },
+  { id: "SL-101", title: "Crear show", desc: "Banda crea show: fecha, lugar, repertorio inicial.", pts: 5, category: "must" },
+  { id: "SL-102", title: "Login y registro", desc: "Login y registro de bandas y fans con email + password.", pts: 5, category: "must" },
+  { id: "SL-103", title: "Compartir link de show", desc: "Link único compartible que los fans abren para sumarse.", pts: 3, category: "must" },
+  { id: "SL-104", title: "RSVP del fan", desc: "El fan confirma asistencia al show con 1 tap.", pts: 3, category: "must" },
+  { id: "SL-105", title: "Buscar canción", desc: "Buscador de canciones integrando Spotify Search API (autocompletado, álbum, artista).", pts: 8, category: "must" },
+  { id: "SL-106", title: "Sugerir canción al show", desc: "Fan agrega una canción al pool de sugerencias del show.", pts: 5, category: "must" },
+  { id: "SL-107", title: "Votar canciones", desc: "La banda revisa el pool y vota qué entra en el setlist final.", pts: 5, category: "should" },
+  { id: "SL-108", title: "Ver setlist final público", desc: "Vista pública del setlist confirmado, accesible vía link.", pts: 3, category: "should" },
+  { id: "SL-109", title: "Notificación push 'Setlist listo'", desc: "Push a los fans cuando la banda confirma el setlist final.", pts: 5, category: "should" },
+  { id: "SL-110", title: "Galería de fotos post-show", desc: "Fans suben fotos del show, se muestran en grilla.", pts: 8, category: "could" },
+  { id: "SL-111", title: "Perfil de banda", desc: "Bio, foto, links a redes y plataformas de música.", pts: 3, category: "could" },
+  { id: "SL-112", title: "Dark mode", desc: "Tema oscuro toggle con persistencia.", pts: 3, category: "could" },
 ]
 
 export const FIBONACCI = [1, 2, 3, 5, 8, 13, 21]
@@ -75,13 +77,14 @@ export const DOCK_ITEMS = [
 ]
 
 // ─── KANO ITEMS (no hay respuesta única correcta — el SM clasifica y EXPLICA) ───
+// Features de Setlist para clasificar Basic/Performance/Delighter
 export const KANO_ITEMS = [
-  { id: "k1", text: "Login funciona" },
-  { id: "k2", text: "Búsqueda rápida" },
+  { id: "k1", text: "Login funciona sin bugs" },
+  { id: "k2", text: "Búsqueda de canciones rápida" },
   { id: "k3", text: "Dark mode" },
-  { id: "k4", text: "Se puede pagar" },
-  { id: "k5", text: "Referidos" },
-  { id: "k6", text: "Filtros avanzados" },
+  { id: "k4", text: "La banda recibe la sugerencia del fan al instante" },
+  { id: "k5", text: "Galería post-show con fotos colaborativas" },
+  { id: "k6", text: "Recomendar canciones según género de la banda" },
 ]
 
 // ─── REL/ABS ITEMS ───
@@ -106,17 +109,17 @@ export const TSHIRT_TEAM_VOTES = {
 }
 
 export const TSHIRT_PBI_INFO = {
-  id: "SL-201",
-  title: "Login y registro",
-  scope: "Registro de usuarios (artistas y venues), login con JWT, recuperar contraseña por email, y validación básica.",
+  id: "SL-105",
+  title: "Buscar canción",
+  scope: "Buscador de canciones integrando Spotify Search API. Incluye autocompletado, info de álbum y artista, manejo de errores cuando el API no responde, y cache local para reducir llamadas.",
 }
 
 export const TSHIRT_VOTE_REASONS = {
-  eric:  "Ya implementé JWT en una startup anterior. No le veo complejidad real, son flujos conocidos.",
-  david: "Pago tiene login propio. Si esto rompe, mi módulo cae también. Lo siento más arriesgado.",
-  gian:  "Hay edge cases de QA: emails inválidos, contraseñas viejas, expiración de token. Necesita tiempo de testing.",
-  nacho: "Es la primera vez que armo flujo de auth en mobile. Lo siento enorme, no sé por dónde empezar.",
-  alan:  "En mobile he hecho login varias veces. Tirando de librerías estándar, no es taaan grave.",
+  eric:  "Ya integré Spotify API en proyectos anteriores. No le veo complejidad real, hay SDKs oficiales.",
+  david: "Si Spotify rate-limita o cambia la API, todo el flujo de sugerir canciones cae. Lo siento más arriesgado.",
+  gian:  "Hay edge cases de QA: queries vacíos, caracteres especiales, idiomas, API caída. Necesita tiempo de testing.",
+  nacho: "Es la primera vez que toco una API externa. No sé cómo manejar el cache ni el rate limit. Lo siento enorme.",
+  alan:  "En mobile el buscador es solo UI sobre lo que devuelva la API. Si David me lo expone bien, no es tanto.",
 }
 
 // ─── POKER STEPS prompts (sin keyword matching, el SM completa libre) ───

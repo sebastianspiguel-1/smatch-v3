@@ -20,7 +20,7 @@ export default function ThankYou() {
         </h1>
 
         <p className="thankyou-subtitle">
-          Acabás de demostrar tus habilidades como Scrum Master a través de 6 situaciones reales del equipo Setlist.
+          Acabás de vivir el Sprint 1 completo con el equipo Setlist. 5 momentos donde un buen Scrum Master marca la diferencia.
         </p>
 
         <div className="thankyou-card">
