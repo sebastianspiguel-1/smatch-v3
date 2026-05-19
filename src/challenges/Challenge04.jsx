@@ -96,6 +96,51 @@ function SMAgreementInput({ topicId, onAdd }) {
   )
 }
 
+// ═══════════════════ TOOL INTRO — Mini-brief compartido (Paso 0) ═══════════════════
+// Aparece antes de la mecánica de cada tool. Explica:
+//   - Qué es la herramienta
+//   - Por qué importa
+//   - Cuál es el rol del SM al usarla
+//   - Quién en el equipo la necesita más
+function ToolIntroStep({ accent, icon, name, whatIs, whyMatters, smRole, hookMember, onStart }) {
+  return (
+    <div style={{ padding: 16, minWidth: 380, maxWidth: 440 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
+        <div style={{ fontSize: 26 }}>{icon}</div>
+        <div style={{ fontSize: 18, fontWeight: 800, color: accent }}>{name}</div>
+      </div>
+
+      <div style={{ marginBottom: 10 }}>
+        <div style={{ fontSize: 10, fontWeight: 800, color: "#64748b", letterSpacing: 1, marginBottom: 3, textTransform: "uppercase" }}>¿Qué es?</div>
+        <div style={{ fontSize: 13, color: "#334155", lineHeight: 1.5 }}>{whatIs}</div>
+      </div>
+
+      <div style={{ marginBottom: 10 }}>
+        <div style={{ fontSize: 10, fontWeight: 800, color: "#64748b", letterSpacing: 1, marginBottom: 3, textTransform: "uppercase" }}>¿Por qué importa?</div>
+        <div style={{ fontSize: 13, color: "#334155", lineHeight: 1.5 }}>{whyMatters}</div>
+      </div>
+
+      <div style={{ marginBottom: 14, padding: 10, background: `${accent}10`, borderLeft: `3px solid ${accent}`, borderRadius: 6 }}>
+        <div style={{ fontSize: 10, fontWeight: 800, color: accent, letterSpacing: 1, marginBottom: 3, textTransform: "uppercase" }}>Tu rol acá</div>
+        <div style={{ fontSize: 13, color: "#0f172a", lineHeight: 1.5, fontWeight: 500 }}>{smRole}</div>
+      </div>
+
+      {hookMember && (
+        <div style={{ marginBottom: 14, fontSize: 12, color: "#64748b", fontStyle: "italic", textAlign: "center", padding: 6 }}>
+          💬 {hookMember}
+        </div>
+      )}
+
+      <button
+        onClick={onStart}
+        style={{ width: "100%", padding: "10px 0", background: accent, color: "#fff", fontWeight: 800, fontSize: 13, border: "none", borderRadius: 8, cursor: "pointer", letterSpacing: 0.3 }}
+      >
+        Usar herramienta →
+      </button>
+    </div>
+  )
+}
+
 // ═══════════════════ EXPLAIN STEP — Paso 2 compartido ═══════════════════
 // Después de completar la mecánica visual de cada tool, el SM escribe su
 // explicación al equipo. La AI evalúa esa explicación al cierre.
@@ -131,12 +176,28 @@ function ExplainStep({ accent, prompt, onSubmit }) {
 
 // ═══════════════════ 1. POKER STEPS TOOL ═══════════════════
 function PokerStepsTool({ onComplete }) {
+  const [introDone, setIntroDone] = useState(false)
   const [answers, setAnswers] = useState(["", "", "", "", ""])
   const [mechanicDone, setMechanicDone] = useState(false)
   const filled = answers.filter(a => a.trim()).length
   const accent = "#e84393"
 
   function finishMechanic() { setMechanicDone(true) }
+
+  if (!introDone) {
+    return (
+      <ToolIntroStep
+        accent={accent}
+        icon="🃏"
+        name="5 pasos del Planning Poker"
+        whatIs="La secuencia que sigue una sesión de Planning Poker bien facilitada: presentar el PBI, aclarar dudas, votar en privado, revelar al mismo tiempo, y discutir desacuerdos."
+        whyMatters="El equipo nunca hizo Planning Poker juntos. Si arrancan sin entender los pasos, los más experimentados imponen su voto y los demás se anclan."
+        smRole="Mostrale al equipo los 5 pasos en orden. Esto los prepara para el Planning Poker real que vas a abrir después."
+        hookMember="Nacho está confundido. Eric va a querer saltar pasos. Tu chance de poner orden sin imponer."
+        onStart={() => setIntroDone(true)}
+      />
+    )
+  }
 
   return (
     <div style={{ padding: 12, minWidth: 380 }}>
@@ -159,7 +220,7 @@ function PokerStepsTool({ onComplete }) {
       {mechanicDone && (
         <ExplainStep
           accent={accent}
-          prompt="Nacho te mira: '¿Por qué es importante que primero los extremos expliquen su voto?'"
+          prompt="Eric dice: 'En mi anterior trabajo saltábamos directo a votar, ¿para qué tantos pasos?'. ¿Cómo le explicás POR QUÉ cada paso importa y qué pasa si te salteás uno?"
           onSubmit={explanation => onComplete({ answers, explanation })}
         />
       )}
@@ -170,10 +231,26 @@ function PokerStepsTool({ onComplete }) {
 // ═══════════════════ 2. FIBONACCI TOOL ═══════════════════
 function FibonacciTool({ onComplete }) {
   const shuffled = [8, 2, 21, 5, 1, 13, 3]
+  const [introDone, setIntroDone] = useState(false)
   const [slots, setSlots] = useState(Array(7).fill(null))
   const [pool, setPool] = useState([...shuffled])
   const [mechanicDone, setMechanicDone] = useState(false)
   const accent = "#00b894"
+
+  if (!introDone) {
+    return (
+      <ToolIntroStep
+        accent={accent}
+        icon="🔢"
+        name="Secuencia Fibonacci"
+        whatIs="La secuencia 1, 2, 3, 5, 8, 13, 21 que usamos para estimar story points. Cada número es la suma de los dos anteriores."
+        whyMatters="Refleja la realidad de la incertidumbre: cuanto más grande algo, menos preciso podés estimar. Los saltos crecientes obligan al equipo a no obsesionarse con precisión falsa."
+        smRole="Mostrá la secuencia al equipo y guiá una conversación de por qué NO usamos 1-2-3-4-5. Es el primer concepto que va a fallar en el Planning Poker."
+        hookMember="Nacho ya dijo que prefiere estimar en horas. Esta es tu chance de mostrarle el WHY antes de que arranquen las cartas."
+        onStart={() => setIntroDone(true)}
+      />
+    )
+  }
 
   function place(num) {
     const i = slots.indexOf(null); if (i === -1) return
@@ -207,7 +284,7 @@ function FibonacciTool({ onComplete }) {
       {mechanicDone && (
         <ExplainStep
           accent={accent}
-          prompt="Nacho pregunta: '¿Por qué Fibonacci y no 1-2-3-4-5? ¿Qué significan los saltos cada vez más grandes?'"
+          prompt="Nacho dice: 'No entiendo, prefiero 1-2-3-4-5 que es más simple'. ¿Cómo le explicás POR QUÉ Fibonacci es mejor para estimar?"
           onSubmit={explanation => onComplete({ order: slots, explanation })}
         />
       )}
@@ -217,10 +294,26 @@ function FibonacciTool({ onComplete }) {
 
 // ═══════════════════ 3. REL VS ABS TOOL ═══════════════════
 function RelAbsTool({ onComplete }) {
+  const [introDone, setIntroDone] = useState(false)
   const [placed, setPlaced] = useState({})
   const [sel, setSel] = useState(null)
   const [mechanicDone, setMechanicDone] = useState(false)
   const accent = "#0984e3"
+
+  if (!introDone) {
+    return (
+      <ToolIntroStep
+        accent={accent}
+        icon="⚖️"
+        name="Estimación Relativa vs Absoluta"
+        whatIs="Dos formas opuestas de estimar: 'relativa' (comparar items entre sí, sin números reales) vs 'absoluta' (tiempo concreto en horas/días)."
+        whyMatters="Los equipos jóvenes confunden ambas. Estimar en horas (absoluta) genera promesas falsas; estimar en story points (relativa) refleja complejidad real del trabajo."
+        smRole="Clasificá los conceptos en el board y después coacheá al equipo. La diferencia es contraintuitiva — un dev nuevo necesita verla, no solo escucharla."
+        hookMember="Alan viene del mundo freelance donde todo era 'son 3 días'. Esta es la conversación clave para que entienda story points."
+        onStart={() => setIntroDone(true)}
+      />
+    )
+  }
 
   function place(side) { if (sel === null) return; setPlaced(p => ({ ...p, [sel]: side })); setSel(null) }
   function finishMechanic() { setMechanicDone(true) }
@@ -252,7 +345,7 @@ function RelAbsTool({ onComplete }) {
       {mechanicDone && (
         <ExplainStep
           accent={accent}
-          prompt="Alan pregunta: '¿Cuál es la diferencia entre estimación relativa y absoluta? ¿Por qué nos importa?'"
+          prompt="Alan dice: 'Yo siempre estimé en días en mi trabajo anterior y funcionaba'. ¿Cómo le mostrás POR QUÉ acá usamos estimación relativa?"
           onSubmit={explanation => onComplete({ placed, explanation })}
         />
       )}
@@ -262,11 +355,27 @@ function RelAbsTool({ onComplete }) {
 
 // ═══════════════════ 4. T-SHIRT SIZING TOOL ═══════════════════
 function TshirtTool({ onComplete }) {
+  const [introDone, setIntroDone] = useState(false)
   const [step, setStep] = useState(0) // 0: pre-reveal, 1: revealed, 2: razones visibles
   const [revealed, setRevealed] = useState(false)
   const [showReasons, setShowReasons] = useState(false)
   const [mechanicDone, setMechanicDone] = useState(false)
   const accent = "#6c5ce7"
+
+  if (!introDone) {
+    return (
+      <ToolIntroStep
+        accent={accent}
+        icon="👕"
+        name="T-Shirt Sizing"
+        whatIs="Una mecánica de estimación usando 'talles' (S, M, L, XL) en vez de números. Más amigable cuando el equipo todavía no maneja story points."
+        whyMatters="Cuando hay desacuerdo en la estimación, las razones DEBAJO del número son lo que importa. Un mismo PBI puede ser 'M' para Eric y 'XL' para Nacho — y AMBOS pueden tener razón parcialmente."
+        smRole="Facilitá la conversación cuando el equipo vota distinto. El equipo votó SL-105 (Buscar canción) con dispersión M/L/XL. Hay 5 razones distintas detrás."
+        hookMember="Eric ya integró Spotify antes (cree que es fácil), Nacho nunca tocó una API externa (le aterra). Tu chance: hacer visible POR QUÉ votaron distinto."
+        onStart={() => setIntroDone(true)}
+      />
+    )
+  }
 
   function reveal() { setRevealed(true); setStep(1) }
   function revealReasons() { setShowReasons(true); setStep(2); setTimeout(() => setMechanicDone(true), 1500) }
@@ -331,7 +440,7 @@ function TshirtTool({ onComplete }) {
       {mechanicDone && (
         <ExplainStep
           accent={accent}
-          prompt="Ahora que sabés POR QUÉ votaron distinto, ¿cómo facilitás este desacuerdo? Escribí cómo lo manejarías paso a paso."
+          prompt="El equipo votó disparejo (M/L/XL) por razones legítimamente distintas. ¿Cómo facilitás este desacuerdo SIN imponer un número? ¿Qué decís primero? ¿A quién le hablás?"
           onSubmit={explanation => onComplete({ votes: TSHIRT_TEAM_VOTES, reasons: TSHIRT_VOTE_REASONS, explanation })}
         />
       )}
@@ -346,10 +455,26 @@ function KanoTool({ onComplete }) {
     { id: "perf", l: "📈 Performance (más es mejor)", bg: "#eff6ff", bc: "#2563eb" },
     { id: "delight", l: "🍪 Delighters (sorprende positivo)", bg: "#fef9c3", bc: "#ca8a04" },
   ]
+  const [introDone, setIntroDone] = useState(false)
   const [placed, setPlaced] = useState({})
   const [sel, setSel] = useState(null)
   const [mechanicDone, setMechanicDone] = useState(false)
   const accent = "#f39c12"
+
+  if (!introDone) {
+    return (
+      <ToolIntroStep
+        accent={accent}
+        icon="🏨"
+        name="Modelo Kano"
+        whatIs="Un framework para clasificar features según cómo el usuario las percibe: Basic (sin esto se enoja), Performance (más es mejor), Delighters (sorprende positivo)."
+        whyMatters="Sin Kano, todo parece 'importante'. Con Kano, el equipo ve que Login es Basic (no negociable), Búsqueda rápida es Performance (mejor invertir más), Dark mode es Delighter (nice-to-have)."
+        smRole="Clasificá 6 features de Setlist y después coacheá al equipo. Esto los ayuda a priorizar mejor en MoSCoW después."
+        hookMember="Gabriela quiere TODO ya. Eric prioriza lo técnicamente interesante. Tu chance: hacer visible que NO todo es lo mismo."
+        onStart={() => setIntroDone(true)}
+      />
+    )
+  }
 
   function place(cat) { if (sel === null) return; setPlaced(p => ({ ...p, [sel]: cat })); setSel(null) }
   function finishMechanic() { setMechanicDone(true) }
@@ -383,7 +508,7 @@ function KanoTool({ onComplete }) {
       {mechanicDone && (
         <ExplainStep
           accent={accent}
-          prompt="Gian pregunta: '¿Cómo decidís qué es Basic, Performance o Delighter? ¿Y por qué importa para priorizar?'"
+          prompt="Eric dice: 'Dark Mode es Basic, todas las apps modernas lo tienen'. ¿Cómo le explicás POR QUÉ es Delighter y no Basic? Y conectalo: ¿cómo cambia esto la priorización en MoSCoW?"
           onSubmit={explanation => onComplete({ placed, explanation })}
         />
       )}
@@ -394,10 +519,26 @@ function KanoTool({ onComplete }) {
 // ═══════════════════ 6. MOSCOW TOOL ═══════════════════
 function MoscowTool({ onComplete }) {
   const items = PBIS.slice(0, 8)
+  const [introDone, setIntroDone] = useState(false)
   const [placed, setPlaced] = useState({})
   const [sel, setSel] = useState(null)
   const [mechanicDone, setMechanicDone] = useState(false)
   const accent = "#e74c3c"
+
+  if (!introDone) {
+    return (
+      <ToolIntroStep
+        accent={accent}
+        icon="🎯"
+        name="MoSCoW"
+        whatIs="Framework de priorización: Must Have (no sale sin esto), Should Have (importante pero no bloqueante), Could Have (si hay tiempo), Won't Have (este sprint no)."
+        whyMatters="Sin un criterio explícito, todo termina siendo 'Must' y el sprint colapsa. MoSCoW fuerza al equipo a tomar decisiones difíciles antes de empezar."
+        smRole="Priorizá 8 PBIs con el equipo. Velocity = 30 pts. Lo que entre en Must + Should + Could debe sumar ~30 pts. Tu rol: hacer cumplir el límite."
+        hookMember="Gabriela ya dijo que Simon (Lollapalooza) quiere todo en 6 semanas. Va a presionar para que casi todo sea Must. Tu chance: defender la priorización con datos."
+        onStart={() => setIntroDone(true)}
+      />
+    )
+  }
 
   function place(cat) { if (sel === null) return; setPlaced(p => ({ ...p, [sel]: cat })); setSel(null) }
   function finishMechanic() { setMechanicDone(true) }
@@ -461,7 +602,7 @@ function MoscowTool({ onComplete }) {
       {mechanicDone && (
         <ExplainStep
           accent={accent}
-          prompt={`Gabriela pregunta: '¿Qué criterios usaste para decidir qué es Must vs Should? Tu propuesta tiene ${totalPts} pts comprometidos. ¿Cómo defendés esta priorización ante Simon (Lollapalooza)?'`}
+          prompt={`Gabriela presiona: 'Simon (Lollapalooza) quiere TODO para el piloto. ¿Por qué dejaste cosas en Could/Won't?' Tu propuesta tiene ${totalPts} pts comprometidos. ¿Cómo defendés tu priorización sin ceder al scope creep?`}
           onSubmit={explanation => onComplete({ placed, totalPts, explanation })}
         />
       )}
@@ -802,7 +943,7 @@ export default function Challenge04() {
   }
 
   // Calculate current step for progress indicator
-  const currentStep = phase === "context" ? 1 : phase === "agreements" ? 2 : phase === "play" ? 3 : 4
+  const currentStep = phase === "context" ? 1 : phase === "agreements" ? 2 : phase === "planning_intro" ? 3 : phase === "play" ? 3 : 4
   const totalSteps = 4
 
   // ═══════════════════ CONTEXT ═══════════════════
@@ -1056,20 +1197,96 @@ export default function Challenge04() {
           {/* CTA al Planning */}
           {allDone ? (
             <button
-              onClick={() => {
-                setPhase("play")
-                setTimeout(() => { setChat(p => [...p, { from: "nacho", text: "Ya está. ¿Arrancamos con el Planning?" }]); bubble("nacho", "Ya está. ¿Arrancamos con el Planning?") }, 1500)
-                setTimeout(() => { setChat(p => [...p, { from: "gabriela", text: "Tengo el backlog listo, son 12 historias. Velocity proyectada ~30 pts." }]); bubble("gabriela", "Tengo el backlog listo, son 12 historias. Velocity proyectada ~30 pts.") }, 4500)
-              }}
+              onClick={() => setPhase("planning_intro")}
               style={{ width: "100%", padding: "16px 0", marginTop: 4, background: "linear-gradient(135deg, #00d4aa, #059669)", color: "#fff", fontWeight: 900, fontSize: 16, border: "none", borderRadius: 12, cursor: "pointer", letterSpacing: 1 }}
             >
-              ABRIR WHITEBOARD — PARTE 2 (PLANNING) →
+              CONTINUAR A PARTE 2 (PLANNING) →
             </button>
           ) : (
             <div style={{ textAlign: "center", fontSize: 13, color: T.dim, padding: 12, background: "rgba(15,23,42,0.03)", borderRadius: 8 }}>
               Necesitás al menos 1 acuerdo por categoría para continuar al Planning ({topicsWithAgreements.length}/{TEAM_AGREEMENT_TOPICS.length}).
             </div>
           )}
+        </div>
+      </div>
+    )
+  }
+
+  // ═══════════════════ PHASE: PLANNING INTRO (puente entre Agreements y Whiteboard) ═══════════════════
+  if (phase === "planning_intro") {
+    return (
+      <div style={{ background: T.bg, minHeight: "100vh", color: T.text, fontFamily: "'Plus Jakarta Sans',system-ui,sans-serif" }}>
+        <TopBar
+          title="Día 1 · Kickoff del equipo"
+          subtitle="Parte 2/2 · Planning Session"
+          currentStep={currentStep}
+          totalSteps={totalSteps}
+        />
+        <div style={{ maxWidth: 760, margin: "0 auto", padding: "40px 22px" }}>
+          <div style={{ textAlign: "center", marginBottom: 32 }}>
+            <div style={{ fontSize: 12, fontWeight: 900, letterSpacing: 3, color: "#00d4aa", marginBottom: 6 }}>PARTE 2 — PLANNING SESSION</div>
+            <h1 style={{ fontSize: 28, fontWeight: 900, margin: "0 0 12px 0", color: T.text, letterSpacing: -0.5 }}>El equipo te espera para arrancar</h1>
+            <p style={{ fontSize: 15, color: T.sub, lineHeight: 1.6, margin: 0 }}>
+              Ya tenés los acuerdos básicos. Ahora vas a <strong style={{ color: T.text }}>facilitar la primera estimación</strong> del equipo Setlist.
+            </p>
+          </div>
+
+          {/* 3 cards de explicación */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 14, marginBottom: 28 }}>
+            <div style={{ display: "flex", gap: 14, padding: 18, background: T.panel, borderRadius: 12, border: `1.5px solid ${T.border}` }}>
+              <div style={{ fontSize: 30, flexShrink: 0 }}>🎯</div>
+              <div>
+                <div style={{ fontSize: 14, fontWeight: 800, color: T.text, marginBottom: 4 }}>Tu rol</div>
+                <div style={{ fontSize: 13, color: T.sub, lineHeight: 1.55 }}>
+                  Facilitar el primer Planning. <strong style={{ color: T.text }}>No imponer estimaciones</strong> — enseñá frameworks (story points, MoSCoW, Kano) y dejá que el equipo decida con tu guía.
+                </div>
+              </div>
+            </div>
+
+            <div style={{ display: "flex", gap: 14, padding: 18, background: T.panel, borderRadius: 12, border: `1.5px solid ${T.border}` }}>
+              <div style={{ fontSize: 30, flexShrink: 0 }}>🛠️</div>
+              <div>
+                <div style={{ fontSize: 14, fontWeight: 800, color: T.text, marginBottom: 4 }}>Las herramientas del sidebar</div>
+                <div style={{ fontSize: 13, color: T.sub, lineHeight: 1.55, marginBottom: 8 }}>
+                  Arrastrá las que necesites. Cada una tiene <strong style={{ color: T.text }}>2 pasos</strong>:
+                </div>
+                <div style={{ fontSize: 12, color: T.sub, lineHeight: 1.7, paddingLeft: 8 }}>
+                  1️⃣ Usás la herramienta vos como ejemplo<br/>
+                  2️⃣ Le explicás al equipo POR QUÉ es así
+                </div>
+                <div style={{ fontSize: 12, color: T.dim, marginTop: 8, fontStyle: "italic" }}>
+                  Tip: no tenés que usar las 6 — elegí las que el equipo necesita para arrancar.
+                </div>
+              </div>
+            </div>
+
+            <div style={{ display: "flex", gap: 14, padding: 18, background: T.panel, borderRadius: 12, border: `1.5px solid ${T.border}` }}>
+              <div style={{ fontSize: 30, flexShrink: 0 }}>🃏</div>
+              <div>
+                <div style={{ fontSize: 14, fontWeight: 800, color: T.text, marginBottom: 4 }}>Planning Poker</div>
+                <div style={{ fontSize: 13, color: T.sub, lineHeight: 1.55 }}>
+                  Cuando estés listo, abrí Planning Poker para <strong style={{ color: T.text }}>estimar 4 PBIs principales</strong> con el equipo. Es donde se ven los <strong style={{ color: "#92400e" }}>bad behaviors reales</strong> (anclaje, confundir puntos con días, etc.).
+                </div>
+              </div>
+            </div>
+
+            <div style={{ padding: 14, background: "rgba(0,212,170,0.05)", borderLeft: "3px solid #00d4aa", borderRadius: 8 }}>
+              <div style={{ fontSize: 12, color: T.text, lineHeight: 1.5 }}>
+                <strong style={{ color: "#059669" }}>📌 Recordá:</strong> los <strong>{TEAM_AGREEMENT_TOPICS.reduce((s, t) => s + (teamAgreements[t.id] || []).length, 0)} acuerdos</strong> que cerraste en Parte 1 están vigentes. Si Nacho habla en horas pero acordaste "story points", es tu chance de coachear.
+              </div>
+            </div>
+          </div>
+
+          <button
+            onClick={() => {
+              setPhase("play")
+              setTimeout(() => { setChat(p => [...p, { from: "nacho", text: "Ya tenemos los acuerdos. ¿Arrancamos con el Planning?" }]); bubble("nacho", "Ya tenemos los acuerdos. ¿Arrancamos con el Planning?") }, 1500)
+              setTimeout(() => { setChat(p => [...p, { from: "gabriela", text: "Tengo el backlog listo: 12 historias, velocity proyectada ~30 pts." }]); bubble("gabriela", "Tengo el backlog listo: 12 historias, velocity proyectada ~30 pts.") }, 4500)
+            }}
+            style={{ width: "100%", padding: "18px 0", background: "linear-gradient(135deg, #00d4aa, #059669)", color: "#fff", fontWeight: 900, fontSize: 16, border: "none", borderRadius: 12, cursor: "pointer", letterSpacing: 1 }}
+          >
+            EMPEZAR FACILITACIÓN →
+          </button>
         </div>
       </div>
     )
@@ -1096,7 +1313,7 @@ export default function Challenge04() {
     >
       <TopBar
         title="📊 Estimación & Priorización"
-        subtitle={`Sprint 1 Planning · ${Object.keys(estimated).length}/4 PBIs estimados`}
+        subtitle={`Parte 2 · Planning Session · ${Object.keys(toolExplanations).length}/6 tools · ${Object.keys(estimated).length}/4 PBIs estimados`}
         currentStep={currentStep}
         totalSteps={totalSteps}
         timer={{ display: `${mm}:${ss}`, warning: timer < 300 }}
@@ -1182,6 +1399,18 @@ export default function Challenge04() {
           ref={boardRef}
           style={{ flex: 1, position: "relative", overflow: "hidden", background: "#ffffff", backgroundImage: "radial-gradient(circle, rgba(15,23,42,0.04) 1px, transparent 1px)", backgroundSize: "24px 24px" }}
         >
+          {/* Progress chip arriba del whiteboard */}
+          <div style={{ position: "absolute", top: 12, left: 12, zIndex: 30, padding: "6px 12px", background: "rgba(255,255,255,0.95)", border: "1px solid rgba(15,23,42,0.10)", borderRadius: 20, fontSize: 11, fontWeight: 700, color: "#475569", boxShadow: "0 2px 8px rgba(15,23,42,0.05)", display: "flex", alignItems: "center", gap: 8 }}>
+            <span>🛠️ {Object.keys(toolExplanations).length}/6 tools</span>
+            <span style={{ color: "#cbd5e1" }}>·</span>
+            <span>🃏 {Object.keys(estimated).length}/4 PBIs</span>
+            {(Object.keys(toolExplanations).length >= 3 || Object.keys(estimated).length >= 2) && (
+              <>
+                <span style={{ color: "#cbd5e1" }}>·</span>
+                <span style={{ color: "#059669" }}>✓ Listo para cerrar</span>
+              </>
+            )}
+          </div>
           {boardItems.map(item => (
             <div key={item.id} onMouseDown={e => item.type !== "challenge" && onItemDrag(item.id, e)} style={{ position: "absolute", left: item.x, top: item.y, cursor: item.type === "challenge" ? "default" : "grab", zIndex: 20, transform: "translate(-50%,-50%)" }}>
               {item.type === "postit" && (
