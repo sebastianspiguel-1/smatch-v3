@@ -26,27 +26,70 @@ import { SETLIST_TEAM } from "../data/team"
 // Team description para el prompt AI (usa las bios ricas del data central)
 const TEAM_DESC = SETLIST_TEAM.map(m => `- ${m.name} (${m.role}): ${m.bio}`).join("\n")
 
-// ═══════════════════ AGREEMENT INPUT — Para la fase de team agreements ═══════════════════
-function AgreementInput({ topic, onSubmit }) {
+// ═══════════════════ SM AGREEMENT INPUT — Compacto inline para cada columna ═══════════════════
+function SMAgreementInput({ topicId, onAdd }) {
   const [text, setText] = useState("")
+  const [expanded, setExpanded] = useState(false)
+
+  function submit() {
+    if (!text.trim()) return
+    onAdd(text.trim())
+    setText("")
+    setExpanded(false)
+  }
+
+  if (!expanded) {
+    return (
+      <button
+        onClick={() => setExpanded(true)}
+        style={{
+          width: "100%",
+          padding: "8px 10px",
+          marginTop: 4,
+          borderRadius: 8,
+          border: "1.5px dashed rgba(0,212,170,0.40)",
+          background: "rgba(0,212,170,0.04)",
+          color: "#059669",
+          fontWeight: 700,
+          fontSize: 12,
+          cursor: "pointer",
+          fontFamily: "inherit",
+        }}
+        onMouseEnter={e => { e.currentTarget.style.background = "rgba(0,212,170,0.10)"; e.currentTarget.style.borderColor = "rgba(0,212,170,0.70)" }}
+        onMouseLeave={e => { e.currentTarget.style.background = "rgba(0,212,170,0.04)"; e.currentTarget.style.borderColor = "rgba(0,212,170,0.40)" }}
+      >
+        + Agregar mi acuerdo
+      </button>
+    )
+  }
+
   return (
-    <div>
+    <div style={{ marginTop: 4, padding: 8, background: "rgba(0,212,170,0.04)", borderRadius: 8, border: "1.5px solid rgba(0,212,170,0.30)" }}>
       <textarea
+        autoFocus
         value={text}
         onChange={e => setText(e.target.value)}
-        placeholder={topic.prompt}
+        onKeyDown={e => {
+          if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); submit() }
+          if (e.key === "Escape") { setExpanded(false); setText("") }
+        }}
+        placeholder="Tu propuesta de acuerdo..."
         rows={2}
-        style={{ width: "100%", padding: 10, borderRadius: 8, border: "1.5px solid #d1d5db", fontSize: 14, fontFamily: "inherit", resize: "none", outline: "none", boxSizing: "border-box", color: "#0f172a", background: "#ffffff" }}
-        onFocus={e => e.target.style.borderColor = "#00d4aa"}
-        onBlur={e => e.target.style.borderColor = "#d1d5db"}
+        style={{ width: "100%", padding: 8, borderRadius: 6, border: "1px solid rgba(0,212,170,0.30)", fontSize: 12, fontFamily: "inherit", resize: "none", outline: "none", boxSizing: "border-box", color: "#0f172a", background: "#ffffff", lineHeight: 1.4 }}
       />
-      <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 8 }}>
+      <div style={{ display: "flex", justifyContent: "flex-end", gap: 6, marginTop: 6 }}>
         <button
-          onClick={() => text.trim() && onSubmit(text.trim())}
-          disabled={!text.trim()}
-          style={{ padding: "8px 18px", borderRadius: 8, border: "none", background: text.trim() ? "#00d4aa" : "#e5e7eb", color: text.trim() ? "#ffffff" : "#9ca3af", fontWeight: 700, fontSize: 13, cursor: text.trim() ? "pointer" : "not-allowed", fontFamily: "inherit" }}
+          onClick={() => { setExpanded(false); setText("") }}
+          style={{ padding: "5px 10px", borderRadius: 6, border: "none", background: "transparent", color: "#64748b", fontWeight: 600, fontSize: 11, cursor: "pointer", fontFamily: "inherit" }}
         >
-          Proponer al equipo →
+          Cancelar
+        </button>
+        <button
+          onClick={submit}
+          disabled={!text.trim()}
+          style={{ padding: "5px 12px", borderRadius: 6, border: "none", background: text.trim() ? "#00d4aa" : "#e5e7eb", color: text.trim() ? "#ffffff" : "#9ca3af", fontWeight: 700, fontSize: 11, cursor: text.trim() ? "pointer" : "not-allowed", fontFamily: "inherit" }}
+        >
+          Agregar al board
         </button>
       </div>
     </div>
@@ -450,7 +493,8 @@ export default function Challenge04() {
   // ─── Tool explanations: lo que el SM escribe después de usar cada herramienta ───
   const [toolExplanations, setToolExplanations] = useState({})
   // ─── Team agreements (Parte 1 del Día 1) ───
-  const [teamAgreements, setTeamAgreements] = useState({}) // { topicId: { text, finishedAt } }
+  // state: { topicId: [{text, source: "sm"|<memberId>}, ...] }
+  const [teamAgreements, setTeamAgreements] = useState({})
   const boardRef = useRef(null)
   const nextId = useRef(100)
   const startTime = useRef(null)
@@ -580,14 +624,19 @@ export default function Challenge04() {
       target: action.target ? MEMBER_MAP[action.target]?.name : null,
     }
     // Construir el contexto de team agreements para el prompt
-    // Esto es lo que el SM acordó con el equipo en la Parte 1 — la AI lo usa
-    // para evaluar si el SM hace cumplir sus propios acuerdos
-    const agreementsContext = Object.keys(teamAgreements).length > 0
+    // Cada categoría tiene un array de acuerdos. La AI los usa para
+    // evaluar si el SM hace cumplir lo que él mismo facilitó.
+    const hasAgreements = TEAM_AGREEMENT_TOPICS.some(t => (teamAgreements[t.id] || []).length > 0)
+    const agreementsContext = hasAgreements
       ? "\n\n═══ TEAM AGREEMENTS (acordados al inicio del Día 1) ═══\n" +
-        TEAM_AGREEMENT_TOPICS.filter(t => teamAgreements[t.id]).map(t =>
-          `• ${t.title}: "${teamAgreements[t.id].text}"`
-        ).join("\n") +
-        "\n\nEvaluá si el SM hace cumplir estos acuerdos durante el Planning. Si los acordó pero NO los hace respetar (ej: acordó story points pero deja que Nacho hable en días), bajá puntaje en facilitation y bias_coaching."
+        TEAM_AGREEMENT_TOPICS.filter(t => (teamAgreements[t.id] || []).length > 0).map(t => {
+          const lines = teamAgreements[t.id].map(a => {
+            const sourceTag = a.source === "sm" ? "[propuesta del SM]" : `[propuesto por ${MEMBER_MAP[a.source]?.name || a.source}, aceptado por el SM]`
+            return `   - "${a.text}" ${sourceTag}`
+          }).join("\n")
+          return `• ${t.title}:\n${lines}`
+        }).join("\n") +
+        "\n\nEvaluá si el SM hace cumplir estos acuerdos durante el Planning. Si los acordó pero NO los hace respetar (ej: acordó 'story points' pero deja que Nacho hable en días sin coachearlo), bajá puntaje en facilitation y bias_coaching. Si NO acordó algo (categoría vacía), eso también es info — el equipo no tiene guía en ese aspecto."
       : ""
 
     const sessionState = { pokerActive, pokerIdx, revealed }
@@ -840,99 +889,185 @@ export default function Challenge04() {
 
   // ═══════════════════ PHASE: TEAM AGREEMENTS (Parte 1 del Día 1) ═══════════════════
   if (phase === "agreements") {
-    const completedCount = Object.keys(teamAgreements).length
-    const allDone = completedCount === TEAM_AGREEMENT_TOPICS.length
+    const topicsWithAgreements = TEAM_AGREEMENT_TOPICS.filter(t => (teamAgreements[t.id] || []).length > 0)
+    const allDone = topicsWithAgreements.length === TEAM_AGREEMENT_TOPICS.length
+    const totalAgreements = TEAM_AGREEMENT_TOPICS.reduce((s, t) => s + (teamAgreements[t.id] || []).length, 0)
+
+    function addAgreement(topicId, text, source) {
+      setTeamAgreements(prev => ({
+        ...prev,
+        [topicId]: [...(prev[topicId] || []), { text, source, addedAt: Date.now() }]
+      }))
+      // Si la sugerencia vino de un miembro, reacción del miembro
+      if (source !== "sm" && MEMBER_MAP[source]) {
+        const m = MEMBER_MAP[source]
+        const msg = `Gracias, lo tomamos.`
+        setChat(p => [...p, { from: source, text: msg }])
+        bubble(source, msg, 4000)
+      }
+    }
+
+    function removeAgreement(topicId, index) {
+      setTeamAgreements(prev => ({
+        ...prev,
+        [topicId]: (prev[topicId] || []).filter((_, i) => i !== index)
+      }))
+    }
 
     return (
       <div style={{ background: T.bg, minHeight: "100vh", color: T.text, fontFamily: "'Plus Jakarta Sans',system-ui,sans-serif" }}>
         <TopBar
           title="Día 1 · Kickoff del equipo"
-          subtitle={`Parte 1/2 · Team Agreements (${completedCount}/${TEAM_AGREEMENT_TOPICS.length})`}
+          subtitle={`Parte 1/2 · Team Agreements Board (${topicsWithAgreements.length}/${TEAM_AGREEMENT_TOPICS.length} categorías · ${totalAgreements} acuerdos)`}
           currentStep={currentStep}
           totalSteps={totalSteps}
         />
-        <div style={{ maxWidth: 920, margin: "0 auto", padding: "28px 22px" }}>
+        <div style={{ maxWidth: 1280, margin: "0 auto", padding: "24px 22px" }}>
           {/* Intro */}
-          <div style={{ background: "linear-gradient(135deg, rgba(0,212,170,0.06), rgba(96,165,250,0.04))", borderLeft: "4px solid #00d4aa", borderRadius: 10, padding: 18, marginBottom: 22 }}>
-            <div style={{ fontSize: 12, fontWeight: 900, letterSpacing: 2, color: "#00d4aa", marginBottom: 6 }}>🤝 PARTE 1 — TEAM AGREEMENTS</div>
-            <div style={{ fontSize: 15, color: T.text, lineHeight: 1.55, fontWeight: 600 }}>
-              Antes de arrancar el Planning, facilitá <strong>3 acuerdos básicos</strong> con el equipo. Lo que decidas acá se va a poner a prueba en la Parte 2 (Planning Session).
+          <div style={{ background: "linear-gradient(135deg, rgba(0,212,170,0.06), rgba(96,165,250,0.04))", borderLeft: "4px solid #00d4aa", borderRadius: 10, padding: 16, marginBottom: 18 }}>
+            <div style={{ fontSize: 11, fontWeight: 900, letterSpacing: 2, color: "#00d4aa", marginBottom: 4 }}>🤝 PARTE 1 — WORKSHOP DE TEAM AGREEMENTS</div>
+            <div style={{ fontSize: 14, color: T.text, lineHeight: 1.55, fontWeight: 600 }}>
+              Facilitá un mini-workshop para definir <strong>3 categorías</strong> de acuerdos básicos. El equipo trajo propuestas — tomá las que te parezcan o agregá las tuyas.
             </div>
-            <div style={{ fontSize: 13, color: T.sub, marginTop: 8, lineHeight: 1.5 }}>
-              📌 No son acuerdos exhaustivos — son los 3 que <strong>importan para arrancar bien este sprint</strong>. Hay tensiones reales en cada uno.
+            <div style={{ fontSize: 12, color: T.sub, marginTop: 6, lineHeight: 1.5 }}>
+              📌 Click en sugerencias del equipo para "tomarlas" como acuerdo · botón <strong>+ Agregar mi acuerdo</strong> para texto libre · todo lo que decidas se evalúa en el Planning después.
             </div>
           </div>
 
-          {/* Topics */}
-          {TEAM_AGREEMENT_TOPICS.map(topic => {
-            const agreement = teamAgreements[topic.id]
-            const isDone = !!agreement
-            return (
-              <div key={topic.id} style={{
-                background: isDone ? "rgba(0,212,170,0.04)" : T.panel,
-                border: `1.5px solid ${isDone ? "rgba(0,212,170,0.30)" : T.border}`,
-                borderRadius: 14,
-                padding: 20,
-                marginBottom: 16,
-                opacity: isDone ? 0.85 : 1,
-              }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 10 }}>
-                  <div style={{ fontSize: 24 }}>{topic.icon}</div>
+          {/* Workshop Board — 3 columnas en desktop, stack en mobile */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(330px, 1fr))", gap: 14, marginBottom: 20 }}>
+            {TEAM_AGREEMENT_TOPICS.map(topic => {
+              const agreements = teamAgreements[topic.id] || []
+              const usedSuggestionTexts = new Set(agreements.filter(a => a.source !== "sm").map(a => a.text))
+              const availableSuggestions = topic.teamSuggestions.filter(s => !usedSuggestionTexts.has(s.text))
+
+              return (
+                <div key={topic.id} style={{
+                  background: T.panel,
+                  border: `1.5px solid ${agreements.length > 0 ? "rgba(0,212,170,0.30)" : T.border}`,
+                  borderRadius: 14,
+                  padding: 16,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 12,
+                  minHeight: 460,
+                }}>
+                  {/* Header */}
+                  <div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+                      <div style={{ fontSize: 22 }}>{topic.icon}</div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: 15, fontWeight: 800, color: T.text, lineHeight: 1.2 }}>{topic.title}</div>
+                      </div>
+                      {agreements.length > 0 && (
+                        <span style={{ fontSize: 11, fontWeight: 900, color: "#059669", background: "rgba(0,212,170,0.10)", padding: "3px 8px", borderRadius: 6 }}>{agreements.length}</span>
+                      )}
+                    </div>
+                    <div style={{ fontSize: 12, color: T.sub, lineHeight: 1.4 }}>{topic.question}</div>
+                  </div>
+
+                  {/* Tension chip */}
+                  <div style={{ fontSize: 11, color: "#92400e", padding: 8, background: "rgba(245,158,11,0.08)", borderLeft: "3px solid rgba(245,158,11,0.5)", borderRadius: 4, lineHeight: 1.45 }}>
+                    <strong>⚠️ Tensión:</strong> {topic.tension}
+                  </div>
+
+                  {/* AGREEMENTS BOARD (post-its agregados) */}
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 16, fontWeight: 800, color: T.text }}>{topic.title}</div>
-                    <div style={{ fontSize: 13, color: T.sub, marginTop: 2 }}>{topic.question}</div>
+                    <div style={{ fontSize: 10, fontWeight: 800, color: "#059669", letterSpacing: 1, marginBottom: 6, textTransform: "uppercase" }}>
+                      ACUERDOS DEL EQUIPO ({agreements.length})
+                    </div>
+                    {agreements.length === 0 && (
+                      <div style={{ fontSize: 12, color: T.dim, padding: "10px 8px", textAlign: "center", border: "1.5px dashed rgba(15,23,42,0.10)", borderRadius: 8, fontStyle: "italic" }}>
+                        Agregá al menos 1 acuerdo para continuar
+                      </div>
+                    )}
+                    {agreements.map((a, i) => {
+                      const sourceMember = a.source !== "sm" ? MEMBER_MAP[a.source] : null
+                      return (
+                        <div key={i} style={{
+                          background: a.source === "sm" ? "#fef9c3" : "#dbeafe",
+                          borderRadius: 8,
+                          padding: "8px 10px",
+                          marginBottom: 6,
+                          position: "relative",
+                          boxShadow: "0 2px 4px rgba(0,0,0,0.04)",
+                          border: a.source === "sm" ? "1px solid rgba(202,138,4,0.25)" : "1px solid rgba(37,99,235,0.20)",
+                        }}>
+                          <div style={{ fontSize: 9, fontWeight: 800, color: a.source === "sm" ? "#92400e" : "#1e40af", letterSpacing: 0.5, marginBottom: 3, textTransform: "uppercase" }}>
+                            {a.source === "sm" ? "📝 Tu propuesta" : `💡 ${sourceMember?.name}`}
+                          </div>
+                          <div style={{ fontSize: 12, color: "#0f172a", lineHeight: 1.4 }}>{a.text}</div>
+                          <button
+                            onClick={() => removeAgreement(topic.id, i)}
+                            style={{ position: "absolute", top: 4, right: 6, background: "transparent", border: "none", color: "#94a3b8", cursor: "pointer", fontSize: 14, padding: 2 }}
+                            title="Quitar"
+                          >×</button>
+                        </div>
+                      )
+                    })}
+
+                    {/* SM custom input */}
+                    <SMAgreementInput topicId={topic.id} onAdd={(text) => addAgreement(topic.id, text, "sm")} />
                   </div>
-                  {isDone && <span style={{ fontSize: 18, color: "#00d4aa", fontWeight: 900 }}>✓</span>}
+
+                  {/* TEAM SUGGESTIONS (chips clickeables) */}
+                  {availableSuggestions.length > 0 && (
+                    <div>
+                      <div style={{ fontSize: 10, fontWeight: 800, color: "#7c3aed", letterSpacing: 1, marginBottom: 6, textTransform: "uppercase" }}>
+                        💡 SUGERENCIAS DEL EQUIPO
+                      </div>
+                      <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+                        {availableSuggestions.map((s, i) => {
+                          const m = MEMBER_MAP[s.from]
+                          return (
+                            <button
+                              key={i}
+                              onClick={() => addAgreement(topic.id, s.text, s.from)}
+                              style={{
+                                display: "flex",
+                                alignItems: "flex-start",
+                                gap: 8,
+                                padding: "7px 9px",
+                                borderRadius: 7,
+                                border: `1px solid ${m?.color || "#ddd"}30`,
+                                background: "#ffffff",
+                                cursor: "pointer",
+                                textAlign: "left",
+                                fontFamily: "inherit",
+                                transition: "all 0.15s",
+                              }}
+                              onMouseEnter={e => { e.currentTarget.style.background = `${m?.color || "#ddd"}10`; e.currentTarget.style.borderColor = `${m?.color || "#ddd"}80` }}
+                              onMouseLeave={e => { e.currentTarget.style.background = "#ffffff"; e.currentTarget.style.borderColor = `${m?.color || "#ddd"}30` }}
+                            >
+                              <span style={{ fontSize: 10, fontWeight: 800, color: m?.color, flexShrink: 0, marginTop: 1 }}>{m?.name.split(" ")[0]}:</span>
+                              <span style={{ fontSize: 12, color: "#334155", lineHeight: 1.35 }}>"{s.text}"</span>
+                              <span style={{ fontSize: 14, color: m?.color, fontWeight: 700, marginLeft: "auto" }}>+</span>
+                            </button>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )}
                 </div>
-
-                <div style={{ fontSize: 12, color: T.dim, marginBottom: 10, padding: 10, background: "rgba(245,158,11,0.05)", borderLeft: "3px solid rgba(245,158,11,0.4)", borderRadius: 6, lineHeight: 1.5 }}>
-                  <strong style={{ color: "#92400e" }}>⚠️ Tensión:</strong> {topic.tension}
-                </div>
-
-                {!isDone && (
-                  <AgreementInput
-                    topic={topic}
-                    onSubmit={(text) => {
-                      setTeamAgreements(prev => ({ ...prev, [topic.id]: { text, finishedAt: Date.now() } }))
-                      // Reacción genérica del equipo
-                      const reactions = [
-                        { from: "eric", text: "Ok, me sirve." },
-                        { from: "gian", text: "De acuerdo, queda anotado." },
-                        { from: "nacho", text: "Dale, sumamos." },
-                      ]
-                      const r = reactions[Math.floor(Math.random() * reactions.length)]
-                      setChat(p => [...p, { from: r.from, text: r.text }])
-                    }}
-                  />
-                )}
-
-                {isDone && (
-                  <div style={{ padding: 12, background: "#ffffff", border: "1.5px solid rgba(0,212,170,0.20)", borderRadius: 8 }}>
-                    <div style={{ fontSize: 11, fontWeight: 800, color: "#059669", letterSpacing: 0.5, marginBottom: 4, textTransform: "uppercase" }}>Acuerdo registrado</div>
-                    <div style={{ fontSize: 14, color: T.text, lineHeight: 1.5, fontStyle: "italic" }}>"{agreement.text}"</div>
-                  </div>
-                )}
-              </div>
-            )
-          })}
+              )
+            })}
+          </div>
 
           {/* CTA al Planning */}
-          {allDone && (
+          {allDone ? (
             <button
               onClick={() => {
                 setPhase("play")
                 setTimeout(() => { setChat(p => [...p, { from: "nacho", text: "Ya está. ¿Arrancamos con el Planning?" }]); bubble("nacho", "Ya está. ¿Arrancamos con el Planning?") }, 1500)
                 setTimeout(() => { setChat(p => [...p, { from: "gabriela", text: "Tengo el backlog listo, son 12 historias. Velocity proyectada ~30 pts." }]); bubble("gabriela", "Tengo el backlog listo, son 12 historias. Velocity proyectada ~30 pts.") }, 4500)
               }}
-              style={{ width: "100%", padding: "16px 0", marginTop: 18, background: "linear-gradient(135deg, #00d4aa, #059669)", color: "#fff", fontWeight: 900, fontSize: 16, border: "none", borderRadius: 12, cursor: "pointer", letterSpacing: 1 }}
+              style={{ width: "100%", padding: "16px 0", marginTop: 4, background: "linear-gradient(135deg, #00d4aa, #059669)", color: "#fff", fontWeight: 900, fontSize: 16, border: "none", borderRadius: 12, cursor: "pointer", letterSpacing: 1 }}
             >
               ABRIR WHITEBOARD — PARTE 2 (PLANNING) →
             </button>
-          )}
-
-          {!allDone && (
-            <div style={{ textAlign: "center", fontSize: 13, color: T.dim, marginTop: 10 }}>
-              Completá los {TEAM_AGREEMENT_TOPICS.length} acuerdos para continuar al Planning.
+          ) : (
+            <div style={{ textAlign: "center", fontSize: 13, color: T.dim, padding: 12, background: "rgba(15,23,42,0.03)", borderRadius: 8 }}>
+              Necesitás al menos 1 acuerdo por categoría para continuar al Planning ({topicsWithAgreements.length}/{TEAM_AGREEMENT_TOPICS.length}).
             </div>
           )}
         </div>

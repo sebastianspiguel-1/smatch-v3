@@ -16,9 +16,11 @@ export const SESSION_CONTEXT = "Equipo Setlist, Sprint 1, Día 1 — Kickoff + P
 
 // ─── TEAM AGREEMENT TOPICS (Parte 1 del Día 1) ───
 // 3 acuerdos básicos que el SM facilita antes de arrancar el Planning.
-// NO son los 6 temas profundos del workshop tradicional — son LOS QUE
-// IMPORTAN AHORA para que el Planning fluya bien. Cada uno tiene una
-// "tensión" real que el SM debe resolver con el equipo.
+// Cada topic tiene:
+//   - tensión real entre miembros del equipo
+//   - teamSuggestions: ideas que cada miembro propone (el SM puede tomarlas
+//     como acuerdo o ignorarlas — refleja la facilitación real)
+//   - El SM puede agregar sus propios acuerdos en texto libre además
 export const TEAM_AGREEMENT_TOPICS = [
   {
     id: "communication",
@@ -26,23 +28,40 @@ export const TEAM_AGREEMENT_TOPICS = [
     title: "Comunicación & Working Hours",
     question: "¿Cómo se comunica el equipo durante el sprint? ¿Slack? ¿Daily? ¿Horarios respetados?",
     tension: "Eric vive online y responde de noche. Alan trabaja 9-18 y no le gusta que le pinguen tarde. Gabriela mete asks urgentes a las 22hs.",
-    prompt: "Escribí el acuerdo que vas a proponer al equipo (1-2 frases)."
+    teamSuggestions: [
+      { from: "eric", text: "Slack en cualquier momento — si no urge no respondo." },
+      { from: "alan", text: "Horario fijo 10-18hs. Después no respondo." },
+      { from: "gabriela", text: "Si es urgente, llamada directa." },
+      { from: "gian", text: "Todo lo no-urgente al daily, no Slack." },
+    ]
   },
   {
     id: "dor",
     icon: "📋",
     title: "Definition of Ready",
-    question: "¿Cuándo un PBI está LISTO para entrar al Planning? ¿Qué info mínima necesita?",
-    tension: "Gabriela mete PBIs sin criterio de aceptación claro. Después el equipo descubre el alcance real en pleno desarrollo. Hoy: 'Buscar canción' parece simple, pero ¿incluye autocompletado? ¿soporta búsqueda por álbum?",
-    prompt: "¿Qué condiciones debe cumplir un PBI antes de entrar al sprint? Escribilas como acuerdo del equipo."
+    question: "¿Cuándo un PBI está LISTO para entrar al sprint?",
+    tension: "Gabriela mete PBIs sin criterios claros. El equipo descubre el alcance real en pleno desarrollo. Hoy 'Buscar canción' parece simple, pero ¿incluye autocompletado? ¿búsqueda por álbum?",
+    teamSuggestions: [
+      { from: "gian", text: "Tener criterios de aceptación escritos." },
+      { from: "eric", text: "Estimado en story points por el equipo." },
+      { from: "david", text: "Dependencias externas identificadas." },
+      { from: "alan", text: "Mockup/wireframe si es UI." },
+      { from: "gabriela", text: "Aprobado por PO sin scope creep oculto." },
+    ]
   },
   {
     id: "estimation",
     icon: "🃏",
     title: "Cómo estimamos",
     question: "¿Story points o tiempo? ¿Quién vota? ¿Qué hacemos con los desacuerdos?",
-    tension: "Nacho viene del mundo freelance y estima en horas. Eric quiere usar story points relativos. Alan no se anima a estimar fuerte por inseguridad.",
-    prompt: "Proponé cómo va a estimar el equipo — esto se va a usar inmediatamente en el Planning Poker."
+    tension: "Nacho viene del mundo freelance y estima en horas. Eric quiere story points relativos. Alan no se anima a estimar fuerte por inseguridad.",
+    teamSuggestions: [
+      { from: "eric", text: "Story points relativos, comparando con PBIs conocidos." },
+      { from: "nacho", text: "Estimamos en horas, es más directo." },
+      { from: "gian", text: "Voto secreto Planning Poker, después discusión." },
+      { from: "alan", text: "Si hay desacuerdo grande, los extremos explican primero." },
+      { from: "david", text: "El estimado lo da quien vaya a hacer la tarea." },
+    ]
   }
 ]
 
