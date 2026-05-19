@@ -4,6 +4,7 @@ import { T, QUALITY, DIM_LABELS } from "../theme"
 import { getResults } from "../engine/supabase"
 import { RadarChartComponent } from "../components"
 import { getChallengeById } from "../data/challengesMetadata"
+import { getProfile } from "../engine/candidateProfile"
 import "./CandidateReport.css"
 
 export default function CandidateReport() {
@@ -11,6 +12,7 @@ export default function CandidateReport() {
   const nav = useNavigate()
   const finalView = false // ahora siempre se accede desde el dashboard del recruiter
   const [results, setResults] = useState([])
+  const [profile, setProfile] = useState(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -156,6 +158,15 @@ export default function CandidateReport() {
       } else {
         setResults(data || [])
       }
+
+      // Cargar profile del candidato (localStorage por ahora, Supabase en MVP)
+      try {
+        const candidateProfile = getProfile(id)
+        setProfile(candidateProfile)
+      } catch (e) {
+        console.warn("Profile not found:", e)
+      }
+
       setLoading(false)
     }
     loadResults()
@@ -341,6 +352,139 @@ export default function CandidateReport() {
             <RadarChartComponent data={consolidatedScores} height={140} />
           </div>
         </div>
+
+        {/* ═══ AI-Generated Profile Insights (NUEVO) ═══ */}
+        {profile && (profile.communication_style || (profile.insights?.patterns || []).length > 0) && (
+          <div className="profile-insights-section">
+            <h3 className="section-title-compact">
+              <span className="ai-badge">🤖 AI</span> Comportamientos detectados durante el assessment
+            </h3>
+            <div className="profile-insights-grid">
+
+              {/* Communication Style */}
+              {profile.communication_style && (
+                <div className="profile-card profile-card-style">
+                  <div className="profile-card-label">Estilo de comunicación</div>
+                  <div className="profile-card-value">
+                    {profile.communication_style === "directive" && "🎯 Directivo"}
+                    {profile.communication_style === "empathic" && "💚 Empático"}
+                    {profile.communication_style === "analytical" && "📊 Analítico"}
+                    {profile.communication_style === "balanced" && "⚖️ Balanceado"}
+                    {profile.communication_style === "passive" && "🌫️ Pasivo"}
+                  </div>
+                  <div className="profile-card-desc">
+                    {profile.communication_style === "directive" && "Toma decisiones rápido. Comunica claro. Riesgo: puede no escuchar."}
+                    {profile.communication_style === "empathic" && "Prioriza relaciones. Escucha activamente. Riesgo: indecisión bajo presión."}
+                    {profile.communication_style === "analytical" && "Razonamiento basado en datos. Estructura clara. Riesgo: parálisis por análisis."}
+                    {profile.communication_style === "balanced" && "Adapta su estilo al contexto. Equilibra empatía y dirección."}
+                    {profile.communication_style === "passive" && "Evita confrontación. Necesita coaching para liderar con autoridad."}
+                  </div>
+                </div>
+              )}
+
+              {/* Patterns Detected */}
+              {(profile.insights?.patterns || []).length > 0 && (
+                <div className="profile-card profile-card-patterns">
+                  <div className="profile-card-label">Patrones observados</div>
+                  <ul className="profile-card-list">
+                    {profile.insights.patterns.slice(0, 5).map((p, i) => (
+                      <li key={i}>{p}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Strengths */}
+              {(profile.insights?.strengths || []).length > 0 && (
+                <div className="profile-card profile-card-strengths">
+                  <div className="profile-card-label" style={{ color: "#059669" }}>✓ Fortalezas</div>
+                  <ul className="profile-card-list">
+                    {profile.insights.strengths.slice(0, 5).map((s, i) => (
+                      <li key={i}>{s}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Areas of opportunity */}
+              {(profile.insights?.weaknesses || []).length > 0 && (
+                <div className="profile-card profile-card-weaknesses">
+                  <div className="profile-card-label" style={{ color: "#ea580c" }}>⚠ Áreas de oportunidad</div>
+                  <ul className="profile-card-list">
+                    {profile.insights.weaknesses.slice(0, 5).map((w, i) => (
+                      <li key={i}>{w}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ═══ AI Fluency Profile (diferenciador del producto) ═══ */}
+        {profile && profile.ai_coach_usage && (
+          <div className="ai-fluency-section">
+            <h3 className="section-title-compact">
+              <span className="ai-badge">🤖 AI</span> AI Fluency — cómo usó la IA durante el assessment
+            </h3>
+            <div className="ai-fluency-card">
+              <div className="ai-fluency-stats">
+                <div className="ai-fluency-stat">
+                  <div className="ai-fluency-stat-value">{profile.ai_coach_usage.total_calls || 0}</div>
+                  <div className="ai-fluency-stat-label">Consultas al coach</div>
+                </div>
+                <div className="ai-fluency-stat">
+                  <div className="ai-fluency-stat-value">
+                    {(profile.challenge_history || []).filter(c => c.ai_fluency_score >= 3).length} / {(profile.challenge_history || []).length}
+                  </div>
+                  <div className="ai-fluency-stat-label">Challenges con buen uso de IA</div>
+                </div>
+              </div>
+
+              {/* Rationale por challenge */}
+              {(profile.challenge_history || []).filter(c => c.ai_fluency_rationale).length > 0 && (
+                <div className="ai-fluency-rationale">
+                  <div className="ai-fluency-rationale-title">Cómo usó la IA en cada challenge:</div>
+                  {(profile.challenge_history || []).filter(c => c.ai_fluency_rationale).map((c, i) => (
+                    <div key={i} className="ai-fluency-rationale-item">
+                      <div className="ai-fluency-rationale-header">
+                        <span className="ai-fluency-rationale-challenge">{c.challenge_name || c.challenge}</span>
+                        <span className={`ai-fluency-score score-${c.ai_fluency_score >= 3 ? 'high' : c.ai_fluency_score >= 2 ? 'mid' : 'low'}`}>
+                          {c.ai_fluency_score}/4
+                        </span>
+                      </div>
+                      <div className="ai-fluency-rationale-text">{c.ai_fluency_rationale}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {profile.ai_coach_usage.total_calls === 0 && (
+                <div className="ai-fluency-no-usage">
+                  <strong>El candidato no consultó al AI Coach durante ningún challenge.</strong>
+                  <p>Puede indicar autosuficiencia (positivo) o resistencia a herramientas de apoyo (negativo según contexto).</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ═══ Notable Moments (conexiones cross-challenge) ═══ */}
+        {profile && (profile.insights?.notable_moments || []).length > 0 && (
+          <div className="notable-moments-section">
+            <h3 className="section-title-compact">
+              <span className="ai-badge">🤖 AI</span> Momentos destacados del journey
+            </h3>
+            <div className="notable-moments-list">
+              {profile.insights.notable_moments.slice(-8).map((m, i) => (
+                <div key={i} className="notable-moment-item">
+                  <span className="notable-moment-challenge">{m.challenge}</span>
+                  <span className="notable-moment-note">{m.note}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Journey Cards */}
         <div className="journey-section">
