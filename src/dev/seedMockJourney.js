@@ -144,7 +144,7 @@ const JOURNEY = [
         strengths: ["crea espacio psicológicamente seguro rápido"],
         weaknesses: ["salta a ofrecer solución antes de profundizar (perdió 1 momento)"],
         notable_moments: [
-          { challenge: "C03", note: "Alan se abrió sobre los 2 meses solo armando la base mobile. SM respetó el silencio en lugar de empujar." },
+          { challenge: "C03", note: "Alan se abrió sobre el burnout que traía de su trabajo anterior. SM respetó el silencio en lugar de empujar." },
         ],
       },
       challenge_history: [

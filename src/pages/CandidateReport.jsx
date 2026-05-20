@@ -401,7 +401,7 @@ export default function CandidateReport() {
                 </div>
               )}
               <div className="ai-insight-stat-chip">
-                <div className="ai-insight-stat-label">Consultas al coach</div>
+                <div className="ai-insight-stat-label">Consultas a Lyra</div>
                 <div className="ai-insight-stat-value">
                   {profile.ai_coach_usage?.total_calls || 0}
                 </div>
@@ -468,11 +468,11 @@ export default function CandidateReport() {
               </div>
             </div>
 
-            {/* Row 3: AI Coach por challenge (1 línea cada uno) */}
+            {/* Row 3: Lyra por challenge (1 línea cada uno) */}
             {(profile.challenge_history || []).filter((c) => c.ai_fluency_rationale).length > 0 && (
               <details className="ai-coach-details">
                 <summary>
-                  Cómo usó el AI Coach en cada challenge ({(profile.challenge_history || []).length})
+                  Cómo usó a Lyra en cada challenge ({(profile.challenge_history || []).length})
                 </summary>
                 <div className="ai-coach-list">
                   {(profile.challenge_history || [])

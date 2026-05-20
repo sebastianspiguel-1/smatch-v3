@@ -84,7 +84,7 @@ export default function AICoach({
           aria-label="Pedir ayuda al coach"
         >
           <span className="ai-coach-fab-icon">💡</span>
-          <span className="ai-coach-fab-label">Pedir ayuda al coach</span>
+          <span className="ai-coach-fab-label">Consultar a Lyra</span>
           {interactionCount > 0 && (
             <span className="ai-coach-fab-badge">{interactionCount}</span>
           )}
@@ -95,15 +95,15 @@ export default function AICoach({
       {isOpen && (
         <>
           <div className="ai-coach-backdrop" onClick={() => setIsOpen(false)} />
-          <div className="ai-coach-drawer" role="dialog" aria-label="AI Coach">
+          <div className="ai-coach-drawer" role="dialog" aria-label="Lyra — coach AI">
             <div className="ai-coach-header">
               <div className="ai-coach-header-info">
                 <div className="ai-coach-title">
                   <span className="ai-coach-title-icon">💡</span>
-                  AI Coach
+                  Lyra
                 </div>
                 <div className="ai-coach-subtitle">
-                  Hace preguntas — no da respuestas
+                  Tu sparring de IA. Hace preguntas, no da respuestas.
                 </div>
               </div>
               <button
@@ -119,7 +119,7 @@ export default function AICoach({
               {conversation.length === 0 && (
                 <div className="ai-coach-intro">
                   <p>
-                    Soy tu coach para esta sesión. No te voy a decir qué hacer —
+                    Soy Lyra. No te voy a decir qué hacer —
                     te voy a ayudar a <strong>pensar</strong>.
                   </p>
                   <p className="ai-coach-intro-hint">
@@ -134,7 +134,7 @@ export default function AICoach({
                   className={`ai-coach-message ai-coach-message-${turn.from}`}
                 >
                   <div className="ai-coach-message-author">
-                    {turn.from === "sm" ? "Vos" : "Coach"}
+                    {turn.from === "sm" ? "Vos" : "Lyra"}
                   </div>
                   <div className="ai-coach-message-text">{turn.text}</div>
                 </div>
@@ -142,7 +142,7 @@ export default function AICoach({
 
               {loading && (
                 <div className="ai-coach-message ai-coach-message-coach">
-                  <div className="ai-coach-message-author">Coach</div>
+                  <div className="ai-coach-message-author">Lyra</div>
                   <div className="ai-coach-typing">
                     <span></span><span></span><span></span>
                   </div>

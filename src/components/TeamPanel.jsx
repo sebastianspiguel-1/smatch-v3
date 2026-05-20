@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { SETLIST_TEAM, SETLIST_STAKEHOLDER } from "../data/team"
+import { TEAM as SETLIST_TEAM, SETLIST_FOUNDER as SETLIST_STAKEHOLDER } from "../data/setlistSprint1"
 import "./TeamPanel.css"
 
 /**
@@ -7,7 +7,7 @@ import "./TeamPanel.css"
  *
  * Props:
  *   - title: título opcional (default: "EQUIPO SETLIST")
- *   - showStakeholder: incluir Simon (Lollapalooza) - default: true
+ *   - showStakeholder: incluir Mateo (Founder/CEO) - default: true
  *   - compact: versión más pequeña para usar dentro de un challenge - default: false
  */
 export default function TeamPanel({

@@ -219,7 +219,7 @@ export default function DevSeed() {
             <div>• <strong>C01 Día 10</strong> · Retro · Grade A</div>
             <div style={{ marginTop: 10 }}>
               Profile: 7 patrones detectados, 6 fortalezas, 4 weaknesses, 6 notable moments, 7
-              consultas al AI Coach distribuidas en los 5 challenges.
+              consultas a Lyra distribuidas en los 5 challenges.
             </div>
           </div>
         </details>

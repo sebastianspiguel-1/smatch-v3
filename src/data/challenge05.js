@@ -10,7 +10,7 @@ import {
 export { TEAM, MEMBER_MAP, STAKEHOLDERS, STAKEHOLDER_MAP }
 
 // ─── CONTEXTO DEL SPRINT ───
-export const SPRINT_CONTEXT = "Setlist · Sprint 1, Día 7/10. Es el PRIMER sprint del equipo. Se comprometieron 30 pts, hoy llevan 13 completados. Paula (Engineering Manager) convocó una reunión 1-1 con el SM en pánico: hizo una proyección lineal y le quedó que se va a entregar solo el 60% del scope comprometido. El piloto con la primera banda arranca en 4 semanas. Causas reales del retraso: SL-105 (búsqueda Spotify) bloqueado 2 días por aprobación de la API; Alan arrastrando burnout de los 2 meses solo construyendo la base mobile; Gabriela agregó cambios de alcance mid-sprint sin actualizar AC. Paula trae presión del CEO. La conversación define cómo se va a comunicar el estado a la banda y al equipo."
+export const SPRINT_CONTEXT = "Setlist · Sprint 1, Día 7/10. Es el PRIMER sprint del equipo trabajando juntos (Mateo armó el equipo en las últimas 2-3 semanas). Se comprometieron 30 pts, hoy llevan 13 completados. Paula (Engineering Manager) convocó una reunión 1-1 con el SM en pánico: hizo una proyección lineal y le quedó que se va a entregar solo el 60% del scope comprometido. El show piloto real con audience pública es en 4 semanas. Causas reales del retraso: SL-105 (búsqueda Spotify) bloqueado 2 días por aprobación de la API; Alan arrastrando burnout de su empresa anterior (nadie en el equipo sabe esto); Gabriela agregó cambios de alcance mid-sprint sin actualizar AC. Paula trae presión de Mateo (CEO). La conversación define cómo se va a comunicar el estado a la banda y al equipo."
 
 export const INITIAL_PAULA_STATE = {
   pressure: 70,
@@ -70,7 +70,7 @@ export const INVESTIGATION_METRICS = [
     previousValue: "—",
     trend: "Arrastra burnout previo",
     status: "critical",
-    insight: "Alan viene de 2 meses solo en la base mobile antes del Sprint 1. PRs con bugs básicos, commits a la madrugada. Si pedimos 30% más de velocity, lo perdemos. Nacho propondría 'trabajar más horas' (insostenible).",
+    insight: "Alan llegó arrastrando burnout de su empresa anterior (nadie del equipo sabe esto). PRs con bugs básicos, commits a la madrugada. Si pedimos 30% más de velocity, lo perdemos. Nacho propondría 'trabajar más horas' (insostenible).",
   },
   {
     id: "first_sprint_data",

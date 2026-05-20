@@ -238,11 +238,11 @@ export default function Landing() {
               <div className="v3-report-dims">
                 {[
                   { label: "Facilitación", pct: 88, tone: "good" },
-                  { label: "Coaching & Empatía", pct: 75, tone: "ok" },
+                  { label: "Coaching Humano", pct: 75, tone: "ok" },
                   { label: "Pensamiento Sistémico", pct: 76, tone: "ok" },
-                  { label: "Procesos & Estimación", pct: 78, tone: "ok" },
+                  { label: "Dominio Scrum", pct: 78, tone: "ok" },
                   { label: "Stakeholders", pct: 74, tone: "ok" },
-                  { label: "Uso de IA", pct: 78, tone: "ai" },
+                  { label: "Fluidez IA", pct: 78, tone: "ai" },
                 ].map((d) => (
                   <div className="v3-report-dim" key={d.label}>
                     <span className="v3-report-dim-label">{d.label}</span>

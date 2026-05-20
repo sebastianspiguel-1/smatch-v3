@@ -4,18 +4,18 @@ import { TEAM, MEMBER_MAP, TEAM_DESC_SHORT } from "./setlistSprint1"
 export { TEAM, MEMBER_MAP }
 
 // ─── CONTEXTO DEL SPRINT ───
-export const SPRINT_CONTEXT = "Setlist · Sprint 1, Día 3/10. El equipo arrancó hace 3 días. Alan (Dev Mobile) viene trabajando 2 meses SOLO en la base mobile antes de que el equipo se formara — fue contratado primero para dejar el shell listo. Está agotado. En el board sus tickets del Sprint 1 (SL-104 RSVP, SL-105 Buscar canción / Spotify, SL-110 Galería de fotos) están en DOING sin avanzar. Los últimos commits son a las 2-3am. Gian ya rebotó 2 PRs por bugs básicos que Alan nunca cometería. En el daily Alan dice 'está todo controlado'. El piloto con la primera banda arranca en 4 semanas y Alan es clave para el mobile. Es la primera semana del equipo y el SM ya empieza a ver señales."
+export const SPRINT_CONTEXT = "Setlist · Sprint 1, Día 3/10. Es la primera semana del equipo trabajando juntos — Mateo armó el equipo en las últimas 2-3 semanas. Alan (Dev Mobile) llegó arrastrando burnout de su empresa anterior (1+ año a 14h/día), pero NADIE del equipo sabe esto. En el board sus tickets del Sprint 1 (SL-104 RSVP, SL-105 Buscar canción / Spotify, SL-110 Galería de fotos) están en DOING sin avanzar. Los últimos commits son a las 2-3am. Gian ya rebotó 2 PRs por bugs básicos que Alan nunca cometería. En el daily Alan dice 'está todo controlado'. El show piloto real con audience pública es en 4 semanas y Alan es clave para el mobile. El SM tiene que detectar señales sin pista obvia — el equipo no lo conoce hace ni una semana."
 
 // ─── TEAM DESCRIPTION (para prompts de AI) ───
 export const TEAM_DESC = `${TEAM_DESC_SHORT}
 
 ESTADO ESPECÍFICO DEL DÍA 3 / SPRINT 1:
-- Alan (PROTAGONISTA): bloqueado en SL-105 (Spotify), también con SL-104 (RSVP) y SL-110 (Galería) en DOING. Trabajó 2 meses SOLO en la base mobile antes del Sprint 1. Trabaja 14h/día. PRs con bugs básicos. Se siente culpable, no se anima a pedir ayuda. En el daily dice "está todo controlado".
-- Eric (TL): nota que Alan está raro pero no sabe cómo abordarlo; espera que el SM lo haga.
-- David (Backend): empático pero no se mete en problemas de otros. Preocupado por Alan pero no dice nada.
+- Alan (PROTAGONISTA): bloqueado en SL-105 (Spotify), también con SL-104 (RSVP) y SL-110 (Galería) en DOING. Llegó a Setlist arrastrando burnout de 1+ año a 14h/día en su empresa anterior — NADIE en el equipo sabe esto. PRs con bugs básicos. Se siente culpable, no se anima a pedir ayuda. En el daily dice "está todo controlado".
+- Eric (TL): nota que Alan está raro pero apenas lo conoce hace 2-3 semanas. No sabe cómo abordarlo; espera que el SM lo haga.
+- David (Backend): empático pero no se mete en problemas de otros. Preocupado por Alan pero no dice nada — apenas se conocen.
 - Gian (QA): tuvo que rechazar 2 PRs de Alan en 3 días por bugs simples (en SL-104 y SL-105). Está perdiendo la paciencia pero percibe que algo más pasa.
-- Gabriela (PO): preocupada. La banda piloto pregunta cada 2 días por el mobile. Alan es clave para el lanzamiento.
-- Nacho (Frontend): confundido. Alan le parece un crack y no entiende qué está pasando estos últimos días.`
+- Gabriela (PO): preocupada. Mateo y la banda piloto preguntan cada 2 días por el mobile. Alan es clave para el lanzamiento.
+- Nacho (Frontend): confundido. Alan le parece un crack pero no entiende qué le pasa estos días — apenas lo conoce.`
 
 // ─── FASE 1: DASHBOARD DE SEÑALES ───
 // Las métricas describen comportamiento OBSERVABLE. No marcamos cuáles son "críticas"
@@ -38,10 +38,10 @@ export const DASHBOARD_METRICS = [
     ],
     details: [
       "14 commits entre 11pm - 3am en los primeros 3 días del sprint",
-      "Patrón viene de las 8 semanas previas (construcción solitaria de la base mobile)",
+      "Patrón viene arrastrado del trabajo anterior (el equipo de Setlist no sabe esto)",
       "Hora promedio de commit: 1:30am (antes del proyecto era 2pm)",
       "Commit messages cada vez más cortos ('fix', 'wip', 'try')",
-      "No tuvo descanso entre los 2 meses solos y el Sprint 1",
+      "No tuvo descanso entre su trabajo anterior y el arranque en Setlist",
     ],
   },
   {

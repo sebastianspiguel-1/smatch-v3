@@ -77,8 +77,8 @@ export const POKER_VOTES = {
 export const EVENTS = [
   { id: "e1", poker: 0, from: "alan", text: "Yo pongo lo mismo que Eric, él sabe más.", tip: "Sesgo de anclaje", delay: 2500 },
   { id: "e2", poker: 0, from: "nacho", text: "Puse 13 porque me llevaría unos 13 días más o menos.", tip: "Confunde puntos con tiempo", delay: 5500 },
-  { id: "e3", poker: 1, from: "gabriela", text: "¿Pero cuándo va a estar todo esto? Simon (Lollapalooza) necesita una fecha.", tip: "Confunde estimación con compromiso", delay: 3000 },
-  { id: "e4", poker: 2, from: "david", text: "Le sumo un par de puntos extra porque integrando con Pagos se complica.", tip: "Estima contexto personal, no complejidad", delay: 3000 },
+  { id: "e3", poker: 1, from: "gabriela", text: "¿Pero cuándo va a estar todo esto? Mateo necesita una fecha para la banda piloto.", tip: "Confunde estimación con compromiso", delay: 3000 },
+  { id: "e4", poker: 2, from: "david", text: "Le sumo un par de puntos extra porque integrando con Spotify se complica.", tip: "Estima contexto personal, no complejidad", delay: 3000 },
 ]
 
 // ─── PROACTIVE TEAM QUESTIONS (fire at intervals) ───

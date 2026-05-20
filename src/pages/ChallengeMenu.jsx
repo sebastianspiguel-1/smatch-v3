@@ -55,7 +55,7 @@ const CHALLENGES = [
     challengeFile: 5, // Maps to Challenge05 component
     title: "Día 7 · Reunión con Paula (EM)",
     sprintDay: "Día 7",
-    desc: "Paula (Engineering Manager) escuchó que el sprint va lento. Te convoca a 1-1. Exige acelerar 30% para Sprint 2 con datos en mano. El equipo te mira. ¿Cómo manejás la situación?",
+    desc: "Paula (Engineering Manager) escuchó que el sprint va lento. Te convoca a 1-1. Hizo una proyección lineal y entró en pánico: piensa que no llegamos al show piloto. El equipo te mira. ¿Cómo manejás la situación?",
     ready: true,
     icon: "▲",
     accentColor: "#dc2626",
@@ -116,7 +116,7 @@ export default function ChallengeMenu() {
                 Bienvenido al equipo de <span className="gradient-text">Setlist</span>
               </h1>
               <p className="intro-subtitle">
-                Sos el nuevo Scrum Master. El equipo está en Sprint 3 y hay problemas que necesitan resolverse urgentemente.
+                Sos el nuevo Scrum Master, recién contratado. El equipo arranca su primer sprint juntos y hay problemas reales que necesitan resolverse.
               </p>
             </div>
 
@@ -126,14 +126,14 @@ export default function ChallengeMenu() {
                 <div className="mission-header">
                   <h2>🎸 El Producto</h2>
                   <p className="mission-tagline">
-                    <strong>Setlist</strong> es una app mobile donde <strong>bandas indie + fans</strong> co-crean los setlists de los shows.
-                    El fan sugiere canciones; la banda vota y arma la lista final. Es la app que querés tener en cada recital.
+                    <strong>Setlist</strong> es una app donde <strong>las bandas</strong> crean shows y <strong>los fans</strong> votan qué canciones se tocan.
+                    Vox populi pura: la banda toca exactamente las más votadas, sin veto. Es la app que querés tener en cada recital.
                   </p>
                 </div>
                 <div className="mission-grid">
                   <div className="mission-item">
                     <h3>🎯 La meta del Sprint 1</h3>
-                    <p>Tener un <strong>MVP usable end-to-end</strong>: banda crea show → fan sugiere canciones → banda elige setlist.</p>
+                    <p>Tener el <strong>flujo core funcionando</strong>: banda crea show → fans se suman → sugieren canciones → votan → el más votado se toca.</p>
                   </div>
                   <div className="mission-item">
                     <h3>🔧 Lo que se va a bloquear</h3>
@@ -141,11 +141,11 @@ export default function ChallengeMenu() {
                   </div>
                   <div className="mission-item">
                     <h3>🎪 El compromiso externo</h3>
-                    <p><strong>Lollapalooza 2026 en 6 semanas.</strong> Simon (productor) quiere usar Setlist como piloto oficial — 60 bandas usando la app en vivo.</p>
+                    <p><strong>Show real público en 4 semanas.</strong> Mateo (CEO) cerró con la banda piloto: la app va a estar en escena frente a audience real. Si falla, falla en público.</p>
                   </div>
                   <div className="mission-item">
                     <h3>⚠️ La presión interna</h3>
-                    <p>Es el <strong>primer sprint del equipo juntos</strong>. Paula (EM) escucha rumores de que va lento y ya le prometió a Mateo (CEO) +30% para Sprint 2.</p>
+                    <p>Es el <strong>primer sprint del equipo juntos</strong>. Mateo armó el equipo en las últimas 2-3 semanas. Casi no se conocen entre sí. Paula (EM) es responsable de que lleguen al show.</p>
                   </div>
                 </div>
               </div>

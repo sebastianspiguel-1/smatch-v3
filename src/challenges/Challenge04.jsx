@@ -21,7 +21,7 @@ import {
   KANO_ITEMS, RELABS_ITEMS, TSHIRT_TEAM_VOTES, TSHIRT_VOTE_REASONS, TSHIRT_PBI_INFO, POKER_STEPS_PROMPTS,
   TEAM_AGREEMENT_TOPICS,
 } from "../data/challenge04"
-import { SETLIST_TEAM } from "../data/team"
+import { TEAM as SETLIST_TEAM } from "../data/setlistSprint1"
 
 // Team description para el prompt AI (usa las bios ricas del data central)
 const TEAM_DESC = SETLIST_TEAM.map(m => `- ${m.name} (${m.role}): ${m.bio}`).join("\n")
@@ -534,7 +534,7 @@ function MoscowTool({ onComplete }) {
         whatIs="Framework de priorización: Must Have (no sale sin esto), Should Have (importante pero no bloqueante), Could Have (si hay tiempo), Won't Have (este sprint no)."
         whyMatters="Sin un criterio explícito, todo termina siendo 'Must' y el sprint colapsa. MoSCoW fuerza al equipo a tomar decisiones difíciles antes de empezar."
         smRole="Priorizá 8 PBIs con el equipo. Velocity = 30 pts. Lo que entre en Must + Should + Could debe sumar ~30 pts. Tu rol: hacer cumplir el límite."
-        hookMember="Gabriela ya dijo que Simon (Lollapalooza) quiere todo en 6 semanas. Va a presionar para que casi todo sea Must. Tu chance: defender la priorización con datos."
+        hookMember="Gabriela ya dijo que la banda piloto quiere todo para el show en 4 semanas. Va a presionar para que casi todo sea Must. Tu chance: defender la priorización con datos."
         onStart={() => setIntroDone(true)}
       />
     )
@@ -602,7 +602,7 @@ function MoscowTool({ onComplete }) {
       {mechanicDone && (
         <ExplainStep
           accent={accent}
-          prompt={`Gabriela presiona: 'Simon (Lollapalooza) quiere TODO para el piloto. ¿Por qué dejaste cosas en Could/Won't?' Tu propuesta tiene ${totalPts} pts comprometidos. ¿Cómo defendés tu priorización sin ceder al scope creep?`}
+          prompt={`Gabriela presiona: 'Mateo le prometió a la banda piloto el flujo completo. ¿Por qué dejaste cosas en Could/Won't?' Tu propuesta tiene ${totalPts} pts comprometidos. ¿Cómo defendés tu priorización sin ceder al scope creep?`}
           onSubmit={explanation => onComplete({ placed, totalPts, explanation })}
         />
       )}
@@ -974,12 +974,12 @@ export default function Challenge04() {
           <div style={{ background: T.panel, borderRadius: 12, padding: 18, border: `1px solid ${T.border}` }}>
             <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: "#60a5fa", marginBottom: 8 }}>🎸 EL PRODUCTO</div>
             <div style={{ fontSize: 14, color: T.text, fontWeight: 700, marginBottom: 4 }}>Setlist</div>
-            <div style={{ fontSize: 13, color: T.sub, lineHeight: 1.5 }}>App mobile que conecta <strong>artistas independientes</strong> con <strong>venues</strong> en Latinoamérica. Permite gestionar shows de principio a fin: contacto inicial → contrato digital → pago.</div>
+            <div style={{ fontSize: 13, color: T.sub, lineHeight: 1.5 }}>App colaborativa: las <strong>bandas</strong> crean shows y los <strong>fans</strong> votan qué canciones se tocan. La banda interpreta el setlist más votado, sin veto.</div>
           </div>
           <div style={{ background: T.panel, borderRadius: 12, padding: 18, border: `1px solid ${T.border}` }}>
             <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: "#f59e0b", marginBottom: 8 }}>🎯 SPRINT GOAL</div>
-            <div style={{ fontSize: 14, color: T.text, fontWeight: 700, marginBottom: 4 }}>MVP funcional para Lollapalooza</div>
-            <div style={{ fontSize: 13, color: T.sub, lineHeight: 1.5 }}>Simon (organizador) confirmó <strong>60 artistas</strong> usando Setlist en vivo durante el festival, en <strong>6 semanas</strong>. Hay que llegar con flujo end-to-end.</div>
+            <div style={{ fontSize: 14, color: T.text, fontWeight: 700, marginBottom: 4 }}>MVP funcional para el show piloto</div>
+            <div style={{ fontSize: 13, color: T.sub, lineHeight: 1.5 }}>Mateo (CEO) cerró un <strong>show real público</strong> con la banda piloto en <strong>4 semanas</strong>. La app va a estar en escena frente a audience real. Si falla, falla en público.</div>
           </div>
         </div>
 
@@ -990,7 +990,7 @@ export default function Challenge04() {
             <div><span style={{ fontSize: 11, color: T.dim }}>Duración</span><br /><span style={{ fontSize: 16, fontWeight: 800, color: T.text }}>2 semanas</span></div>
             <div><span style={{ fontSize: 11, color: T.dim }}>Velocity proyectada</span><br /><span style={{ fontSize: 16, fontWeight: 800, color: T.teal }}>~30 pts</span></div>
             <div><span style={{ fontSize: 11, color: T.dim }}>Backlog</span><br /><span style={{ fontSize: 16, fontWeight: 800, color: T.text }}>12 historias</span></div>
-            <div><span style={{ fontSize: 11, color: T.dim }}>Stakeholders</span><br /><span style={{ fontSize: 13, color: T.sub }}>Gabriela (PO), Simon (Lollapalooza)</span></div>
+            <div><span style={{ fontSize: 11, color: T.dim }}>Stakeholders</span><br /><span style={{ fontSize: 13, color: T.sub }}>Gabriela (PO), Mateo (CEO)</span></div>
           </div>
         </div>
 

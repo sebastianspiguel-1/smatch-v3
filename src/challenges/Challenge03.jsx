@@ -562,7 +562,7 @@ export default function Challenge03() {
 
         <AICoach
           challengeName="El dev que se está apagando"
-          challengeContext="El SM está en un 1-1 con un dev que muestra señales claras de burnout. El dev viene de 2 meses solo construyendo la base mobile antes del Sprint 1. Está agotado, callado, se siente culpable de no rendir. Es la primera conversación a solas entre el SM y este dev."
+          challengeContext="El SM está en un 1-1 con un dev que muestra señales claras de burnout. El dev llegó a Setlist arrastrando burnout de 1+ año a 14h/día en su empresa anterior — nadie del equipo sabe esto. Está agotado, callado, se siente culpable. Es la primera conversación a solas entre el SM y este dev."
         />
       </div>
     )

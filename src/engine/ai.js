@@ -112,7 +112,7 @@ export function buildBlockerChallengePrompt(teamDesc, kanbanState, smAction, cha
     ? `Le dijo a ${smAction.target}: "${smAction.message}"`
     : `Dijo al equipo: "${smAction.message}"`
 
-  return `Sos el director de escena del Equipo Setlist en Sprint 3, Día 7/10 para el assessment SMatch. Hay un bloqueo en SL-105 (David, 3 días) y el WIP limit está excedido. Tu rol es doble:
+  return `Sos el director de escena del Equipo Setlist en Sprint 1, Día 5/10 para el assessment SMatch. Hay un bloqueo en SL-105 (Alan, 2 días esperando aprobación Spotify API) y el WIP limit está excedido. Tu rol es doble:
 1. Generar reacciones REALISTAS de los miembros del equipo según sus personalidades
 2. Evaluar silenciosamente al SM en 7 dimensiones (NO mostrar evaluación al candidato)
 
