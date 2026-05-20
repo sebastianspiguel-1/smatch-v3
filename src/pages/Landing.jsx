@@ -100,7 +100,7 @@ export default function Landing() {
                 Candidate Login
               </button>
             </li>
-            <li><a href="https://calendly.com" target="_blank" rel="noreferrer" className="nav-btn-secondary">Schedule Demo</a></li>
+            <li><a href="https://calendly.com" target="_blank" rel="noreferrer" className="nav-btn-secondary">Agendar demo</a></li>
           </ul>
           <button className={`mobile-menu-toggle ${mobileOpen ? "active" : ""}`} onClick={() => setMobileOpen(!mobileOpen)}>
             <span /><span /><span />
@@ -108,266 +108,273 @@ export default function Landing() {
         </div>
       </nav>
 
-      {/* ═══ HERO ═══ */}
-      <section id="home" className="hero">
-        <div className="hero-shapes">
-          <div className="shape shape-1" />
-          <div className="shape shape-2" />
-          <div className="shape shape-3" />
+      {/* ═══ HERO V3 — Text-only centered with ambient color ═══ */}
+      <section id="home" className="hero-v3 hero-v3-center">
+        <div className="hero-v3-ambient" aria-hidden="true" />
+        <div className="hero-v3-halo" aria-hidden="true" />
+        <div className="hero-v3-stars" aria-hidden="true" />
+        <div className="hero-v3-stars hero-v3-stars-2" aria-hidden="true" />
+        <div className="hero-v3-text hero-v3-text-center">
+          <h1 className="hero-v3-headline">
+            <span className="hero-v3-line">Contratá Scrum Masters y PMs</span>
+            <span className="hero-v3-line">que generen <em className="hero-v3-accent">impacto real</em></span>
+          </h1>
+          <p className="hero-v3-sub">
+            El assessment situacional para Scrum Masters y Project Managers.
+            Los ves trabajar antes de contratar.
+          </p>
+          <a
+            href="#producto"
+            className="hero-v3-scroll-prompt"
+            onClick={(e) => { e.preventDefault(); scrollTo("producto") }}
+          >
+            <span>Ver cómo funciona</span>
+            <span className="hero-v3-scroll-arrow">↓</span>
+          </a>
         </div>
-        <div className="hero-content">
-          <h1>Contratá <span className="gradient-text">Scrum Masters</span> que generen impacto real</h1>
-          <p>Identificá el talento ágil correcto con evaluaciones prácticas y objetivas. Reducí el riesgo de contrataciones equivocadas con data real de desempeño.</p>
-          <div className="hero-ctas">
-            <a href="#contacto" className="btn btn-primary" onClick={(e) => { e.preventDefault(); scrollTo("contacto") }}>Probar gratis</a>
-            <a href="#como-funciona" className="btn btn-secondary" onClick={(e) => { e.preventDefault(); scrollTo("como-funciona") }}>Ver demo</a>
+      </section>
+
+      {/* ═══ EL PROBLEMA ═══ */}
+      <section id="problema" className="v3-section v3-section-light v3-problema">
+        <div className="v3-container">
+          <div className="v3-section-intro">
+            <p className="v3-eyebrow">Por qué existe Smatch</p>
+            <h2 className="v3-section-headline">
+              Contratar talento ágil<br />no debería ser una apuesta.
+            </h2>
+          </div>
+
+          <div className="v3-problems-grid">
+            {[
+              {
+                title: "Los CVs mienten.",
+                desc: "Es fácil exagerar skills en papel. Las certificaciones no garantizan performance real.",
+              },
+              {
+                title: "Las entrevistas son limitadas.",
+                desc: "No revelan cómo alguien facilita, resuelve conflictos o maneja presión real. Los roles ágiles requieren evaluar desempeño, no solo conocimiento teórico.",
+              },
+              {
+                title: "Contratar mal sale caro.",
+                desc: "Un mal hire puede costar 3-5× el salario anual, con un alto riesgo de destruir al equipo.",
+              },
+            ].map((p) => (
+              <div className="v3-problem-card" key={p.title}>
+                <h4 className="v3-problem-title">{p.title}</h4>
+                <p className="v3-problem-desc">{p.desc}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* ═══ FEATURE 1 ═══ */}
-      <section id="producto" className="section">
-        <div className="container">
-          <div className="feature-section">
-            <div className="feature-text">
-              <h2>Evaluaciones basadas en situaciones reales</h2>
-              <p>Simulaciones interactivas donde los candidatos demuestran sus habilidades de facilitación, resolución de conflictos y liderazgo ágil.</p>
-              <p>Métricas objetivas y reportes detallados para tomar decisiones de contratación con confianza.</p>
-            </div>
-            <div className="feature-visual">
-              <div className="visual-card">
-                <h3>Dimensiones que evaluamos</h3>
-                {["Facilitación", "Resolución de conflictos", "Stakeholder management", "Pensamiento sistémico", "Coaching empático", "Decisión bajo presión"].map(dim => (
-                  <div className="metric-row" key={dim}>
-                    <span className="metric-label">{dim}</span>
-                    <span className="metric-value metric-check">✓</span>
-                  </div>
-                ))}
-              </div>
-            </div>
+      {/* ═══ CÓMO FUNCIONA — Flujo del recruiter (5 pasos) ═══ */}
+      <section id="como-funciona" className="v3-section v3-funciona">
+        <div className="v3-container">
+          <div className="v3-section-intro">
+            <p className="v3-eyebrow">Cómo funciona</p>
+            <h2 className="v3-section-headline">De la oferta a la decisión, en una semana.</h2>
+            <p className="v3-section-sub">
+              Publicás la posición, el candidato vive un sprint completo,
+              vos recibís un reporte con evidencia. Sin entrevistas a ciegas.
+            </p>
           </div>
-        </div>
-      </section>
 
-      {/* ═══ PROBLEMS ═══ */}
-      <section className="problems-section">
-        <div className="section-header">
-          <h2>El problema con el recruiting tradicional</h2>
-          <p>Contratar talento ágil no debería ser una apuesta</p>
-        </div>
-        <div className="problems-grid">
-          {[
-            { icon: "📄", title: "Los CVs Mienten", desc: "Es fácil exagerar skills en papel. Las certificaciones no garantizan performance real." },
-            { icon: "💬", title: "Entrevistas Limitadas", desc: "No revelan cómo alguien facilita, resuelve conflictos o maneja presión real. Los roles ágiles requieren evaluar desempeño real, no solo conocimiento teórico." },
-            { icon: "💸", title: "Contratar Mal Sale Caro", desc: "Un mal hire puede costar 3-5x el salario anual, con un alto riesgo de destruir al equipo." },
-          ].map(p => (
-            <div className="problem-item" key={p.title}>
-              <span className="problem-icon">{p.icon}</span>
-              <h3>{p.title}</h3>
-              <p>{p.desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ═══ FEATURE 2 ═══ */}
-      <section className="section">
-        <div className="container">
-          <div className="feature-section">
-            <div className="feature-visual">
-              <div className="visual-card">
-                <h3>Lo que ve el recruiter</h3>
-                {[
-                  ["Score por dimensión", "Radar chart"],
-                  ["Comparativa de candidatos", "Side-by-side"],
-                  ["Red flags detectados", "Auto-flagged"],
-                  ["Recomendación de seniority", "Junior → Lead"],
-                ].map(([l, v]) => (
-                  <div className="metric-row" key={l}>
-                    <span className="metric-label">{l}</span>
-                    <span className="metric-value metric-tag">{v}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="feature-text">
-              <h2>Dashboards que revelan la verdad</h2>
-              <p>Métricas objetivas. Rankings claros. Videos del assessment completo.</p>
-              <p>Comparás candidatos con data real, no con impresiones subjetivas de una entrevista de 30 minutos.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ═══ TIMELINE ═══ */}
-      <section id="como-funciona" className="timeline-section">
-        <div className="timeline-header">
-          <h2>Cómo funciona</h2>
-          <p>Simple. Rápido. Efectivo.</p>
-        </div>
-        <div className="timeline">
-          {[
-            { icon: "📝", title: "1. Publicá", desc: "Creá tu oferta en minutos y definí el perfil que buscás." },
-            { icon: "📬", title: "2. Screening", desc: "Los candidatos aplican. Una vez terminado el screening inicial, les enviás el assessment." },
-            { icon: "🎮", title: "3. Assessment gamificado", desc: "Simulación de 60-90 minutos. Evaluación de impacto real en equipos a través de escenarios accionables." },
-            { icon: "📊", title: "4. Scoreboard", desc: "Recibís métricas claras, ranking objetivo y video del assessment. Comparás candidatos con data real." },
-            { icon: "💡", title: "5. Decidís", desc: "Tomás la decisión basada en datos y necesidades reales del producto. Menos riesgo, menos tiempo, menos errores." },
-          ].map((t, i) => (
-            <div className="timeline-item" key={i}>
-              <div className="timeline-number">{t.icon}</div>
-              <div className="timeline-content">
-                <h3>{t.title}</h3>
-                <p>{t.desc}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ═══ PRINCIPLES ═══ */}
-      <section id="experiencias" className="experiences-section">
-        <div className="section-header">
-          <h2>Por qué Smatch funciona</h2>
-          <p>Diseñado por SMs y PMs senior con experiencia real en hiring ágil</p>
-        </div>
-        <div className="experiences-grid">
-          {[
-            { icon: "🎯", title: "Escenarios reales, no teoría", text: "Cada challenge está construido desde situaciones que ocurren todos los días en equipos ágiles: bloqueos no escalados, devs apagados, scope creep, presión de management. Si el candidato sabe navegar esto, sabe hacer el trabajo." },
-            { icon: "🤖", title: "La IA es evaluada, no prohibida", text: "Mientras Codility y otros prohíben IA durante el test, Smatch trackea cómo la usa el candidato. Saber usar IA bien es una competencia en sí misma — y la medimos." },
-            { icon: "📊", title: "Output diseñado para decidir rápido", text: "El reporte del recruiter no es un dump de números. Mostramos seniority inferida, dimensiones fuertes, red flags accionables y recomendación clara. Decisión en 5 minutos, no 5 entrevistas." },
-          ].map(p => (
-            <div className="testimonial-card" key={p.title}>
-              <div className="testimonial-header">
-                <div className="testimonial-avatar">{p.icon}</div>
-                <div className="testimonial-info">
-                  <h4>{p.title}</h4>
+          <div className="v3-steps-list">
+            {[
+              { n: "01", title: "Publicá", desc: "Creás la posición en minutos y definís el perfil que buscás." },
+              { n: "02", title: "Screening", desc: "Los candidatos aplican. A los que pasan el filtro inicial les enviás el assessment." },
+              { n: "03", title: "Assessment", desc: "El candidato vive un Sprint 1 completo. 60-90 minutos. Cinco situaciones reales." },
+              { n: "04", title: "Reporte", desc: "Recibís un reporte con seniority inferida, dimensiones y red flags. Comparás con data real." },
+              { n: "05", title: "Decidís", desc: "Decisión con evidencia, no con intuición. Menos riesgo, menos tiempo." },
+            ].map((s) => (
+              <div className="v3-step-card" key={s.n}>
+                <div className="v3-step-number">{s.n}</div>
+                <div className="v3-step-content">
+                  <h3 className="v3-step-title">{s.title}</h3>
+                  <p className="v3-step-desc">{s.desc}</p>
                 </div>
               </div>
-              <div className="testimonial-text">{p.text}</div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ═══ STATS ═══ */}
-      <section className="stats-section">
-        <div className="stats-row">
-          {[["6", "Challenges situacionales"], ["8", "Dimensiones evaluadas"], ["60-90", "Minutos por candidato"], ["AI", "Scoring automático"]].map(([n, l]) => (
-            <div className="stat" key={l}>
-              <div className="stat-number">{n}</div>
-              <div className="stat-label">{l}</div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ═══ RECRUITER CTA BANNER ═══ */}
-      <section className="recruiter-cta-section">
-        <div className="recruiter-cta-banner">
-          <div className="recruiter-cta-content">
-            <div className="recruiter-cta-icon">👔</div>
-            <div className="recruiter-cta-text">
-              <strong>¿Eres recruiter?</strong>
-              <span>Evalúa candidatos con SMatch y toma decisiones basadas en data real</span>
-            </div>
-          </div>
-          <button onClick={() => scrollTo("contacto")} className="recruiter-cta-button">
-            Ver Planes →
-          </button>
-        </div>
-      </section>
-
-      {/* ═══ CTA + CONTACT ═══ */}
-      <section id="contacto" className="cta-section">
-        <div className="cta-content">
-          <h2>Empecemos a trabajar juntos</h2>
-          <p>¿Listo para contratar mejor talento ágil?</p>
-          <div className="contact-form">
-            <div className="form-group">
-              <label htmlFor="nombre">Nombre Completo</label>
-              <input id="nombre" value={contactForm.nombre} onChange={e => setContactForm(f => ({ ...f, nombre: e.target.value }))} required />
-            </div>
-            <div className="form-group">
-              <label htmlFor="email">Email</label>
-              <input id="email" type="email" value={contactForm.email} onChange={e => setContactForm(f => ({ ...f, email: e.target.value }))} required />
-            </div>
-            <div className="form-group">
-              <label htmlFor="empresa">Empresa</label>
-              <input id="empresa" value={contactForm.empresa} onChange={e => setContactForm(f => ({ ...f, empresa: e.target.value }))} required />
-            </div>
-            <div className="form-group">
-              <label htmlFor="tipo">Estoy Interesado en:</label>
-              <select id="tipo" value={contactForm.tipo} onChange={e => setContactForm(f => ({ ...f, tipo: e.target.value }))} required>
-                <option value="">Seleccionar...</option>
-                <option value="publicar">Publicar una Posición</option>
-                <option value="demo">Agendar una Demo</option>
-                <option value="pricing">Solicitar Pricing</option>
-                <option value="otro">Otro</option>
-              </select>
-            </div>
-            <div className="form-group">
-              <label htmlFor="mensaje">Mensaje</label>
-              <textarea id="mensaje" value={contactForm.mensaje} onChange={e => setContactForm(f => ({ ...f, mensaje: e.target.value }))} placeholder="Cuéntanos qué necesitas..." />
-            </div>
-            <button type="button" className="btn-submit" onClick={handleContact}>Enviar Mensaje</button>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* ═══ EARLY ACCESS ═══ */}
-      <section className="trusted-by-section">
-        <div className="trusted-container">
-          <p className="trusted-label">En este momento</p>
-          <div className="trust-stats">
-            <div className="trust-stat">
-              <span className="trust-number">🚀</span>
-              <span className="trust-text">Early access · primeras empresas seleccionadas</span>
-            </div>
-            <div className="trust-stat">
-              <span className="trust-number">🔧</span>
-              <span className="trust-text">Diseñado en colaboración con SMs/PMs senior</span>
-            </div>
-            <div className="trust-stat">
-              <span className="trust-number">📨</span>
-              <span className="trust-text">Onboarding 1-1 con cada empresa que entra</span>
+      {/* ═══ EL PRODUCTO — con mockup del reporte ═══ */}
+      <section id="producto" className="v3-section v3-section-light v3-producto">
+        <div className="v3-container">
+          <div className="v3-section-intro">
+            <p className="v3-eyebrow">El producto</p>
+            <h2 className="v3-section-headline">Evaluaciones basadas en situaciones reales.</h2>
+            <p className="v3-section-sub">
+              Simulaciones donde los candidatos demuestran cómo facilitan, resuelven
+              conflictos y lideran bajo presión. Vos recibís un reporte con métricas
+              objetivas para decidir con confianza.
+            </p>
+          </div>
+
+          {/* Mockup CSS del reporte del recruiter */}
+          <div className="v3-producto-mockup">
+            <div className="v3-report-card">
+              <div className="v3-report-header">
+                <div className="v3-report-avatar">JL</div>
+                <div className="v3-report-info">
+                  <div className="v3-report-name">
+                    Candidato
+                    <span className="v3-report-tag">ASSESSMENT · 47 min</span>
+                  </div>
+                  <div className="v3-report-sub">Evaluación completa</div>
+                </div>
+                <div className="v3-report-score">
+                  <div className="v3-report-grade">B</div>
+                  <div className="v3-report-pct">77%</div>
+                  <div className="v3-report-label">COMPETENTE</div>
+                </div>
+              </div>
+
+              <div className="v3-report-divider" />
+
+              <div className="v3-report-section-title">Dimensiones</div>
+              <div className="v3-report-dims">
+                {[
+                  { label: "Facilitación", pct: 88, tone: "good" },
+                  { label: "Coaching & Empatía", pct: 75, tone: "ok" },
+                  { label: "Pensamiento Sistémico", pct: 76, tone: "ok" },
+                  { label: "Procesos & Estimación", pct: 78, tone: "ok" },
+                  { label: "Stakeholders", pct: 74, tone: "ok" },
+                  { label: "Uso de IA", pct: 78, tone: "ai" },
+                ].map((d) => (
+                  <div className="v3-report-dim" key={d.label}>
+                    <span className="v3-report-dim-label">{d.label}</span>
+                    <div className="v3-report-dim-bar">
+                      <div
+                        className={`v3-report-dim-fill v3-report-dim-fill-${d.tone}`}
+                        style={{ width: `${d.pct}%` }}
+                      />
+                    </div>
+                    <span className="v3-report-dim-pct">{d.pct}%</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="v3-report-divider" />
+
+              <div className="v3-report-cols">
+                <div className="v3-report-col">
+                  <div className="v3-report-col-title v3-report-col-title-good">Fortalezas</div>
+                  <div className="v3-report-col-item">Detecta WIP overflow temprano</div>
+                  <div className="v3-report-col-item">Argumenta con métricas concretas</div>
+                  <div className="v3-report-col-item">Invita voces calladas explícitamente</div>
+                </div>
+                <div className="v3-report-col">
+                  <div className="v3-report-col-title v3-report-col-title-warn">A desarrollar</div>
+                  <div className="v3-report-col-item">Pierde oportunidades de coachear sesgos</div>
+                  <div className="v3-report-col-item">Action items sin criterio de éxito</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ═══ FOOTER ═══ */}
-      <footer className="landing-footer">
-        <div className="footer-content">
-          <div className="footer-section">
-            <h3>SMatch</h3>
-            <p>El marketplace de talento ágil con assessments que realmente importan.</p>
+      {/* ═══ POR QUÉ FUNCIONA ═══ */}
+      <section className="v3-section v3-principles">
+        <div className="v3-container">
+          <div className="v3-section-intro">
+            <p className="v3-eyebrow">Por qué funciona</p>
+            <h2 className="v3-section-headline">Diseñado por gente que estuvo del otro lado.</h2>
+            <p className="v3-section-sub">
+              Construido por Scrum Masters y Project Managers senior
+              con experiencia real en hiring ágil.
+            </p>
           </div>
-          <div className="footer-section">
-            <h3>Producto</h3>
-            <ul>
-              <li><a href="#producto" onClick={(e) => { e.preventDefault(); scrollTo("producto") }}>Producto</a></li>
-              <li><a href="#como-funciona" onClick={(e) => { e.preventDefault(); scrollTo("como-funciona") }}>Cómo Funciona</a></li>
-              <li><a href="#contacto" onClick={(e) => { e.preventDefault(); scrollTo("contacto") }}>Pricing</a></li>
-              <li><a href="#contacto" onClick={(e) => { e.preventDefault(); scrollTo("contacto") }}>Demo</a></li>
-            </ul>
-          </div>
-          <div className="footer-section">
-            <h3>Empresa</h3>
-            <ul>
-              <li><a href="#experiencias" onClick={(e) => { e.preventDefault(); scrollTo("experiencias") }}>Testimonios</a></li>
-              <li><a href="#contacto" onClick={(e) => { e.preventDefault(); scrollTo("contacto") }}>Contacto</a></li>
-            </ul>
-          </div>
-          <div className="footer-section">
-            <h3>Contacto</h3>
-            <ul>
-              <li>hola@smatch.com</li>
-              <li>LinkedIn (próximamente)</li>
-            </ul>
+
+          <div className="v3-principles-grid v3-principles-grid-2">
+            {[
+              {
+                title: "Escenarios reales, no teoría.",
+                desc: "Cada challenge nace de situaciones que ocurren todos los días en equipos ágiles: bloqueos no escalados, devs apagados, scope creep, presión de management. Si el candidato sabe navegar esto, sabe hacer el trabajo.",
+              },
+              {
+                title: "Output diseñado para decidir rápido.",
+                desc: "El reporte no es un dump de números. Mostramos seniority inferida, dimensiones fuertes, red flags accionables y recomendación clara. Decisión en 5 minutos, no en 5 entrevistas.",
+              },
+            ].map((p) => (
+              <div className="v3-principle-card" key={p.title}>
+                <span className="v3-principle-mark" aria-hidden="true" />
+                <h3 className="v3-principle-title">{p.title}</h3>
+                <p className="v3-principle-desc">{p.desc}</p>
+              </div>
+            ))}
           </div>
         </div>
-        <div className="footer-bottom">
-          <p>© 2026 SMatch. Todos los derechos reservados.</p>
+      </section>
+
+      {/* ═══ EL DIFERENCIADOR (climax antes del CTA) ═══ */}
+      <section className="v3-section v3-section-light v3-diferenciador">
+        <div className="v3-container">
+          <p className="v3-eyebrow v3-eyebrow-light">El diferenciador</p>
+          <h2 className="v3-mega-headline">
+            Mientras otros prohíben la IA.
+            <br />
+            <span className="v3-mega-accent">Nosotros la medimos.</span>
+          </h2>
+          <p className="v3-mega-sub">
+            Saber usar IA bien es la habilidad central del SM/PM moderno.
+            Smatch trackea cómo el candidato la usa durante el assessment
+            y lo evalúa como una dimensión más.
+          </p>
+        </div>
+      </section>
+
+      {/* ═══ CTA FINAL ═══ */}
+      <section id="contacto" className="v3-section v3-cta-final">
+        <div className="v3-container">
+          <h2 className="v3-cta-headline">Empezá hoy.</h2>
+          <p className="v3-cta-sub">
+            15 minutos. Te mostramos el assessment, vos decidís si encaja.
+          </p>
+          <form
+            className="v3-cta-form"
+            onSubmit={(e) => { e.preventDefault(); handleContact(e) }}
+          >
+            <input
+              type="email"
+              placeholder="tu@empresa.com"
+              value={contactForm.email}
+              onChange={(e) => setContactForm((f) => ({ ...f, email: e.target.value, nombre: f.nombre || "—", empresa: f.empresa || "—", tipo: "demo" }))}
+              required
+              className="v3-cta-input"
+            />
+            <button type="submit" className="v3-cta-submit">
+              Hablemos
+              <span className="hero-v3-cta-arrow">→</span>
+            </button>
+          </form>
+          <p className="v3-cta-microcopy">
+            15 minutos. Te muestro el producto. Decidís si encaja.
+          </p>
+        </div>
+      </section>
+
+      {/* ═══ FOOTER minimal ═══ */}
+      <footer className="v3-footer">
+        <div className="v3-container">
+          <div className="v3-footer-row">
+            <div className="v3-footer-brand">
+              Smatch
+              <span className="v3-footer-tagline">— Contratá lo que ves.</span>
+            </div>
+            <div className="v3-footer-links">
+              <a href="#producto" onClick={(e) => { e.preventDefault(); scrollTo("producto") }}>Producto</a>
+              <a href="#como-funciona" onClick={(e) => { e.preventDefault(); scrollTo("como-funciona") }}>Cómo funciona</a>
+              <a href="#contacto" onClick={(e) => { e.preventDefault(); scrollTo("contacto") }}>Demo</a>
+              <a href="mailto:hola@smatch.com">hola@smatch.com</a>
+            </div>
+          </div>
+          <div className="v3-footer-bottom">
+            © 2026 Smatch
+          </div>
         </div>
       </footer>
 
@@ -377,7 +384,7 @@ export default function Landing() {
           <div className="login-modal-content">
             <button className="login-modal-close" onClick={() => setLoginOpen(false)}>×</button>
             <div className="login-header">
-              <h2>🎯 Iniciar Sesión</h2>
+              <h2>Iniciar sesión</h2>
               <p>{loginTab === "candidate" ? "Ingresá como candidato para empezar el assessment" : "Ingresá como recruiter para gestionar posiciones"}</p>
             </div>
             <div className="login-tabs">
