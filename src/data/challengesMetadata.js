@@ -1,87 +1,73 @@
 // ─── CHALLENGE METADATA ───
-// Maps challenge IDs to their names, colors, and context
-// Used for reports, navigation, and display
+// Los 5 challenges del Sprint 1 (orden cronológico real).
+// id = orden en el menú; fileId = qué archivo Challenge0X.jsx renderiza.
 
 export const CHALLENGES_METADATA = {
   1: {
     id: 1,
-    fileId: 6,
-    title: "Team Agreements Workshop",
-    shortTitle: "Team Agreements",
-    sprint: "Sprint 0",
-    context: "Primer día del equipo",
-    icon: "□",
-    color: "#7c3aed",
-    gradient: "linear-gradient(135deg, #7c3aed, #6d28d9)"
+    fileId: 4,
+    title: "Día 1 · Kickoff & Planning",
+    shortTitle: "Kickoff & Planning",
+    sprint: "Sprint 1",
+    context: "Día 1 — Team agreements + Estimación",
+    icon: "■",
+    color: "#0891b2",
+    gradient: "linear-gradient(135deg, #0891b2, #06b6d4)",
   },
   2: {
     id: 2,
-    fileId: 4,
-    title: "Estimación & Priorización",
-    shortTitle: "Planning Poker",
+    fileId: 3,
+    title: "Día 3 · 1-1 con Alan",
+    shortTitle: "Coaching 1-1",
     sprint: "Sprint 1",
-    context: "Sprint Planning",
-    icon: "■",
-    color: "#0891b2",
-    gradient: "linear-gradient(135deg, #0891b2, #06b6d4)"
+    context: "Día 3 — El dev que se está apagando",
+    icon: "⬢",
+    color: "#ff8a80",
+    gradient: "linear-gradient(135deg, #ff8a80, #fa8072)",
   },
   3: {
     id: 3,
-    fileId: 1,
-    title: "La retro que parece perfecta",
-    shortTitle: "Retro Oculta",
-    sprint: "Sprint 2",
-    context: "Sprint retrospective",
-    icon: "◉",
-    color: "#00d4aa",
-    gradient: "linear-gradient(135deg, #00d4aa, #059669)"
+    fileId: 2,
+    title: "Día 5 · Daily con bloqueo",
+    shortTitle: "Kanban Bloqueado",
+    sprint: "Sprint 1",
+    context: "Día 5 — Bloqueo de Spotify API",
+    icon: "◆",
+    color: "#f59e0b",
+    gradient: "linear-gradient(135deg, #f59e0b, #d97706)",
   },
   4: {
     id: 4,
-    fileId: 2,
-    title: "El bloqueo que nadie escala",
-    shortTitle: "Kanban Bloqueado",
-    sprint: "Sprint 3",
-    context: "Día 7 - Bloqueos críticos",
-    icon: "◆",
-    color: "#f59e0b",
-    gradient: "linear-gradient(135deg, #f59e0b, #d97706)"
+    fileId: 5,
+    title: "Día 7 · Reunión con Paula",
+    shortTitle: "Velocity Pressure",
+    sprint: "Sprint 1",
+    context: "Día 7 — Stakeholder management",
+    icon: "▲",
+    color: "#dc2626",
+    gradient: "linear-gradient(135deg, #dc2626, #b91c1c)",
   },
   5: {
     id: 5,
-    fileId: 3,
-    title: "El dev que se está apagando",
-    shortTitle: "Burnout",
-    sprint: "Sprint 5",
-    context: "Día 6 - Coaching 1-1",
-    icon: "⬢",
-    color: "#ff8a80",
-    gradient: "linear-gradient(135deg, #ff8a80, #fa8072)"
+    fileId: 1,
+    title: "Día 10 · Retro del Sprint 1",
+    shortTitle: "Retro Oculta",
+    sprint: "Sprint 1",
+    context: "Día 10 — La retro que parece perfecta",
+    icon: "◉",
+    color: "#00d4aa",
+    gradient: "linear-gradient(135deg, #00d4aa, #059669)",
   },
-  6: {
-    id: 6,
-    fileId: 5,
-    title: "La presión de velocidad",
-    shortTitle: "Velocity Pressure",
-    sprint: "Sprint 6",
-    context: "Día 3 - Management",
-    icon: "▲",
-    color: "#dc2626",
-    gradient: "linear-gradient(135deg, #dc2626, #b91c1c)"
-  }
 }
 
-// Helper function to get challenge by ID
 export function getChallengeById(id) {
   return CHALLENGES_METADATA[id] || null
 }
 
-// Helper function to get challenge by file ID
 export function getChallengeByFileId(fileId) {
-  return Object.values(CHALLENGES_METADATA).find(c => c.fileId === fileId) || null
+  return Object.values(CHALLENGES_METADATA).find((c) => c.fileId === fileId) || null
 }
 
-// Get all challenges in order
 export function getAllChallenges() {
   return Object.values(CHALLENGES_METADATA).sort((a, b) => a.id - b.id)
 }

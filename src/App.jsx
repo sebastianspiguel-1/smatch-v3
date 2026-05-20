@@ -5,12 +5,12 @@ import CandidateReport from "./pages/CandidateReport"
 import ThankYou from "./pages/ThankYou"
 import RecruiterDashboard from "./pages/RecruiterDashboard"
 import RecruiterHub from "./pages/RecruiterHub"
+import DevSeed from "./pages/DevSeed"
 import Challenge01 from "./challenges/Challenge01"
 import Challenge02 from "./challenges/Challenge02"
 import Challenge03 from "./challenges/Challenge03"
 import Challenge04 from "./challenges/Challenge04"
 import Challenge05 from "./challenges/Challenge05"
-import Challenge06 from "./challenges/Challenge06"
 
 export default function App() {
   return (
@@ -23,12 +23,12 @@ export default function App() {
         <Route path="/challenge/3" element={<Challenge03 />} />
         <Route path="/challenge/4" element={<Challenge04 />} />
         <Route path="/challenge/5" element={<Challenge05 />} />
-        <Route path="/challenge/6" element={<Challenge06 />} />
         <Route path="/gracias" element={<ThankYou />} />
         {/* Reporte y dashboard del recruiter — NO accesible para candidato */}
         <Route path="/report/:id" element={<CandidateReport />} />
         <Route path="/dashboard" element={<RecruiterDashboard />} />
         <Route path="/recruiter" element={<RecruiterHub />} />
+        <Route path="/dev/seed" element={<DevSeed />} />
       </Routes>
     </BrowserRouter>
   )

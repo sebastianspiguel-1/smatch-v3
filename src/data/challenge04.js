@@ -1,16 +1,8 @@
 import { T } from "../theme"
+import { TEAM, MEMBER_MAP, PBIS as SSOT_PBIS } from "./setlistSprint1"
 
-// ─── EQUIPO SETLIST ───
-export const TEAM = [
-  { id: "eric", name: "Eric", role: "Tech Lead", color: "#60a5fa", init: "ER" },
-  { id: "david", name: "David", role: "Dev de Pagos", color: "#34d399", init: "DV" },
-  { id: "alan", name: "Alan", role: "Dev Mobile", color: "#f472b6", init: "AL" },
-  { id: "gian", name: "Gian", role: "QA", color: "#fb923c", init: "GI" },
-  { id: "gabriela", name: "Gabriela", role: "Product Owner", color: "#a78bfa", init: "GA" },
-  { id: "nacho", name: "Nacho", role: "Dev Frontend", color: "#fbbf24", init: "NA" },
-]
-
-export const MEMBER_MAP = Object.fromEntries(TEAM.map(t => [t.id, t]))
+// Re-export del equipo SSOT
+export { TEAM, MEMBER_MAP }
 
 export const SESSION_CONTEXT = "Equipo Setlist, Sprint 1, Día 1 — Kickoff + Planning. Es la primera vez que el equipo trabaja junto y la primera vez que estiman y priorizan en común. La sesión tiene dos partes: PARTE 1 — Team Agreements rápidos (3 acuerdos básicos para arrancar bien); PARTE 2 — Planning Session (estimar y priorizar 12 PBIs con velocity proyectada ~30 pts). La meta del Sprint 1: MVP usable con flujo end-to-end (banda crea show → fan sugiere canciones → banda elige setlist)."
 
@@ -66,22 +58,9 @@ export const TEAM_AGREEMENT_TOPICS = [
 ]
 
 // ─── PRODUCT BACKLOG ITEMS — Setlist MVP Sprint 1 ───
-// Producto: app mobile donde bandas + fans co-crean setlists de shows.
-// SL-105 (Buscar canción) es la que se bloquea en C02 (esperando API Spotify).
-export const PBIS = [
-  { id: "SL-101", title: "Crear show", desc: "Banda crea show: fecha, lugar, repertorio inicial.", pts: 5, category: "must" },
-  { id: "SL-102", title: "Login y registro", desc: "Login y registro de bandas y fans con email + password.", pts: 5, category: "must" },
-  { id: "SL-103", title: "Compartir link de show", desc: "Link único compartible que los fans abren para sumarse.", pts: 3, category: "must" },
-  { id: "SL-104", title: "RSVP del fan", desc: "El fan confirma asistencia al show con 1 tap.", pts: 3, category: "must" },
-  { id: "SL-105", title: "Buscar canción", desc: "Buscador de canciones integrando Spotify Search API (autocompletado, álbum, artista).", pts: 8, category: "must" },
-  { id: "SL-106", title: "Sugerir canción al show", desc: "Fan agrega una canción al pool de sugerencias del show.", pts: 5, category: "must" },
-  { id: "SL-107", title: "Votar canciones", desc: "La banda revisa el pool y vota qué entra en el setlist final.", pts: 5, category: "should" },
-  { id: "SL-108", title: "Ver setlist final público", desc: "Vista pública del setlist confirmado, accesible vía link.", pts: 3, category: "should" },
-  { id: "SL-109", title: "Notificación push 'Setlist listo'", desc: "Push a los fans cuando la banda confirma el setlist final.", pts: 5, category: "should" },
-  { id: "SL-110", title: "Galería de fotos post-show", desc: "Fans suben fotos del show, se muestran en grilla.", pts: 8, category: "could" },
-  { id: "SL-111", title: "Perfil de banda", desc: "Bio, foto, links a redes y plataformas de música.", pts: 3, category: "could" },
-  { id: "SL-112", title: "Dark mode", desc: "Tema oscuro toggle con persistencia.", pts: 3, category: "could" },
-]
+// El catálogo vive en setlistSprint1.js. Re-export para mantener compat con
+// el resto del módulo y los componentes que importan de acá.
+export const PBIS = SSOT_PBIS
 
 export const FIBONACCI = [1, 2, 3, 5, 8, 13, 21]
 export const TSHIRTS = ["XS", "S", "M", "L", "XL", "XXL"]

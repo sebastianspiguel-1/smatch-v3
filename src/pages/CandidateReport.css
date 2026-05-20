@@ -1888,3 +1888,218 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ═══════════════════════════════════════════════════
+   DEMO BADGE
+   ═══════════════════════════════════════════════════ */
+
+.demo-badge {
+  display: inline-block;
+  margin-left: 10px;
+  padding: 3px 9px;
+  background: linear-gradient(135deg, #00d4aa, #059669);
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  border-radius: 6px;
+  vertical-align: middle;
+  box-shadow: 0 1px 3px rgba(5, 150, 105, 0.3);
+}
+
+/* ═══════════════════════════════════════════════════
+   AI INSIGHTS — sección unificada y compacta
+   ═══════════════════════════════════════════════════ */
+
+.ai-insights-section {
+  background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 20px 22px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+}
+
+.ai-insights-stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.ai-insight-stat-chip {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.ai-insight-stat-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  color: #64748b;
+  text-transform: uppercase;
+}
+
+.ai-insight-stat-value {
+  font-size: 16px;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.2;
+}
+
+.ai-insights-cols {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.ai-insights-col {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 14px 14px 12px;
+}
+
+.ai-insights-col-title {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.ai-insights-col-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ai-insights-col-list li {
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: #334155;
+  padding-left: 12px;
+  position: relative;
+}
+
+.ai-insights-col-list li::before {
+  content: "·";
+  position: absolute;
+  left: 4px;
+  color: #94a3b8;
+  font-weight: 700;
+}
+
+.ai-insights-col-list li.muted {
+  color: #94a3b8;
+  font-style: italic;
+}
+
+.moment-tag {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: #dbeafe;
+  color: #1d4ed8;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  margin-right: 4px;
+}
+
+.ai-coach-details {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 10px 14px;
+}
+
+.ai-coach-details summary {
+  font-size: 12px;
+  font-weight: 700;
+  color: #475569;
+  cursor: pointer;
+  list-style: revert;
+}
+
+.ai-coach-details summary:hover {
+  color: #0f172a;
+}
+
+.ai-coach-list {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ai-coach-list-item {
+  display: grid;
+  grid-template-columns: minmax(160px, 200px) 50px 1fr;
+  gap: 10px;
+  align-items: start;
+  font-size: 12px;
+  line-height: 1.5;
+  padding: 8px 0;
+  border-top: 1px dashed #f1f5f9;
+}
+
+.ai-coach-list-item:first-child {
+  border-top: none;
+}
+
+.ai-coach-challenge {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.ai-coach-rationale {
+  color: #475569;
+}
+
+.ai-fluency-score {
+  font-size: 11px;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 6px;
+  text-align: center;
+  height: fit-content;
+}
+
+.ai-fluency-score.score-high {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.ai-fluency-score.score-mid {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.ai-fluency-score.score-low {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+@media (max-width: 900px) {
+  .ai-insights-stats-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .ai-insights-cols {
+    grid-template-columns: 1fr;
+  }
+  .ai-coach-list-item {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+}

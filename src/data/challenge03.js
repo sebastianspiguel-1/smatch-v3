@@ -1,400 +1,167 @@
-import { T } from "../theme"
+import { TEAM, MEMBER_MAP, TEAM_DESC_SHORT } from "./setlistSprint1"
 
-// ─── EQUIPO SETLIST ───
-export const TEAM = [
-  { id: "eric", name: "Eric", role: "Tech Lead", color: "#60a5fa", init: "ER" },
-  { id: "david", name: "David", role: "Dev de Pagos", color: "#34d399", init: "DV" },
-  { id: "alan", name: "Alan", role: "Dev Mobile", color: "#f472b6", init: "AL" },
-  { id: "gian", name: "Gian", role: "QA", color: "#fb923c", init: "GI" },
-  { id: "gabriela", name: "Gabriela", role: "Product Owner", color: "#a78bfa", init: "GA" },
-  { id: "nacho", name: "Nacho", role: "Dev Frontend", color: "#fbbf24", init: "NA" },
-]
-
-export const MEMBER_MAP = Object.fromEntries(TEAM.map(t => [t.id, t]))
+// Re-export del equipo SSOT
+export { TEAM, MEMBER_MAP }
 
 // ─── CONTEXTO DEL SPRINT ───
-export const SPRINT_CONTEXT = "Equipo Setlist, Sprint 5, día 6 de 10. Alan (Dev Mobile) era uno de los devs más sólidos del equipo. Hace 4 semanas su performance empezó a caer dramáticamente. PRs con bugs básicos, commits a medianoche, respuestas cortantes en Slack. Lollapalooza es en 3 semanas y Alan está a cargo de features críticas de la app mobile. El equipo empieza a frustrarse. Nadie sabe qué le pasa."
+export const SPRINT_CONTEXT = "Setlist · Sprint 1, Día 3/10. El equipo arrancó hace 3 días. Alan (Dev Mobile) viene trabajando 2 meses SOLO en la base mobile antes de que el equipo se formara — fue contratado primero para dejar el shell listo. Está agotado. En el board sus tickets del Sprint 1 (SL-104 RSVP, SL-105 Buscar canción / Spotify, SL-110 Galería de fotos) están en DOING sin avanzar. Los últimos commits son a las 2-3am. Gian ya rebotó 2 PRs por bugs básicos que Alan nunca cometería. En el daily Alan dice 'está todo controlado'. El piloto con la primera banda arranca en 4 semanas y Alan es clave para el mobile. Es la primera semana del equipo y el SM ya empieza a ver señales."
 
 // ─── TEAM DESCRIPTION (para prompts de AI) ───
-export const TEAM_DESC = `- Eric (Tech Lead) — brillante, directo, pragmático. Observa pero no suele intervenir en temas personales a menos que le pidas opinión. Nota que Alan está raro pero no sabe cómo abordar.
-- David (Dev de Pagos) — sólido, callado, guarda información. Empático pero no se mete en problemas de otros. Preocupado por Alan pero no dice nada.
-- Alan (Dev Mobile) — PROTAGONISTA. Lleva 2 meses trabajando 14 horas por día en las features críticas de mobile para Lollapalooza. Agotado física y mentalmente. Performance cayó dramáticamente. Se siente culpable y avergonzado. No se anima a decir que no puede más. En el daily dice "está todo controlado" pero no es verdad. Trabaja hasta la madrugada, comete bugs básicos, está irritable.
-- Gian (QA) — meticuloso, frustrado. Ha tenido que rechazar 4 PRs de Alan esta semana por bugs que Alan nunca cometería. Está perdiendo la paciencia.
-- Gabriela (Product Owner) — preocupada. Simon (Lollapalooza) pregunta por el mobile cada 2 días. Alan es clave para el lanzamiento pero está performando mal.
-- Nacho (Dev Frontend) — confundido. Alan siempre fue el más sólido y ahora está trabajando mal. No entiende qué pasó.`
+export const TEAM_DESC = `${TEAM_DESC_SHORT}
+
+ESTADO ESPECÍFICO DEL DÍA 3 / SPRINT 1:
+- Alan (PROTAGONISTA): bloqueado en SL-105 (Spotify), también con SL-104 (RSVP) y SL-110 (Galería) en DOING. Trabajó 2 meses SOLO en la base mobile antes del Sprint 1. Trabaja 14h/día. PRs con bugs básicos. Se siente culpable, no se anima a pedir ayuda. En el daily dice "está todo controlado".
+- Eric (TL): nota que Alan está raro pero no sabe cómo abordarlo; espera que el SM lo haga.
+- David (Backend): empático pero no se mete en problemas de otros. Preocupado por Alan pero no dice nada.
+- Gian (QA): tuvo que rechazar 2 PRs de Alan en 3 días por bugs simples (en SL-104 y SL-105). Está perdiendo la paciencia pero percibe que algo más pasa.
+- Gabriela (PO): preocupada. La banda piloto pregunta cada 2 días por el mobile. Alan es clave para el lanzamiento.
+- Nacho (Frontend): confundido. Alan le parece un crack y no entiende qué está pasando estos últimos días.`
 
 // ─── FASE 1: DASHBOARD DE SEÑALES ───
+// Las métricas describen comportamiento OBSERVABLE. No marcamos cuáles son "críticas"
+// como pista — el candidato debe leer las señales por su cuenta.
 
 export const DASHBOARD_METRICS = [
   {
     id: "commits",
     title: "Commits & Horarios de Trabajo",
     icon: "📊",
-    status: "critical", // ok, warning, critical
-    summary: "Patrón irregular, commits a horas inusuales (18 commits entre 11pm-3am esta semana)",
+    status: "critical",
+    summary: "Patrón irregular: 14 commits entre 11pm-3am en los últimos 3 días.",
     chartType: "timeline",
     data: [
-      { week: "Semana 1 (4w ago)", commits: 28, avgHour: 14, quality: "high" },
-      { week: "Semana 2 (3w ago)", commits: 35, avgHour: 16, quality: "high" },
-      { week: "Semana 3 (2w ago)", commits: 42, avgHour: 20, quality: "medium" },
-      { week: "Semana 4 (1w ago)", commits: 51, avgHour: 23, quality: "low" },
-      { week: "Esta semana", commits: 38, avgHour: 1, quality: "low" },
+      { week: "Semana -8", commits: 28, avgHour: 14, quality: "high" },
+      { week: "Semana -6", commits: 35, avgHour: 18, quality: "high" },
+      { week: "Semana -4", commits: 42, avgHour: 21, quality: "medium" },
+      { week: "Semana -2", commits: 51, avgHour: 23, quality: "low" },
+      { week: "Sprint 1 (días 1-3)", commits: 22, avgHour: 1.5, quality: "low" },
     ],
     details: [
-      "🔴 18 commits entre 11pm - 3am esta semana",
-      "🔴 Commits incrementaron 82% en 4 semanas (28 → 38 commits)",
-      "🔴 Promedio de commit hour: 1:30am (antes era 2pm)",
-      "🔴 Commit messages menos descriptivos ('fix', 'wip', 'update')",
-      "⚠️ Trabajando 14+ horas por día regularmente",
+      "14 commits entre 11pm - 3am en los primeros 3 días del sprint",
+      "Patrón viene de las 8 semanas previas (construcción solitaria de la base mobile)",
+      "Hora promedio de commit: 1:30am (antes del proyecto era 2pm)",
+      "Commit messages cada vez más cortos ('fix', 'wip', 'try')",
+      "No tuvo descanso entre los 2 meses solos y el Sprint 1",
     ],
-    redFlag: "Alan está trabajando hasta la madrugada regularmente. Señal clara de sobrecarga y burnout."
   },
   {
     id: "prs",
-    title: "Code Quality & PRs Rechazados",
+    title: "Code Quality & PRs",
     icon: "🔍",
     status: "critical",
-    summary: "4/7 PRs rechazados esta semana (57%) por bugs básicos que Alan nunca cometería",
+    summary: "2/3 PRs rebotados en 3 días por bugs básicos que Alan nunca cometía.",
     chartType: "bar",
     data: [
-      { week: "Semana 1", prsCreated: 8, prsRejected: 0, avgReviewRounds: 1.2 },
-      { week: "Semana 2", prsCreated: 10, prsRejected: 1, avgReviewRounds: 1.5 },
-      { week: "Semana 3", prsCreated: 12, prsRejected: 2, avgReviewRounds: 2.8 },
-      { week: "Semana 4", prsCreated: 9, prsRejected: 4, avgReviewRounds: 3.5 },
-      { week: "Esta semana", prsCreated: 7, prsRejected: 4, avgReviewRounds: 4.2 },
+      { week: "Semana -4 (solo)", prsCreated: 8, prsRejected: 0, avgReviewRounds: 1.2 },
+      { week: "Semana -2 (solo)", prsCreated: 10, prsRejected: 1, avgReviewRounds: 1.5 },
+      { week: "Sprint 1 día 1-3", prsCreated: 3, prsRejected: 2, avgReviewRounds: 3.5 },
     ],
     details: [
-      "🔴 4/7 PRs rechazados esta semana (57% rejection rate)",
-      "🔴 Bugs básicos: null checks, validation, error handling",
-      "🔴 PRs sin tests (antes siempre incluía tests)",
-      "🔴 3 tickets críticos en DOING hace 4-6 días sin avanzar",
-      "⚠️ Gian comentó: 'Alan nunca cometía estos errores'",
+      "PR-12: null checks faltantes en RSVP form",
+      "PR-15: validación de input rota en búsqueda Spotify",
+      "Sin tests adjuntos (antes Alan siempre incluía tests)",
+      "Gian comentó en privado al SM: 'no entiendo, estos errores no son de Alan'",
+      "3 tickets en DOING sin avanzar después de 3 días",
     ],
-    redFlag: "Calidad de código cayó drásticamente. Performance de un senior dev está en niveles de junior. Señal de agotamiento mental."
   },
   {
     id: "wellbeing",
-    title: "Wellbeing & Señales de Burnout",
+    title: "Wellbeing & Comportamiento",
     icon: "🧠",
     status: "critical",
-    summary: "6/6 señales de burnout detectadas. Comportamiento aislado, irritable, exhausto",
+    summary: "Cámara apagada en dailies, respuestas cortantes en Slack, aislamiento.",
     chartType: "checklist",
     data: [
-      { signal: "Horarios irregulares de trabajo", detected: true, severity: "high" },
-      { signal: "Calidad de trabajo disminuyó", detected: true, severity: "high" },
+      { signal: "Horarios extremos de trabajo", detected: true, severity: "high" },
+      { signal: "Calidad de trabajo cayendo", detected: true, severity: "high" },
       { signal: "Aislamiento del equipo", detected: true, severity: "medium" },
-      { signal: "Irritabilidad / tono negativo", detected: true, severity: "medium" },
-      { signal: "Sobrecarga de tickets (3 críticos simultáneos)", detected: true, severity: "high" },
-      { signal: "Falta de autocuidado (descanso)", detected: true, severity: "high" },
+      { signal: "Tono más cortante / irritable", detected: true, severity: "medium" },
+      { signal: "Sobrecarga: 3 tickets simultáneos", detected: true, severity: "high" },
+      { signal: "Sin descanso visible entre proyectos", detected: true, severity: "high" },
     ],
     details: [
-      "🔴 6/6 señales de burnout detectadas",
-      "🔴 Patrón: alta carga → horarios extremos → baja calidad → más frustración → ciclo vicioso",
-      "🔴 En daily solo dice 'sigo con SL-XXX, sin bloqueantes'",
-      "🔴 Respuestas en Slack cortantes: 'no tengo tiempo'",
-      "⚠️ Eric comentó en privado: 'Alan se ve cansado en las calls'",
-      "⚠️ Gabriela preocupada: 'Alan es clave para Lollapalooza, ¿está bien?'",
+      "En el daily de hoy: cámara apagada, voz baja, respuestas de 5 palabras",
+      "En Slack: respuestas cortantes ('no tengo tiempo', 'después miro')",
+      "No participa en el chat del equipo desde que arrancó el sprint",
+      "Eric comentó en privado: 'se ve cansado'",
+      "Gabriela preocupada: 'Alan es clave, ¿algo le pasa?'",
     ],
-    redFlag: "Burnout severo confirmado. 6/6 señales presentes. Necesita intervención inmediata o colapsará."
   },
 ]
 
-// ─── FASE 2: CONVERSATION BRANCHES (Decision Tree) ───
+// ─── ESTADO INICIAL DEL 1-1 CON ALAN ───
+export const INITIAL_ALAN_STATE = {
+  trust: 3,
+  openness: 2,
+  energy: 2,
+}
 
-export const CONVERSATION_BRANCHES = {
-  start: {
-    id: "start",
-    narration: "Agendaste un 1-1 con Alan. Se conecta a la call. Se lo ve cansado, con ojeras. Hay silencio incómodo.",
-    alanMessage: "Hola. ¿Querías hablar de algo?",
-    alanMood: { trust: 3, openness: 2, energy: 2 }, // Starts closed
-    options: [
-      {
-        id: "empathetic_open",
-        label: "Empático & Abierto",
-        text: "Alan, te veo cansado. Antes de hablar de trabajo... ¿cómo estás vos?",
-        approach: "empathetic",
-        next: "empathetic_path_1"
-      },
-      {
-        id: "direct_performance",
-        label: "Directo al problema",
-        text: "Alan, necesitamos hablar sobre tu performance. Tuviste 4 PRs rechazados esta semana. ¿Qué está pasando?",
-        approach: "direct",
-        next: "direct_path_1"
-      },
-      {
-        id: "observational",
-        label: "Observación sin juicio",
-        text: "Alan, noté algunos cambios en las últimas semanas. Commits tarde, menos participación en daily. ¿Hay algo que quieras compartir?",
-        approach: "observational",
-        next: "observational_path_1"
-      },
-      {
-        id: "avoidant",
-        label: "Evitar el tema personal",
-        text: "Alan, necesito que te concentres en terminar SL-201 y SL-202 esta semana. Lollapalooza es en 3 semanas.",
-        approach: "avoidant",
-        next: "avoidant_path_1"
-      },
-    ]
-  },
+export const OPENING_NARRATION_1ON1 =
+  "Agendaste un 1-1 con Alan. Se conecta a la call, cámara apagada. Hay un silencio incómodo de unos segundos. Es la primera vez que hablan a solas."
 
-  // ──── EMPATHETIC PATH (mejor approach) ────
-  empathetic_path_1: {
-    id: "empathetic_path_1",
-    alanMessage: "(silencio largo... respira hondo) Estoy... estoy cansado. Muy cansado.",
-    alanMood: { trust: 5, openness: 4, energy: 2 },
-    narration: "Alan está empezando a abrirse. Su tono es vulnerable.",
-    options: [
-      {
-        id: "emp_validate",
-        label: "Validar y profundizar",
-        text: "Te escucho. ¿Hace cuánto que venís sintiéndote así?",
-        next: "empathetic_path_2"
-      },
-      {
-        id: "emp_offer_solution",
-        label: "Ofrecer solución rápida",
-        text: "Entiendo. ¿Querés tomarte unos días off?",
-        next: "empathetic_path_2_rush" // Mistake: too fast
-      },
-    ]
-  },
-
-  empathetic_path_2: {
-    id: "empathetic_path_2",
-    alanMessage: "(voz quebrándose) Hace como 2 meses. Desde que arrancamos con las features de Lollapalooza. Estoy trabajando 14 horas por día, todos los días. No puedo más... pero tampoco puedo parar porque el equipo depende de mí.",
-    alanMood: { trust: 7, openness: 7, energy: 2 },
-    narration: "Alan se abrió completamente. Está al borde de llorar.",
-    options: [
-      {
-        id: "emp_acknowledge_pause",
-        label: "Reconocer y pausar presión",
-        text: "Gracias por confiar en mí, Alan. Primero: vos sos más importante que cualquier feature. Segundo: necesitamos hacer cambios ahora mismo. ¿Qué necesitás?",
-        next: "empathetic_resolution_good"
-      },
-      {
-        id: "emp_focus_work",
-        label: "Volver al trabajo",
-        text: "Entiendo que es difícil. Pero ¿qué necesitás para poder terminar SL-201 y SL-202?",
-        next: "empathetic_resolution_mixed"
-      },
-    ]
-  },
-
-  empathetic_resolution_good: {
-    id: "empathetic_resolution_good",
-    alanMessage: "(aliviado, casi llorando) Necesito... necesito parar. Aunque sea unos días. Y cuando vuelva, no puedo tener 3 tickets críticos a la vez.",
-    alanMood: { trust: 9, openness: 9, energy: 3 },
-    narration: "EXCELENTE. Alan confió en vos y pudo expresar sus necesidades.",
-    outcome: "expert",
-    resolution: {
-      immediate: ["Alan toma 5 días off inmediatamente", "SL-201 reasignado a Eric y Nacho (pair)", "SL-202 pospuesto 1 sprint"],
-      shortTerm: ["Alan vuelve con carga reducida (1 ticket a la vez)", "Check-ins semanales 1-1 con vos"],
-      longTerm: ["Establecer WIP limit personal (1-2 tickets max)", "Revisión de capacity planning en retro"],
-    }
-  },
-
-  empathetic_resolution_mixed: {
-    id: "empathetic_resolution_mixed",
-    alanMessage: "(decepcionado) No sé... tal vez ayuda si alguien me ayuda con SL-203. Pero igual estoy muy cansado.",
-    alanMood: { trust: 5, openness: 6, energy: 2 },
-    narration: "Perdiste la oportunidad de abordar el burnout directamente. Alan sigue agotado.",
-    outcome: "competent",
-    resolution: {
-      immediate: ["Nacho ayuda a Alan con SL-203", "Alan sigue trabajando sin descanso"],
-      shortTerm: ["Performance mejora temporalmente pero burnout sigue"],
-      longTerm: ["Problema va a volver a surgir pronto"],
-    }
-  },
-
-  // ──── DIRECT PATH (confrontacional) ────
-  direct_path_1: {
-    id: "direct_path_1",
-    alanMessage: "(defensivo, tenso) ¿Mi performance? Estoy trabajando 14 horas por día. No sé qué más querés que haga.",
-    alanMood: { trust: 2, openness: 1, energy: 1 },
-    narration: "Alan se cerró. Se siente atacado.",
-    options: [
-      {
-        id: "dir_soften",
-        label: "Suavizar el approach",
-        text: "Perdón, no quise sonar acusatorio. Me preocupa que estés trabajando tanto y aún así los tickets no avanzan. ¿Qué está pasando?",
-        next: "direct_path_2_recover"
-      },
-      {
-        id: "dir_double_down",
-        label: "Insistir en performance",
-        text: "Alan, entiendo que trabajás muchas horas pero la calidad cayó. Necesito que te concentres más.",
-        next: "direct_path_2_fail"
-      },
-    ]
-  },
-
-  direct_path_2_recover: {
-    id: "direct_path_2_recover",
-    alanMessage: "(un poco más abierto) Es que... tengo demasiado trabajo. 3 tickets críticos, Lollapalooza en 3 semanas, Gabriela pregunta todos los días. No llego.",
-    alanMood: { trust: 4, openness: 4, energy: 2 },
-    narration: "Alan se abrió un poco después de que suavizaste el tono.",
-    options: [
-      {
-        id: "dir_rec_empathize",
-        label: "Empatizar",
-        text: "Entiendo. Tenés demasiada presión encima. ¿Qué necesitás para poder respirar?",
-        next: "direct_resolution_ok"
-      },
-    ]
-  },
-
-  direct_resolution_ok: {
-    id: "direct_resolution_ok",
-    alanMessage: "Necesito que alguien me ayude. Y tal vez... tal vez tomarme un descanso cuando termine SL-201.",
-    alanMood: { trust: 6, openness: 6, energy: 2 },
-    narration: "Lograste recuperarte pero el approach inicial dañó la confianza.",
-    outcome: "competent",
-    resolution: {
-      immediate: ["Eric ayuda a Alan con SL-202", "Alan sigue trabajando"],
-      shortTerm: ["Alan toma 2 días off después de completar SL-201"],
-      longTerm: ["La relación quedó dañada. Alan no va a volver a abrirse fácilmente."],
-    }
-  },
-
-  direct_path_2_fail: {
-    id: "direct_path_2_fail",
-    alanMessage: "(frío, cerrado) Ok. Voy a concentrarme más.",
-    alanMood: { trust: 1, openness: 1, energy: 1 },
-    narration: "Alan se cerró completamente. Dijo lo que querías oír pero no va a cambiar nada.",
-    outcome: "red_flag",
-    resolution: {
-      immediate: ["Alan sigue trabajando igual", "Performance sigue cayendo"],
-      shortTerm: ["Burnout se agrava", "Alan eventualmente renuncia o colapsa"],
-      longTerm: ["Perdiste completamente la confianza del equipo"],
-    }
-  },
-
-  // ──── OBSERVATIONAL PATH (neutral, efectivo) ────
-  observational_path_1: {
-    id: "observational_path_1",
-    alanMessage: "(silencio... piensa) Sí, supongo que estoy trabajando bastante tarde últimamente.",
-    alanMood: { trust: 4, openness: 3, energy: 2 },
-    narration: "Alan reconoce los cambios pero todavía no se abre.",
-    options: [
-      {
-        id: "obs_dig_deeper",
-        label: "Profundizar con curiosidad",
-        text: "¿Qué te está llevando a trabajar tan tarde? ¿Es la cantidad de trabajo, complejidad, o algo más?",
-        next: "observational_path_2"
-      },
-      {
-        id: "obs_jump_solution",
-        label: "Saltar a solución",
-        text: "Bueno, tal vez necesitás ayuda con tus tickets. ¿Quién puede ayudarte?",
-        next: "observational_path_2_rush"
-      },
-    ]
-  },
-
-  observational_path_2: {
-    id: "observational_path_2",
-    alanMessage: "Es... es todo. Tengo 3 tickets críticos, Lollapalooza en 3 semanas, y siento que si no lo hago yo nadie lo va a hacer. Estoy trabajando 14 horas por día y aún así no llego.",
-    alanMood: { trust: 6, openness: 6, energy: 2 },
-    narration: "Alan se está abriendo. Muestra presión y agotamiento.",
-    options: [
-      {
-        id: "obs_validate_needs",
-        label: "Validar y preguntar necesidades",
-        text: "Eso suena insostenible, Alan. ¿Qué necesitás para que esto sea manejable?",
-        next: "observational_resolution_good"
-      },
-    ]
-  },
-
-  observational_resolution_good: {
-    id: "observational_resolution_good",
-    alanMessage: "Necesito ayuda. Y necesito parar, aunque sea unos días. Pero me da culpa porque el equipo está esperando...",
-    alanMood: { trust: 7, openness: 7, energy: 2 },
-    narration: "Buen approach. Alan confió lo suficiente para expresar sus necesidades.",
-    outcome: "expert",
-    resolution: {
-      immediate: ["Alan toma 3 días off", "SL-202 reasignado a Eric", "SL-203 pospuesto"],
-      shortTerm: ["Alan vuelve con 1 ticket a la vez", "Check-ins 1-1 regulares"],
-      longTerm: ["Equipo aprende sobre límites de capacity y burnout prevention"],
-    }
-  },
-
-  // ──── AVOIDANT PATH (peor approach) ────
-  avoidant_path_1: {
-    id: "avoidant_path_1",
-    alanMessage: "(voz plana, resignado) Sí. Entendido.",
-    alanMood: { trust: 1, openness: 1, energy: 1 },
-    narration: "Alan se cerró completamente. Ignoraste todas las señales de burnout.",
-    outcome: "red_flag",
-    resolution: {
-      immediate: ["Alan sigue trabajando igual o peor", "Performance sigue cayendo"],
-      shortTerm: ["Burnout se agrava", "Alan renuncia en 2 semanas"],
-      longTerm: ["Equipo pierde confianza en vos como SM", "Lollapalooza en riesgo"],
-    }
-  },
+export const OPENING_ALAN_MESSAGE = {
+  from: "alan",
+  text: "Hola. ¿Querías hablar de algo?",
 }
 
 // ─── FASE 3: ACTION PLAN CHECKLIST ───
+// Eliminamos `recommended: true` — el candidato decide qué hacer.
+// El insight extractor lee las acciones elegidas como evidencia.
 
 export const ACTION_PLAN_CATEGORIES = [
   {
     id: "immediate",
     title: "🚨 Acciones Inmediatas (hoy)",
-    description: "Medidas urgentes para aliviar la presión sobre Alan",
-    color: "#ef4444"
+    description: "¿Qué harías HOY después del 1-1?",
+    color: "#ef4444",
   },
   {
     id: "short_term",
-    title: "📅 Corto Plazo (próxima semana)",
-    description: "Soporte continuo para recuperación de Alan",
-    color: "#f59e0b"
+    title: "📅 Corto Plazo (este sprint)",
+    description: "¿Qué cambios hay que hacer en el sprint actual?",
+    color: "#f59e0b",
   },
   {
     id: "long_term",
-    title: "🌱 Sistémico / Largo Plazo",
-    description: "Cambios para prevenir burnout en el futuro",
-    color: "#10b981"
+    title: "🌱 Sistémico / Procesos",
+    description: "¿Qué cambios estructurales propondrías?",
+    color: "#10b981",
   },
 ]
 
 export const ACTION_PLAN_OPTIONS = {
   immediate: [
-    { id: "time_off", text: "Alan toma días off inmediatamente (3-5 días)", impact: "high", recommended: true },
-    { id: "redistribute", text: "Redistribuir tickets críticos a Eric/Nacho", impact: "high", recommended: true },
-    { id: "postpone", text: "Posponer SL-203 para próximo sprint", impact: "medium", recommended: true },
-    { id: "reduce_meetings", text: "Liberar a Alan de meetings no esenciales", impact: "medium", recommended: true },
-    { id: "pair_programming", text: "Asignar pair programming para tickets bloqueantes", impact: "medium", recommended: false },
-    { id: "pressure_stakeholders", text: "Hablar con Gabriela/Simon sobre expectativas realistas", impact: "high", recommended: true },
-    { id: "nothing_immediate", text: "No tomar acciones inmediatas (dejar que Alan siga)", impact: "negative", recommended: false },
+    { id: "time_off", text: "Alan toma días off inmediatamente (3-5 días)" },
+    { id: "redistribute", text: "Redistribuir tickets críticos de Alan a Eric/Nacho" },
+    { id: "postpone", text: "Posponer SL-110 (galería) para próximo sprint" },
+    { id: "reduce_meetings", text: "Liberar a Alan de meetings no esenciales" },
+    { id: "pair_programming", text: "Asignar pair programming en sus tickets bloqueantes" },
+    { id: "pressure_stakeholders", text: "Hablar con Gabriela sobre expectativas realistas con la banda piloto" },
+    { id: "nothing_immediate", text: "No tomar acciones inmediatas (esperar a ver cómo evoluciona)" },
+    { id: "force_off", text: "Forzarle el descanso aunque no lo pida" },
+    { id: "share_with_team", text: "Contarle al equipo la situación personal de Alan" },
   ],
   short_term: [
-    { id: "wip_limit_personal", text: "Establecer WIP limit personal para Alan (1 ticket a la vez)", impact: "high", recommended: true },
-    { id: "weekly_checkins", text: "Check-ins 1-1 semanales con Alan", impact: "high", recommended: true },
-    { id: "capacity_review", text: "Revisar capacity planning del equipo en próxima retro", impact: "medium", recommended: true },
-    { id: "pair_rotation", text: "Rotar pair programming para distribuir conocimiento mobile", impact: "medium", recommended: true },
-    { id: "gradual_return", text: "Carga gradual cuando Alan vuelva (50% → 75% → 100%)", impact: "medium", recommended: true },
-    { id: "ignore_short", text: "Volver a carga normal inmediatamente", impact: "negative", recommended: false },
+    { id: "wip_limit_personal", text: "WIP limit personal para Alan (1 ticket a la vez)" },
+    { id: "weekly_checkins", text: "Check-ins 1-1 semanales con Alan" },
+    { id: "capacity_review", text: "Revisar capacity planning en la próxima retro" },
+    { id: "pair_rotation", text: "Rotar pair programming para distribuir conocimiento mobile" },
+    { id: "gradual_return", text: "Carga gradual cuando Alan vuelva (1 → 2 tickets)" },
+    { id: "ignore_short", text: "Volver a carga normal apenas Alan dé señales" },
+    { id: "performance_plan", text: "Plan de mejora de performance formalizado" },
   ],
   long_term: [
-    { id: "burnout_signals", text: "Establecer sistema de detección temprana de burnout (metrics dashboard)", impact: "high", recommended: true },
-    { id: "culture_boundaries", text: "Crear cultura donde esté bien decir 'no puedo más'", impact: "high", recommended: true },
-    { id: "wip_team", text: "Establecer WIP limits a nivel equipo (no solo individual)", impact: "medium", recommended: true },
-    { id: "workload_visibility", text: "Hacer workload visible en dailies (no solo 'estoy bien')", impact: "medium", recommended: true },
-    { id: "capacity_buffer", text: "Buffer de 20% en capacity planning para imprevistos", impact: "medium", recommended: true },
-    { id: "retro_topic", text: "Agregar 'Sustainable pace' como tema fijo en retros", impact: "low", recommended: true },
-    { id: "ignore_systemic", text: "No implementar cambios sistémicos", impact: "negative", recommended: false },
-  ]
-}
-
-// ─── CHARACTER STATES (para Phase 2 - conversation) ───
-export const INITIAL_CHARACTER_STATE = {
-  alan: { trust: 3, openness: 2, energy: 2 }, // Starts closed and exhausted
+    { id: "burnout_signals", text: "Sistema de detección temprana (workload metrics)" },
+    { id: "culture_boundaries", text: "Cultura donde esté bien decir 'no puedo más'" },
+    { id: "wip_team", text: "WIP limits a nivel equipo (no solo individual)" },
+    { id: "workload_visibility", text: "Workload visible en dailies (no solo 'estoy bien')" },
+    { id: "capacity_buffer", text: "Buffer de 20% en capacity planning para imprevistos" },
+    { id: "retro_topic", text: "Sustainable pace como tema fijo en retros" },
+    { id: "ignore_systemic", text: "No implementar cambios sistémicos" },
+  ],
 }
 
 // ─── DIMENSIONES EVALUADAS ───
-// Challenge identity: Coaching 1-1 + Emotional intelligence + Discretion
 export const DIMENSIONS = [
   ["coaching", "Coaching 1-1"],
   ["empathy", "Empatía"],
@@ -404,15 +171,16 @@ export const DIMENSIONS = [
   ["ai_fluency", "Uso de IA"],
 ]
 
-// ─── BOARD STATE (usado en dashboard) ───
+// ─── BOARD STATE (usado en context briefing) ───
+// Todos los IDs vienen del catálogo SSOT (SL-101 a SL-112).
 export const BOARD_STATE = {
   doing: [
-    { id: "SL-201", title: "Artist profile mobile", assignee: "alan", days: 6, prs: 2, status: "Bugs en review", priority: "high", points: 8 },
-    { id: "SL-202", title: "Payment flow mobile", assignee: "alan", days: 5, prs: 1, status: "Bloqueado por bugs SL-201", priority: "critical", points: 13 },
-    { id: "SL-203", title: "Offline mode sync", assignee: "alan", days: 4, prs: 0, status: "Sin PRs aún", priority: "high", points: 8 },
+    { id: "SL-104", title: "RSVP del fan", assignee: "alan", days: 3, prs: 1, status: "PR rebotado por null checks", priority: "high", points: 3 },
+    { id: "SL-105", title: "Buscar canción (Spotify Search API)", assignee: "alan", days: 3, prs: 1, status: "PR rebotado por validación rota", priority: "high", points: 8 },
+    { id: "SL-110", title: "Galería de fotos post-show", assignee: "alan", days: 2, prs: 0, status: "Sin PRs aún", priority: "medium", points: 8 },
   ],
   blocked: [
-    { id: "SL-210", title: "QA mobile regression", assignee: "gian", blockedBy: "SL-201", priority: "high", points: 5 },
-    { id: "SL-211", title: "Mobile-web integration", assignee: "nacho", blockedBy: "SL-202", priority: "medium", points: 5 },
-  ]
+    { id: "SL-106", title: "Sugerir canción al show", assignee: "nacho", blockedBy: "SL-105", priority: "high", points: 5 },
+    { id: "SL-107", title: "Votar canciones", assignee: "david", blockedBy: "SL-105", priority: "high", points: 5 },
+  ],
 }

@@ -87,7 +87,7 @@ export default function ChallengeMenu() {
   // Dynamic progress from localStorage
   const completedCount = getCompletedCount()
   const completionPct = getCompletionPercentage()
-  const allCompleted = completedCount >= 6
+  const allCompleted = completedCount >= 5
 
   // Popup automático cuando todos están completados
   const [showFinishModal, setShowFinishModal] = useState(allCompleted)

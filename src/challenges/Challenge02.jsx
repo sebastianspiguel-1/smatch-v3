@@ -95,12 +95,12 @@ export default function Challenge02() {
     setSelectedCard(cardId)
 
     // Trigger specific chat reactions
-    if (cardId === "FEN-403") {
-      triggerChatReaction("on_card_click_FEN403")
-    } else if (cardId === "FEN-406") {
-      triggerChatReaction("on_card_click_FEN406")
-    } else if (cardId === "FEN-405" || cardId === "FEN-409") {
+    if (cardId === "SL-105") {
+      triggerChatReaction("on_card_click_SL105")
+    } else if (cardId === "SL-106" || cardId === "SL-107") {
       triggerChatReaction("on_card_click_waiting")
+    } else if (cardId === "SL-103" || cardId === "SL-106") {
+      triggerChatReaction("on_card_click_nacho")
     }
 
     // Evaluate action
@@ -443,7 +443,7 @@ export default function Challenge02() {
     <div className="kanban-container">
       <TopBar
         title="📊 El bloqueo que nadie escala"
-        subtitle={`Equipo Fenix · Sprint ${SPRINT_SUMMARY.sprint}, Día ${SPRINT_SUMMARY.day}/${SPRINT_SUMMARY.totalDays}`}
+        subtitle={`Equipo Setlist · Sprint ${SPRINT_SUMMARY.sprint}, Día ${SPRINT_SUMMARY.day}/${SPRINT_SUMMARY.totalDays}`}
         currentStep={currentStep}
         totalSteps={totalSteps}
         timer={{ display: `${mm}:${ss}`, warning: timer < 180 }}

@@ -5,6 +5,12 @@ import { getResults } from "../engine/supabase"
 import { RadarChartComponent } from "../components"
 import { getChallengeById } from "../data/challengesMetadata"
 import { getProfile } from "../engine/candidateProfile"
+import { getMockResults, seedMockJourney } from "../dev/seedMockJourney"
+import { consolidateToMacro } from "../engine/macroDimensions"
+
+// ID público de la demo. Entrar a /report/demo siembra automáticamente
+// si no hay data y muestra el reporte sample.
+const DEMO_CANDIDATE_ID = "demo"
 import "./CandidateReport.css"
 
 export default function CandidateReport() {
@@ -19,16 +25,15 @@ export default function CandidateReport() {
     async function loadResults() {
       setLoading(true)
 
-      // Mock candidates data (same as dashboard)
+      // /report/demo: auto-siembra el journey mock si no hay data.
+      // Garantiza que cualquier visitante (inversor, recruiter, prospect)
+      // vea el reporte poblado al instante.
+      if (id === DEMO_CANDIDATE_ID && !getMockResults(DEMO_CANDIDATE_ID)) {
+        seedMockJourney(DEMO_CANDIDATE_ID)
+      }
+
+      // Mock candidates data hardcodeados (legacy demo del dashboard del recruiter)
       const candidatesData = {
-        "demo": {
-          name: "María González",
-          score: 86,
-          dimensions: { facilitation: 89, process: 85, coaching: 84, systems: 87 },
-          redFlags: 0,
-          highlights: 6,
-          completed: 6
-        },
         "candidate2": {
           name: "Carlos Ramírez",
           score: 78,
@@ -152,6 +157,20 @@ export default function CandidateReport() {
         return
       }
 
+      // 1. Intentar leer mock results sembrados (modo dev / E2E)
+      const mocked = getMockResults(id)
+      if (mocked && mocked.length > 0) {
+        setResults(mocked)
+        try {
+          setProfile(getProfile(id))
+        } catch (e) {
+          console.warn("Profile not found:", e)
+        }
+        setLoading(false)
+        return
+      }
+
+      // 2. Fallback a Supabase
       const { data, error } = await getResults(id)
       if (error) {
         console.error("Error loading results:", error)
@@ -193,26 +212,17 @@ export default function CandidateReport() {
     )
   }
 
-  // Calculate consolidated scores
-  const allDimensions = {}
-  results.forEach(r => {
-    r.scores.forEach(s => {
-      if (!allDimensions[s.dimension]) {
-        allDimensions[s.dimension] = []
-      }
-      allDimensions[s.dimension].push(s.score)
-    })
-  })
+  // Consolidated scores: 6 macro dimensions SIEMPRE (radar + bars).
+  // Si una dimensión no tiene data en ningún challenge se muestra con score 0
+  // y se etiqueta como n/a en la card; en el radar queda en 0 para mantener
+  // los 6 vértices del polígono.
+  const consolidatedScores = consolidateToMacro(results)
 
-  const consolidatedScores = Object.entries(allDimensions).map(([dimension, scores]) => ({
-    dimension,
-    score: Math.round(scores.reduce((a, b) => a + b, 0) / scores.length),
-    fullMark: 100
-  }))
-
-  const globalScore = Math.round(
-    consolidatedScores.reduce((a, b) => a + b.score, 0) / consolidatedScores.length
-  )
+  // El score global solo considera dimensiones con data (sampleCount > 0).
+  const scoredDims = consolidatedScores.filter((d) => d.sampleCount > 0)
+  const globalScore = scoredDims.length
+    ? Math.round(scoredDims.reduce((a, b) => a + b.score, 0) / scoredDims.length)
+    : 0
 
   const globalGrade = globalScore >= 80 ? { letter: "A", label: "Scrum Master Experto", color: T.green }
     : globalScore >= 60 ? { letter: "B", label: "Scrum Master Competente", color: T.blue }
@@ -284,14 +294,25 @@ export default function CandidateReport() {
 
           <div className="candidate-info">
             <div className="candidate-avatar">
-              {finalView ? "🎉" : id.charAt(0).toUpperCase()}
+              {finalView ? "🎉" : id === DEMO_CANDIDATE_ID ? "✨" : id.charAt(0).toUpperCase()}
             </div>
             <div>
               <h1 className="candidate-name">
-                {finalView ? "¡Assessment completado!" : id}
+                {finalView
+                  ? "¡Assessment completado!"
+                  : id === DEMO_CANDIDATE_ID
+                  ? "Reporte de demostración"
+                  : id}
+                {id === DEMO_CANDIDATE_ID && (
+                  <span className="demo-badge">DEMO</span>
+                )}
               </h1>
               <p className="candidate-subtitle">
-                {finalView ? "Acá están tus resultados consolidados" : "Scrum Master Assessment Report"}
+                {finalView
+                  ? "Acá están tus resultados consolidados"
+                  : id === DEMO_CANDIDATE_ID
+                  ? "Candidato de muestra del Sprint 1 del Equipo Setlist"
+                  : "Scrum Master Assessment Report"}
               </p>
             </div>
           </div>
@@ -299,7 +320,7 @@ export default function CandidateReport() {
           <div className="report-meta">
             <div className="meta-item">
               <span className="meta-label">Challenges Completados</span>
-              <span className="meta-value">{results.length}/4</span>
+              <span className="meta-value">{results.length}/5</span>
             </div>
             <div className="meta-item">
               <span className="meta-label">Tiempo Promedio</span>
@@ -353,136 +374,129 @@ export default function CandidateReport() {
           </div>
         </div>
 
-        {/* ═══ AI-Generated Profile Insights (NUEVO) ═══ */}
-        {profile && (profile.communication_style || (profile.insights?.patterns || []).length > 0) && (
-          <div className="profile-insights-section">
+        {/* ═══ AI INSIGHTS — unificado y compacto ═══ */}
+        {profile && (
+          profile.communication_style ||
+          (profile.insights?.patterns || []).length > 0 ||
+          (profile.insights?.notable_moments || []).length > 0 ||
+          (profile.ai_coach_usage?.total_calls || 0) > 0
+        ) && (
+          <div className="ai-insights-section">
             <h3 className="section-title-compact">
-              <span className="ai-badge">🤖 AI</span> Comportamientos detectados durante el assessment
+              <span className="ai-badge">🤖 AI</span> Insights generados durante el assessment
             </h3>
-            <div className="profile-insights-grid">
 
-              {/* Communication Style */}
+            {/* Row 1: 4 chips de stats rápidos */}
+            <div className="ai-insights-stats-row">
               {profile.communication_style && (
-                <div className="profile-card profile-card-style">
-                  <div className="profile-card-label">Estilo de comunicación</div>
-                  <div className="profile-card-value">
+                <div className="ai-insight-stat-chip">
+                  <div className="ai-insight-stat-label">Estilo</div>
+                  <div className="ai-insight-stat-value">
                     {profile.communication_style === "directive" && "🎯 Directivo"}
                     {profile.communication_style === "empathic" && "💚 Empático"}
                     {profile.communication_style === "analytical" && "📊 Analítico"}
                     {profile.communication_style === "balanced" && "⚖️ Balanceado"}
                     {profile.communication_style === "passive" && "🌫️ Pasivo"}
                   </div>
-                  <div className="profile-card-desc">
-                    {profile.communication_style === "directive" && "Toma decisiones rápido. Comunica claro. Riesgo: puede no escuchar."}
-                    {profile.communication_style === "empathic" && "Prioriza relaciones. Escucha activamente. Riesgo: indecisión bajo presión."}
-                    {profile.communication_style === "analytical" && "Razonamiento basado en datos. Estructura clara. Riesgo: parálisis por análisis."}
-                    {profile.communication_style === "balanced" && "Adapta su estilo al contexto. Equilibra empatía y dirección."}
-                    {profile.communication_style === "passive" && "Evita confrontación. Necesita coaching para liderar con autoridad."}
-                  </div>
                 </div>
               )}
-
-              {/* Patterns Detected */}
-              {(profile.insights?.patterns || []).length > 0 && (
-                <div className="profile-card profile-card-patterns">
-                  <div className="profile-card-label">Patrones observados</div>
-                  <ul className="profile-card-list">
-                    {profile.insights.patterns.slice(0, 5).map((p, i) => (
-                      <li key={i}>{p}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {/* Strengths */}
-              {(profile.insights?.strengths || []).length > 0 && (
-                <div className="profile-card profile-card-strengths">
-                  <div className="profile-card-label" style={{ color: "#059669" }}>✓ Fortalezas</div>
-                  <ul className="profile-card-list">
-                    {profile.insights.strengths.slice(0, 5).map((s, i) => (
-                      <li key={i}>{s}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {/* Areas of opportunity */}
-              {(profile.insights?.weaknesses || []).length > 0 && (
-                <div className="profile-card profile-card-weaknesses">
-                  <div className="profile-card-label" style={{ color: "#ea580c" }}>⚠ Áreas de oportunidad</div>
-                  <ul className="profile-card-list">
-                    {profile.insights.weaknesses.slice(0, 5).map((w, i) => (
-                      <li key={i}>{w}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* ═══ AI Fluency Profile (diferenciador del producto) ═══ */}
-        {profile && profile.ai_coach_usage && (
-          <div className="ai-fluency-section">
-            <h3 className="section-title-compact">
-              <span className="ai-badge">🤖 AI</span> AI Fluency — cómo usó la IA durante el assessment
-            </h3>
-            <div className="ai-fluency-card">
-              <div className="ai-fluency-stats">
-                <div className="ai-fluency-stat">
-                  <div className="ai-fluency-stat-value">{profile.ai_coach_usage.total_calls || 0}</div>
-                  <div className="ai-fluency-stat-label">Consultas al coach</div>
-                </div>
-                <div className="ai-fluency-stat">
-                  <div className="ai-fluency-stat-value">
-                    {(profile.challenge_history || []).filter(c => c.ai_fluency_score >= 3).length} / {(profile.challenge_history || []).length}
-                  </div>
-                  <div className="ai-fluency-stat-label">Challenges con buen uso de IA</div>
+              <div className="ai-insight-stat-chip">
+                <div className="ai-insight-stat-label">Consultas al coach</div>
+                <div className="ai-insight-stat-value">
+                  {profile.ai_coach_usage?.total_calls || 0}
                 </div>
               </div>
+              <div className="ai-insight-stat-chip">
+                <div className="ai-insight-stat-label">Uso eficiente de IA</div>
+                <div className="ai-insight-stat-value">
+                  {(profile.challenge_history || []).filter((c) => c.ai_fluency_score >= 3).length}
+                  /{(profile.challenge_history || []).length || 5}
+                </div>
+              </div>
+              <div className="ai-insight-stat-chip">
+                <div className="ai-insight-stat-label">Patrones</div>
+                <div className="ai-insight-stat-value">
+                  {(profile.insights?.patterns || []).length}
+                </div>
+              </div>
+            </div>
 
-              {/* Rationale por challenge */}
-              {(profile.challenge_history || []).filter(c => c.ai_fluency_rationale).length > 0 && (
-                <div className="ai-fluency-rationale">
-                  <div className="ai-fluency-rationale-title">Cómo usó la IA en cada challenge:</div>
-                  {(profile.challenge_history || []).filter(c => c.ai_fluency_rationale).map((c, i) => (
-                    <div key={i} className="ai-fluency-rationale-item">
-                      <div className="ai-fluency-rationale-header">
-                        <span className="ai-fluency-rationale-challenge">{c.challenge_name || c.challenge}</span>
-                        <span className={`ai-fluency-score score-${c.ai_fluency_score >= 3 ? 'high' : c.ai_fluency_score >= 2 ? 'mid' : 'low'}`}>
+            {/* Row 2: 3 columnas — Fortalezas · Oportunidades · Momentos */}
+            <div className="ai-insights-cols">
+              <div className="ai-insights-col strengths">
+                <div className="ai-insights-col-title" style={{ color: "#059669" }}>
+                  ✓ Fortalezas
+                </div>
+                <ul className="ai-insights-col-list">
+                  {(profile.insights?.strengths || []).slice(0, 4).map((s, i) => (
+                    <li key={i}>{s}</li>
+                  ))}
+                  {(profile.insights?.strengths || []).length === 0 && (
+                    <li className="muted">Sin fortalezas destacadas</li>
+                  )}
+                </ul>
+              </div>
+
+              <div className="ai-insights-col weaknesses">
+                <div className="ai-insights-col-title" style={{ color: "#ea580c" }}>
+                  ⚠ Oportunidades
+                </div>
+                <ul className="ai-insights-col-list">
+                  {(profile.insights?.weaknesses || []).slice(0, 4).map((w, i) => (
+                    <li key={i}>{w}</li>
+                  ))}
+                  {(profile.insights?.weaknesses || []).length === 0 && (
+                    <li className="muted">Sin áreas críticas</li>
+                  )}
+                </ul>
+              </div>
+
+              <div className="ai-insights-col moments">
+                <div className="ai-insights-col-title" style={{ color: "#2563eb" }}>
+                  ⭐ Momentos destacados
+                </div>
+                <ul className="ai-insights-col-list">
+                  {(profile.insights?.notable_moments || []).slice(-4).map((m, i) => (
+                    <li key={i}>
+                      <span className="moment-tag">{m.challenge}</span> {m.note}
+                    </li>
+                  ))}
+                  {(profile.insights?.notable_moments || []).length === 0 && (
+                    <li className="muted">Sin momentos cross-challenge</li>
+                  )}
+                </ul>
+              </div>
+            </div>
+
+            {/* Row 3: AI Coach por challenge (1 línea cada uno) */}
+            {(profile.challenge_history || []).filter((c) => c.ai_fluency_rationale).length > 0 && (
+              <details className="ai-coach-details">
+                <summary>
+                  Cómo usó el AI Coach en cada challenge ({(profile.challenge_history || []).length})
+                </summary>
+                <div className="ai-coach-list">
+                  {(profile.challenge_history || [])
+                    .filter((c) => c.ai_fluency_rationale)
+                    .map((c, i) => (
+                      <div key={i} className="ai-coach-list-item">
+                        <span className="ai-coach-challenge">{c.challenge_name || c.challenge}</span>
+                        <span
+                          className={`ai-fluency-score score-${
+                            c.ai_fluency_score >= 3
+                              ? "high"
+                              : c.ai_fluency_score >= 2
+                              ? "mid"
+                              : "low"
+                          }`}
+                        >
                           {c.ai_fluency_score}/4
                         </span>
+                        <span className="ai-coach-rationale">{c.ai_fluency_rationale}</span>
                       </div>
-                      <div className="ai-fluency-rationale-text">{c.ai_fluency_rationale}</div>
-                    </div>
-                  ))}
+                    ))}
                 </div>
-              )}
-
-              {profile.ai_coach_usage.total_calls === 0 && (
-                <div className="ai-fluency-no-usage">
-                  <strong>El candidato no consultó al AI Coach durante ningún challenge.</strong>
-                  <p>Puede indicar autosuficiencia (positivo) o resistencia a herramientas de apoyo (negativo según contexto).</p>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* ═══ Notable Moments (conexiones cross-challenge) ═══ */}
-        {profile && (profile.insights?.notable_moments || []).length > 0 && (
-          <div className="notable-moments-section">
-            <h3 className="section-title-compact">
-              <span className="ai-badge">🤖 AI</span> Momentos destacados del journey
-            </h3>
-            <div className="notable-moments-list">
-              {profile.insights.notable_moments.slice(-8).map((m, i) => (
-                <div key={i} className="notable-moment-item">
-                  <span className="notable-moment-challenge">{m.challenge}</span>
-                  <span className="notable-moment-note">{m.note}</span>
-                </div>
-              ))}
-            </div>
+              </details>
+            )}
           </div>
         )}
 
@@ -551,23 +565,49 @@ export default function CandidateReport() {
           {/* Dimensions Column */}
           <div className="dimensions-compact">
             <h3 className="section-title-compact">Dimensiones</h3>
-            {consolidatedScores.sort((a, b) => b.score - a.score).map(s => (
-              <div key={s.dimension} className="dimension-row-compact">
-                <div className="dimension-name-compact">{s.dimension}</div>
-                <div className="dimension-bar-compact">
-                  <div
-                    className="dimension-fill-compact"
-                    style={{
-                      width: `${s.score}%`,
-                      background: s.score >= 75 ? T.green : s.score >= 50 ? T.blue : s.score >= 25 ? T.orange : T.red
-                    }}
-                  />
-                </div>
-                <div className="dimension-score-compact" style={{
-                  color: s.score >= 75 ? T.green : s.score >= 50 ? T.blue : s.score >= 25 ? T.orange : T.red
-                }}>{s.score}%</div>
-              </div>
-            ))}
+            {[...consolidatedScores]
+              .sort((a, b) => (b.sampleCount === 0 ? -1 : a.sampleCount === 0 ? 1 : b.score - a.score))
+              .map((s) => {
+                const noData = s.sampleCount === 0
+                return (
+                  <div key={s.dimension} className="dimension-row-compact">
+                    <div className="dimension-name-compact">{s.dimension}</div>
+                    <div className="dimension-bar-compact">
+                      <div
+                        className="dimension-fill-compact"
+                        style={{
+                          width: noData ? "0%" : `${s.score}%`,
+                          background: noData
+                            ? "#cbd5e1"
+                            : s.score >= 75
+                            ? T.green
+                            : s.score >= 50
+                            ? T.blue
+                            : s.score >= 25
+                            ? T.orange
+                            : T.red,
+                        }}
+                      />
+                    </div>
+                    <div
+                      className="dimension-score-compact"
+                      style={{
+                        color: noData
+                          ? "#94a3b8"
+                          : s.score >= 75
+                          ? T.green
+                          : s.score >= 50
+                          ? T.blue
+                          : s.score >= 25
+                          ? T.orange
+                          : T.red,
+                      }}
+                    >
+                      {noData ? "n/a" : `${s.score}%`}
+                    </div>
+                  </div>
+                )
+              })}
           </div>
 
           {/* Insights Column */}
