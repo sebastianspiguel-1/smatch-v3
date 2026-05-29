@@ -13,10 +13,10 @@ import {
 import "./ChallengeMenu.css"
 
 // ─── Los 5 challenges del Sprint 1 (orden cronológico real) ───
+// id = numero del archivo Challenge0X.jsx que renderiza esta tarjeta.
 const CHALLENGES = [
   {
     id: 1,
-    challengeFile: 4, // Maps to Challenge04 component
     title: "Día 1 · Kickoff & Planning",
     sprintDay: "Día 1",
     desc: "Primer día del equipo trabajando juntos. Sesión 2 en 1: primero facilitás 3 team agreements básicos (comunicación, DoR, cómo estimamos), después arrancás el Planning con las herramientas de estimación. Lo que acuerdes en la Parte 1 se va a poner a prueba en la Parte 2.",
@@ -28,7 +28,6 @@ const CHALLENGES = [
   },
   {
     id: 2,
-    challengeFile: 3, // Maps to Challenge03 component
     title: "Día 3 · 1-1 con Alan",
     sprintDay: "Día 3",
     desc: "Alan estuvo callado en el Planning. Sus métricas vienen cayendo desde antes. Convocás un 1-1. Generá un espacio seguro para una conversación de coaching difícil.",
@@ -40,10 +39,9 @@ const CHALLENGES = [
   },
   {
     id: 3,
-    challengeFile: 2, // Maps to Challenge02 component
     title: "Día 5 · Daily con bloqueo",
     sprintDay: "Día 5",
-    desc: "Mid-sprint. David tiene una task bloqueada hace 2 días esperando aprobación de Spotify Developer API y no escaló. WIP excedido, sprint en riesgo. Facilitá el daily.",
+    desc: "Mid-sprint. Alan tiene una task bloqueada hace 2 días esperando aprobación de Spotify Developer API y no escaló. WIP excedido, sprint en riesgo. Facilitá el daily.",
     ready: true,
     icon: "◆",
     accentColor: "#f59e0b",
@@ -52,7 +50,6 @@ const CHALLENGES = [
   },
   {
     id: 4,
-    challengeFile: 5, // Maps to Challenge05 component
     title: "Día 7 · Reunión con Paula (EM)",
     sprintDay: "Día 7",
     desc: "Paula (Engineering Manager) escuchó que el sprint va lento. Te convoca a 1-1. Hizo una proyección lineal y entró en pánico: piensa que no llegamos al show piloto. El equipo te mira. ¿Cómo manejás la situación?",
@@ -64,7 +61,6 @@ const CHALLENGES = [
   },
   {
     id: 5,
-    challengeFile: 1, // Maps to Challenge01 component
     title: "Día 10 · Retro del Sprint 1",
     sprintDay: "Día 10",
     desc: "Sprint 1 cierra: 22/30 puntos entregados (3 carry-overs por SL-105). Hay tensión entre Eric (velocidad) y Gian (calidad). En superficie todos están OK, pero hay algo no dicho. Facilitá la retro.",
@@ -210,7 +206,7 @@ export default function ChallengeMenu() {
     <div className="challenge-journey">
       <div className="journey-bg"></div>
 
-      {/* Finish Challenge Modal - aparece automáticamente cuando completaste los 6 */}
+      {/* Finish Challenge Modal - aparece automáticamente cuando completaste los 5 */}
       {showFinishModal && (
         <div className="finish-modal-overlay" onClick={() => setShowFinishModal(false)}>
           <div className="finish-modal" onClick={(e) => e.stopPropagation()}>
@@ -281,7 +277,7 @@ export default function ChallengeMenu() {
 
           <div className="journey-stats">
             <div className="stat-item">
-              <div className="stat-value">{completedCount}/6</div>
+              <div className="stat-value">{completedCount}/5</div>
               <div className="stat-label">Completados</div>
             </div>
             <div className="stat-item">
@@ -312,9 +308,9 @@ export default function ChallengeMenu() {
         <div className="journey-stepper">
           <div className="stepper-track">
             {CHALLENGES.map((c, idx) => {
-              const isCompleted = isChallengeCompleted(c.challengeFile)
-              const isUnlocked = isChallengeUnlocked(c.challengeFile)
-              const isNext = isUnlocked && !isCompleted && CHALLENGES.slice(0, idx).every(prev => isChallengeCompleted(prev.challengeFile))
+              const isCompleted = isChallengeCompleted(c.id)
+              const isUnlocked = isChallengeUnlocked(c.id)
+              const isNext = isUnlocked && !isCompleted && CHALLENGES.slice(0, idx).every(prev => isChallengeCompleted(prev.id))
               const dotStatus = isCompleted ? "completed" : isNext ? "next" : isUnlocked ? "available" : "locked"
 
               return (
@@ -334,17 +330,17 @@ export default function ChallengeMenu() {
 
         <div className="challenge-grid">
           {CHALLENGES.map((c, idx) => {
-            const isCompleted = isChallengeCompleted(c.challengeFile)
-            const isUnlocked = isChallengeUnlocked(c.challengeFile)
+            const isCompleted = isChallengeCompleted(c.id)
+            const isUnlocked = isChallengeUnlocked(c.id)
             const isClickable = isUnlocked && !isCompleted
-            const isNext = isClickable && CHALLENGES.slice(0, idx).every(prev => isChallengeCompleted(prev.challengeFile))
+            const isNext = isClickable && CHALLENGES.slice(0, idx).every(prev => isChallengeCompleted(prev.id))
             const status = isCompleted ? "completed" : isNext ? "next" : isUnlocked ? "available" : "locked"
 
             return (
               <div
                 key={c.id}
                 className={`challenge-card ${status}`}
-                onClick={() => isClickable && nav(`/challenge/${c.challengeFile || c.id}`)}
+                onClick={() => isClickable && nav(`/challenge/${c.id}`)}
               >
                 {isCompleted && (
                   <div className="completed-badge">
@@ -423,7 +419,7 @@ export default function ChallengeMenu() {
             {!allCompleted && (
               <button
                 onClick={() => {
-                  CHALLENGE_ORDER.forEach(challengeFile => markChallengeComplete(challengeFile))
+                  CHALLENGE_ORDER.forEach(id => markChallengeComplete(id))
                   setShowFinishModal(true)
                 }}
                 style={{

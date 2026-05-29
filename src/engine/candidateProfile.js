@@ -30,9 +30,9 @@ function emptyProfile(candidateId) {
       patterns: [],         // ej: ["directive", "empathic", "ignores_quiet_voices"]
       strengths: [],        // ej: ["systems_thinking", "psychological_safety"]
       weaknesses: [],       // ej: ["stakeholder_management", "low_empathy"]
-      notable_moments: [],  // ej: [{ challenge: "C02", note: "Detectó WIP overflow temprano" }]
+      notable_moments: [],  // ej: [{ challenge: "C03", note: "Detectó WIP overflow temprano" }]
     },
-    challenge_history: [],  // [{ challenge: "C02", completed_at: "...", summary: "..." }]
+    challenge_history: [],  // [{ challenge: "C03", completed_at: "...", summary: "..." }]
     communication_style: null, // "directive" | "empathic" | "analytical" | "balanced"
     ai_coach_usage: {
       interactions: [],     // [{ challenge, sm_question, coach_response, timestamp, copy_pasted: bool }]

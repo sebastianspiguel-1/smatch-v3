@@ -1,7 +1,13 @@
-import { useState, useEffect, useRef, useMemo } from "react"
+import { useState, useEffect, useMemo, useRef } from "react"
 import { useNavigate } from "react-router-dom"
 import { T } from "../theme"
-import { callAI, computeScores, getGrade, buildBlockerChallengePrompt, buildInsightExtractorPrompt } from "../engine/ai"
+import {
+  callAI,
+  buildBurnout1on1Prompt,
+  buildInsightExtractorPrompt,
+  computeScores,
+  getGrade,
+} from "../engine/ai"
 import { saveResult } from "../engine/supabase"
 import { Avatar, TopBar } from "../components"
 import ChallengeComplete from "../components/ChallengeComplete"
@@ -15,48 +21,58 @@ import {
   DEFAULT_CANDIDATE_ID,
 } from "../engine/candidateProfile"
 import {
-  TEAM,
   MEMBER_MAP,
   SPRINT_CONTEXT,
-  SPRINT_SUMMARY,
   TEAM_DESC,
-  KANBAN_COLUMNS,
-  INITIAL_KANBAN_STATE,
-  CHAT_TRIGGERS,
-  CARD_DETAILS,
-  DIMENSIONS
+  DASHBOARD_METRICS,
+  INITIAL_ALAN_STATE,
+  OPENING_NARRATION_1ON1,
+  OPENING_ALAN_MESSAGE,
+  ACTION_PLAN_CATEGORIES,
+  ACTION_PLAN_OPTIONS,
+  DIMENSIONS,
+  BOARD_STATE,
 } from "../data/challenge02"
 import "./Challenge02.css"
+import "./Challenge03.css"
 
 export default function Challenge02() {
   const nav = useNavigate()
-  const [phase, setPhase] = useState("context")
-  const [kanbanState, setKanbanState] = useState(INITIAL_KANBAN_STATE)
-  const [selectedCard, setSelectedCard] = useState(null)
+  const [phase, setPhase] = useState("context") // context | dashboard | conversation | action_plan | results
+  const [selectedMetric, setSelectedMetric] = useState(null)
+
+  // Conversation state (chat libre)
   const [chat, setChat] = useState([])
+  const [smInput, setSmInput] = useState("")
+  const [alanState, setAlanState] = useState(INITIAL_ALAN_STATE)
+  const [loading, setLoading] = useState(false)
   const [allScores, setAllScores] = useState([])
   const [allFeedback, setAllFeedback] = useState([])
-  const [timer, setTimer] = useState(1200) // 20 minutes
-  const [startTime] = useState(Date.now())
-  const [draggedCard, setDraggedCard] = useState(null)
-  const [draggedFromColumn, setDraggedFromColumn] = useState(null)
-  // ─── Chat composer state (new) ───
-  const [smInput, setSmInput] = useState("")
-  const [replyTarget, setReplyTarget] = useState(null)
-  const [loading, setLoading] = useState(false)
-  const [actionCount, setActionCount] = useState(0)
+  const [turnCount, setTurnCount] = useState(0)
 
+  // Action plan
+  const [selectedActions, setSelectedActions] = useState({
+    immediate: [],
+    short_term: [],
+    long_term: [],
+  })
+
+  const [timer, setTimer] = useState(1200)
+  const [startTime] = useState(Date.now())
   const chatRef = useRef(null)
   const timerRef = useRef(null)
 
-  useEffect(() => { if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight }, [chat])
   useEffect(() => {
-    if (phase === "board") {
+    if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight
+  }, [chat, loading])
+
+  useEffect(() => {
+    if (phase !== "context" && phase !== "results") {
       timerRef.current = setInterval(() => {
-        setTimer(t => {
+        setTimer((t) => {
           if (t <= 1) {
             clearInterval(timerRef.current)
-            finishChallenge()
+            if (phase === "action_plan") finishChallenge()
             return 0
           }
           return t - 1
@@ -68,270 +84,202 @@ export default function Challenge02() {
 
   const mm = String(Math.floor(timer / 60)).padStart(2, "0")
   const ss = String(timer % 60).padStart(2, "0")
+  const currentStep =
+    phase === "context" ? 1 : phase === "dashboard" ? 2 : phase === "conversation" ? 3 : 4
+  const totalSteps = 4
 
-  function startChallenge() {
-    setPhase("board")
-    setChat([])
-    // Trigger initial narration
+  // ─────────────────────────────────────────────────────────────
+  // PHASE TRANSITIONS
+  // ─────────────────────────────────────────────────────────────
+
+  function startDashboard() {
+    setPhase("dashboard")
+  }
+
+  function startConversation() {
+    setPhase("conversation")
     setTimeout(() => {
-      triggerChatReaction("on_board_view")
-    }, 500)
+      setChat([
+        { narration: true, text: OPENING_NARRATION_1ON1 },
+        { from: OPENING_ALAN_MESSAGE.from, text: OPENING_ALAN_MESSAGE.text },
+      ])
+    }, 400)
   }
 
-  function triggerChatReaction(triggerKey) {
-    const messages = CHAT_TRIGGERS[triggerKey]
-    if (messages) {
-      const newMsgs = messages.map(m => {
-        if (m.from === "narration") {
-          return { narration: true, text: m.text }
-        }
-        return { from: m.from, text: m.text }
-      })
-      setChat(prev => [...prev, ...newMsgs])
-    }
+  function startActionPlan() {
+    setPhase("action_plan")
   }
 
-  function handleCardClick(cardId) {
-    setSelectedCard(cardId)
+  // ─────────────────────────────────────────────────────────────
+  // CHAT LIBRE 1-1 con Alan
+  // ─────────────────────────────────────────────────────────────
 
-    // Trigger specific chat reactions
-    if (cardId === "SL-105") {
-      triggerChatReaction("on_card_click_SL105")
-    } else if (cardId === "SL-106" || cardId === "SL-107") {
-      triggerChatReaction("on_card_click_waiting")
-    } else if (cardId === "SL-103" || cardId === "SL-106") {
-      triggerChatReaction("on_card_click_nacho")
-    }
-
-    // Evaluate action
-    evaluateAction({
-      type: "card_click",
-      target: cardId,
-      message: null
-    })
-  }
-
-  // ─── Handler unificado: el SM escribe en su input libre ───
-  async function handleSMMessage(message, targetMemberId = null) {
+  async function handleSMMessage(message) {
     if (!message.trim() || loading) return
-
-    // Show SM's message immediately in chat
-    setChat(p => [...p, {
-      isYou: true,
-      text: message,
-      targetName: targetMemberId ? MEMBER_MAP[targetMemberId]?.name : null
-    }])
+    setChat((p) => [
+      ...p,
+      { isYou: true, text: message, targetName: "Alan" },
+    ])
     setLoading(true)
-
-    await evaluateAction({
-      type: "chat_message",
-      target: targetMemberId,
-      message: message
-    })
-
+    await evaluateAction({ type: "chat_message", target: "alan", message })
     setLoading(false)
   }
 
-  // Drag and Drop handlers
-  function handleDragStart(card, columnId) {
-    setDraggedCard(card)
-    setDraggedFromColumn(columnId)
-  }
-
-  function handleDragOver(e) {
-    e.preventDefault() // Allow drop
-  }
-
-  function handleDrop(e, targetColumnId) {
-    e.preventDefault()
-    if (!draggedCard || !draggedFromColumn) return
-
-    // Don't do anything if dropped in same column
-    if (draggedFromColumn === targetColumnId) {
-      setDraggedCard(null)
-      setDraggedFromColumn(null)
-      return
-    }
-
-    // Move card from source to target column
-    setKanbanState(prev => {
-      const newState = { ...prev }
-      // Remove from source
-      newState[draggedFromColumn] = newState[draggedFromColumn].filter(c => c.id !== draggedCard.id)
-      // Add to target
-      newState[targetColumnId] = [...newState[targetColumnId], draggedCard]
-      return newState
-    })
-
-    // Log the action for evaluation
-    evaluateAction({
-      type: "move_card",
-      target: draggedCard.id,
-      message: `Moved ${draggedCard.id} from ${draggedFromColumn} to ${targetColumnId}`
-    })
-
-    setDraggedCard(null)
-    setDraggedFromColumn(null)
-  }
-
   async function evaluateAction(action) {
-    const chatContext = chat.slice(-10).map(c =>
-      c.narration ? { from: 'narration', text: c.text } :
-      c.isYou ? { from: 'sm', text: c.text } :
-      { from: MEMBER_MAP[c.from]?.name || c.from, text: c.text }
+    const chatContext = chat.slice(-12).map((c) =>
+      c.narration
+        ? { from: "narration", text: c.text }
+        : c.isYou
+        ? { from: "sm", text: c.text }
+        : { from: MEMBER_MAP[c.from]?.name || c.from, text: c.text }
     )
-
-    // Inject candidate profile context (vacío en primer challenge)
     const candidateContext = buildAIContextString(DEFAULT_CANDIDATE_ID)
-
-    // Use member name as target if specified
     const actionForPrompt = {
       ...action,
-      target: action.target ? MEMBER_MAP[action.target]?.name : null
+      target: action.target ? MEMBER_MAP[action.target]?.name : null,
     }
+    const sys = buildBurnout1on1Prompt(
+      TEAM_DESC,
+      SPRINT_CONTEXT,
+      alanState,
+      actionForPrompt,
+      chatContext,
+      candidateContext
+    )
+    const res = await callAI(sys, action.message || "1-1 turn")
+    if (!res) return
 
-    const sys = buildBlockerChallengePrompt(TEAM_DESC, kanbanState, actionForPrompt, chatContext, candidateContext)
-    const res = await callAI(sys, action.message || "Action evaluation")
+    if (res.reactions) {
+      setChat((p) => [
+        ...p,
+        ...res.reactions.map((r) => ({ from: r.from, text: r.text })),
+      ])
+    }
+    if (res.newAlanState) setAlanState(res.newAlanState)
 
-    if (res) {
-      // Add team reactions
-      if (res.reactions) {
-        const newMsgs = res.reactions.map(r => ({ from: r.from, text: r.text }))
-        setChat(p => [...p, ...newMsgs])
-      }
-
-      // Store scores SILENTLY (candidato no las ve)
-      const vs = {}
-      if (res.scores) Object.entries(res.scores).forEach(([k, v]) => { if (v > 0) vs[k] = v })
-
-      setAllScores(s => [...s, vs])
-      // Solo guardar la acción + scores para el reporte del recruiter.
-      // NO guardar quality/feedback (estaban en versiones anteriores como leak).
-      setAllFeedback(f => [...f, {
+    const vs = {}
+    if (res.scores)
+      Object.entries(res.scores).forEach(([k, v]) => {
+        if (v > 0) vs[k] = v
+      })
+    setAllScores((s) => [...s, vs])
+    setAllFeedback((f) => [
+      ...f,
+      {
         action: action.type,
         target: action.target,
         message: action.message,
-        scores: vs
-      }])
-
-      // Update board if needed
-      if (res.boardUpdates && Object.keys(res.boardUpdates).length > 0) {
-        applyBoardUpdates(res.boardUpdates)
-      }
-
-      setActionCount(c => c + 1)
-    }
+        scores: vs,
+      },
+    ])
+    setTurnCount((c) => c + 1)
   }
 
-  function serializeBoard() {
-    return Object.entries(kanbanState)
-      .map(([column, cards]) => {
-        const wipInfo = column === "DOING" && cards.length > KANBAN_COLUMNS.find(c => c.id === "DOING").wipLimit
-          ? ` ⚠️ WIP LIMIT EXCEEDED (${cards.length}/${KANBAN_COLUMNS.find(c => c.id === "DOING").wipLimit})`
-          : ""
-        const cardsText = cards.map(c =>
-          `• ${c.id}: ${c.title} (${c.assignee ? MEMBER_MAP[c.assignee]?.name : 'unassigned'}, status: ${c.status}${c.blockedDays ? `, blocked ${c.blockedDays}d` : ''})`
-        ).join("\n")
-        return `${column}${wipInfo}:\n${cardsText || "  (vacío)"}`
-      })
-      .join("\n\n")
-  }
+  // ─────────────────────────────────────────────────────────────
+  // ACTION PLAN
+  // ─────────────────────────────────────────────────────────────
 
-  function applyBoardUpdates(updates) {
-    setKanbanState(prev => {
-      const newState = { ...prev }
-      Object.entries(updates).forEach(([cardId, changes]) => {
-        // Find and update card
-        Object.keys(newState).forEach(column => {
-          const cardIndex = newState[column].findIndex(c => c.id === cardId)
-          if (cardIndex !== -1) {
-            newState[column][cardIndex] = { ...newState[column][cardIndex], ...changes }
-          }
-        })
-      })
-      return newState
-    })
+  function toggleAction(category, actionId) {
+    setSelectedActions((prev) => ({
+      ...prev,
+      [category]: prev[category].includes(actionId)
+        ? prev[category].filter((id) => id !== actionId)
+        : [...prev[category], actionId],
+    }))
   }
 
   async function finishChallenge() {
     clearInterval(timerRef.current)
     markChallengeComplete(2)
 
-    // ─── Insight Extraction: corre antes de mostrar resultados
-    // para que ai_fluency aparezca en el radar final ───
+    // Log action plan choices for the insight extractor
+    setAllFeedback((f) => [
+      ...f,
+      {
+        action: "action_plan",
+        target: null,
+        message: JSON.stringify(selectedActions),
+        scores: {},
+      },
+    ])
+
     setLoading(true)
     await extractAndSaveInsights()
     setLoading(false)
-
     setPhase("results")
   }
 
-  // ─── Extract insights post-challenge y guardar en profile ───
   async function extractAndSaveInsights() {
     try {
-      // Build conversation log for the extractor
       const conversationLog = chat
-        .filter(c => !c.narration)
-        .map(c => c.isYou
-          ? `SM: "${c.text}"${c.targetName ? ` (a ${c.targetName})` : ''}`
-          : `${MEMBER_MAP[c.from]?.name || c.from}: "${c.text}"`
-        ).join("\n")
+        .filter((c) => !c.narration)
+        .map((c) =>
+          c.isYou
+            ? `SM: "${c.text}"${c.targetName ? ` (a ${c.targetName})` : ""}`
+            : `${MEMBER_MAP[c.from]?.name || c.from}: "${c.text}"`
+        )
+        .join("\n")
 
-      // Coach log (read from profile)
       const profile = getProfile(DEFAULT_CANDIDATE_ID)
-      const thisChallengeCoachLog = (profile.ai_coach_usage.interactions || [])
-        .filter(i => i.challenge === "El bloqueo que nadie escala")
-        .map(i => `SM pregunta: "${i.sm_question}"\nCoach responde: "${i.coach_response}"`)
+      const coachLog = (profile.ai_coach_usage.interactions || [])
+        .filter((i) => i.challenge === "Día 3 · 1-1 con Alan")
+        .map(
+          (i) =>
+            `SM pregunta: "${i.sm_question}"\nCoach responde: "${i.coach_response}"`
+        )
         .join("\n\n")
 
-      // Actions log (board changes + actions taken)
       const actionsLog = allFeedback
-        .map(fb => `${fb.action}${fb.target ? ` → ${fb.target}` : ''}: "${fb.message || ''}"`)
+        .map(
+          (fb) =>
+            `${fb.action}${fb.target ? ` → ${fb.target}` : ""}: "${
+              fb.message || ""
+            }"`
+        )
+        .concat([
+          `Action plan elegido: ${Object.entries(selectedActions)
+            .map(([cat, ids]) => `${cat}=[${ids.join(", ")}]`)
+            .join(" | ")}`,
+        ])
         .join("\n")
 
       const prompt = buildInsightExtractorPrompt(
-        "El bloqueo que nadie escala (C02)",
+        "Día 3 · 1-1 con Alan (C03)",
         conversationLog,
-        thisChallengeCoachLog,
+        coachLog,
         actionsLog
       )
-
       const insights = await callAI(prompt, "Extraé insights del candidato")
-      if (!insights) {
-        console.warn("Insight extractor returned null")
-        return
-      }
+      if (!insights) return
 
-      // Inyectar ai_fluency en allScores → aparece en el radar final
       const aiFluencyScore = insights.ai_fluency?.score
       if (aiFluencyScore && aiFluencyScore > 0) {
-        setAllScores(s => [...s, { ai_fluency: aiFluencyScore }])
+        setAllScores((s) => [...s, { ai_fluency: aiFluencyScore }])
       }
 
-      // Save to profile
       updateProfile(DEFAULT_CANDIDATE_ID, {
         communication_style: insights.communication_style,
         insights: {
           patterns: insights.patterns || [],
           strengths: insights.strengths || [],
           weaknesses: insights.weaknesses || [],
-          notable_moments: (insights.notable_moments || []).map(m => ({
+          notable_moments: (insights.notable_moments || []).map((m) => ({
             challenge: "C02",
             note: m.note || m,
           })),
         },
-        challenge_history: [{
-          challenge: "C02",
-          challenge_name: "El bloqueo que nadie escala",
-          completed_at: new Date().toISOString(),
-          ai_fluency_score: aiFluencyScore,
-          ai_fluency_rationale: insights.ai_fluency?.rationale,
-        }],
+        challenge_history: [
+          {
+            challenge: "C02",
+            challenge_name: "Día 3 · 1-1 con Alan",
+            completed_at: new Date().toISOString(),
+            ai_fluency_score: aiFluencyScore,
+            ai_fluency_rationale: insights.ai_fluency?.rationale,
+          },
+        ],
       })
-
-      console.log("📊 Insights extraídos:", insights)
     } catch (e) {
-      console.error("Error en insight extraction:", e)
+      console.error("Error en insight extraction C02:", e)
     }
   }
 
@@ -341,7 +289,8 @@ export default function Challenge02() {
   }, [allScores])
 
   const gradeData = useMemo(() => {
-    if (finalScores.length === 0) return { letter: "F", label: "", color: "#888", avg: 0 }
+    if (finalScores.length === 0)
+      return { letter: "F", label: "", color: "#888", avg: 0 }
     return getGrade(finalScores)
   }, [finalScores])
 
@@ -354,370 +303,363 @@ export default function Challenge02() {
         scores: finalScores,
         feedback: allFeedback,
         grade: gradeData,
-        timeUsed
-      }).then(() => {
-        console.log("Challenge 02 result saved to Supabase")
-      })
+        timeUsed,
+      }).then(() => console.log("Challenge 02 result saved"))
     }
   }, [phase, finalScores, allFeedback, gradeData, startTime])
 
-  const currentStep = phase === "context" ? 1 : phase === "board" ? 2 : 3
-  const totalSteps = 3
+  // ═════════════════════════════════════════════════════════════
+  // CONTEXT
+  // ═════════════════════════════════════════════════════════════
 
-  // Calculate WIP warning
-  const wipExceeded = kanbanState["DOING"].length > 3
-
-  // ═══════════════════════ CONTEXT PHASE ═══════════════════════
   if (phase === "context") {
     return (
-      <div style={{ background: T.bg, minHeight: "100vh", color: T.text, fontFamily: "'Plus Jakarta Sans', 'Segoe UI', system-ui, sans-serif" }}>
+      <div style={{ background: T.bg, minHeight: "100vh", color: T.text, fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}>
         <TopBar
           currentStep={currentStep}
           totalSteps={totalSteps}
-          backButton={{ label: "← Back to Challenges", onClick: () => nav("/challenges") }}
+          backButton={{ label: "← Volver", onClick: () => nav("/challenges") }}
         />
         <div style={{ maxWidth: 700, margin: "0 auto", padding: "40px 24px" }}>
           <div style={{ textAlign: "center", marginBottom: 40 }}>
-            <div style={{ fontSize: 13, fontWeight: 900, letterSpacing: 4, color: T.orange, marginBottom: 12, opacity: 0.9 }}>SMATCH · CHALLENGE 02</div>
-            <h1 style={{ fontSize: 42, fontWeight: 900, margin: "0 0 12px 0", background: "linear-gradient(135deg, #fb923c, #f59e0b)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", lineHeight: 1.2 }}>
-              El bloqueo que nadie escala
+            <div style={{ fontSize: 13, fontWeight: 900, letterSpacing: 4, color: "#ff8a80", marginBottom: 12, opacity: 0.9 }}>SMATCH · CHALLENGE 02</div>
+            <h1 style={{ fontSize: 42, fontWeight: 900, margin: "0 0 12px 0", background: "linear-gradient(135deg, #ff8a80, #fa8072)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", lineHeight: 1.2 }}>
+              Día 3 · 1-1 con Alan
             </h1>
-            <p style={{ fontSize: 18, color: T.sub, margin: 0, lineHeight: 1.5 }}>Sprint día 7/10. Un bloqueo crítico que nadie está manejando.</p>
+            <p style={{ fontSize: 18, color: T.sub, margin: 0, lineHeight: 1.5 }}>
+              Sprint 1 · Día 3. Alan está mostrando señales antes de tiempo.
+            </p>
           </div>
 
-          <div style={{ background: "linear-gradient(135deg, rgba(251, 146, 60, 0.06), #ffffff)", borderRadius: 16, padding: 24, marginBottom: 24, border: "2px solid rgba(251, 146, 60, 0.20)", boxShadow: "0 2px 8px rgba(15, 23, 42, 0.06)" }}>
-            <div style={{ fontSize: 12, fontWeight: 900, letterSpacing: 3, color: "#fb923c", marginBottom: 16, display: "flex", alignItems: "center", gap: 8 }}>
-              <span style={{ fontSize: 20 }}>📊</span>
-              SITUACIÓN DEL SPRINT
-            </div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16, marginBottom: 16 }}>
-              <div style={{ background: T.panel, borderRadius: 12, padding: 16, border: `1px solid ${T.border}` }}>
-                <div style={{ fontSize: 11, color: T.dim, marginBottom: 4 }}>Velocity</div>
-                <div style={{ fontSize: 24, fontWeight: 900, color: T.orange }}>57%</div>
-                <div style={{ fontSize: 10, color: T.sub }}>24/42 points</div>
-              </div>
-              <div style={{ background: T.panel, borderRadius: 12, padding: 16, border: `1px solid ${T.border}` }}>
-                <div style={{ fontSize: 11, color: T.dim, marginBottom: 4 }}>Bloqueado</div>
-                <div style={{ fontSize: 24, fontWeight: 900, color: "#ef4444" }}>8 pts</div>
-                <div style={{ fontSize: 10, color: T.sub }}>3 días</div>
-              </div>
-              <div style={{ background: T.panel, borderRadius: 12, padding: 16, border: `1px solid ${T.border}` }}>
-                <div style={{ fontSize: 11, color: T.dim, marginBottom: 4 }}>En Riesgo</div>
-                <div style={{ fontSize: 24, fontWeight: 900, color: "#f59e0b" }}>16 pts</div>
-                <div style={{ fontSize: 10, color: T.sub }}>38% sprint</div>
-              </div>
-            </div>
-            <div style={{ fontSize: 14, color: T.sub, lineHeight: 1.6 }}>
+          <div style={{ background: "linear-gradient(135deg, rgba(255, 138, 128, 0.06), #ffffff)", borderRadius: 16, padding: 24, marginBottom: 24, border: "2px solid rgba(255, 138, 128, 0.20)" }}>
+            <div style={{ fontSize: 12, fontWeight: 900, letterSpacing: 3, color: "#ff8a80", marginBottom: 16 }}>📋 SITUACIÓN</div>
+            <div style={{ fontSize: 15, color: T.sub, lineHeight: 1.7 }}>
               {SPRINT_CONTEXT}
             </div>
+          </div>
+
+          <div style={{ background: T.panel, borderRadius: 16, padding: 24, marginBottom: 24, border: `2px solid ${T.border}` }}>
+            <div style={{ fontSize: 12, fontWeight: 900, letterSpacing: 3, color: "#f472b6", marginBottom: 16 }}>📊 BOARD - TICKETS DE ALAN</div>
+            {BOARD_STATE.doing.map((ticket) => (
+              <div key={ticket.id} style={{ background: "rgba(244,114,182,0.08)", borderRadius: 12, padding: "12px 16px", marginBottom: 10, borderLeft: "4px solid #f472b6" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: "#f472b6" }}>{ticket.id}</span>
+                  <span style={{ fontSize: 11, color: "#f87171", fontWeight: 600 }}>⏱️ {ticket.days} días en DOING</span>
+                </div>
+                <div style={{ fontSize: 14, fontWeight: 600, color: T.text, marginBottom: 4 }}>{ticket.title}</div>
+                <div style={{ fontSize: 12, color: T.dim }}>{ticket.status}</div>
+              </div>
+            ))}
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: "#f87171", marginTop: 16, marginBottom: 8 }}>BLOQUEADOS ESPERANDO A ALAN:</div>
+            {BOARD_STATE.blocked.map((ticket) => (
+              <div key={ticket.id} style={{ background: "rgba(248,113,113,0.06)", borderRadius: 10, padding: "10px 14px", marginBottom: 8, borderLeft: "3px solid #f87171" }}>
+                <div style={{ fontSize: 12, fontWeight: 600, color: T.text }}>{ticket.id}: {ticket.title}</div>
+                <div style={{ fontSize: 11, color: "#f87171" }}>Bloqueado por {ticket.blockedBy}</div>
+              </div>
+            ))}
           </div>
 
           <div style={{ marginBottom: 32 }}>
             <TeamPanel title="Equipo Setlist" showStakeholder={false} />
           </div>
 
-          <button onClick={startChallenge} style={{ width: "100%", padding: "20px 0", background: "linear-gradient(135deg, #fb923c, #f59e0b)", color: "#ffffff", fontWeight: 900, fontSize: 16, border: "2px solid rgba(251, 146, 60, 0.8)", borderRadius: 12, cursor: "pointer", letterSpacing: 1.5, boxShadow: "0 4px 16px rgba(251, 146, 60, 0.25)", transition: "all 0.3s", textTransform: "uppercase" }}>
-            Ver Sprint Board →
+          <button onClick={startDashboard} style={{ width: "100%", padding: "20px 0", background: "linear-gradient(135deg, #ff8a80, #fa8072)", color: "#ffffff", fontWeight: 900, fontSize: 16, border: "2px solid rgba(255, 138, 128, 0.8)", borderRadius: 12, cursor: "pointer", letterSpacing: 1.5, textTransform: "uppercase" }}>
+            Investigar las señales →
           </button>
         </div>
       </div>
     )
   }
 
-  // ═══════════════════════ RESULTS PHASE ═══════════════════════
-  if (phase === "results") {
+  // ═════════════════════════════════════════════════════════════
+  // DASHBOARD (exploración read-only, sin score leak)
+  // ═════════════════════════════════════════════════════════════
+
+  if (phase === "dashboard") {
     return (
-      <ChallengeComplete
-        challengeTitle="El bloqueo que nadie escala"
-        challengeNumber={2}
-        accentColor="#f59e0b"
-        gradientStart="rgba(245, 158, 11, 0.85)"
-        gradientEnd="rgba(217, 119, 6, 0.80)"
-        isLastChallenge={isLastChallenge(2)}
-      />
-    )
-  }
-
-  // ═══════════════════════ KANBAN BOARD PHASE ═══════════════════════
-  return (
-    <div className="kanban-container">
-      <TopBar
-        title="📊 El bloqueo que nadie escala"
-        subtitle={`Equipo Setlist · Sprint ${SPRINT_SUMMARY.sprint}, Día ${SPRINT_SUMMARY.day}/${SPRINT_SUMMARY.totalDays}`}
-        currentStep={currentStep}
-        totalSteps={totalSteps}
-        timer={{ display: `${mm}:${ss}`, warning: timer < 180 }}
-      />
-
-      <div className="kanban-main">
-        {/* Left: Board */}
-        <div className="kanban-board-container">
-          {/* Metrics Bar */}
-          <div className="metrics-bar">
-            <div className={`metric-card ${wipExceeded ? 'warning' : ''}`}>
-              <div className="metric-label">WIP</div>
-              <div className="metric-value">{kanbanState["DOING"].length}/3</div>
-              {wipExceeded && <div className="metric-warning">⚠️ Excedido</div>}
-            </div>
-            <div className="metric-card">
-              <div className="metric-label">Bloqueado</div>
-              <div className="metric-value">{SPRINT_SUMMARY.blocked} pts</div>
-              <div className="metric-sub">3 días</div>
-            </div>
-            <div className="metric-card">
-              <div className="metric-label">Velocity</div>
-              <div className="metric-value">{SPRINT_SUMMARY.velocity}</div>
-              <div className="metric-sub">{SPRINT_SUMMARY.done}/{SPRINT_SUMMARY.committed}</div>
-            </div>
-            <div className="metric-card danger">
-              <div className="metric-label">En Riesgo</div>
-              <div className="metric-value">{SPRINT_SUMMARY.atRisk} pts</div>
-              <div className="metric-sub">38% sprint</div>
-            </div>
+      <div className="challenge03-container">
+        <TopBar
+          title="🔥 Día 3 · 1-1 con Alan"
+          subtitle="Investigá las señales antes del 1-1"
+          currentStep={currentStep}
+          totalSteps={totalSteps}
+          timer={{ display: `${mm}:${ss}`, warning: timer < 180 }}
+        />
+        <div className="dashboard-phase">
+          <div className="dashboard-header">
+            <h2>📊 Lo que se ve en los últimos meses + Sprint 1</h2>
+            <p>
+              Mirá las señales y armá tu hipótesis antes de hablar con Alan. No hay respuestas
+              marcadas: lo que detectes lo vas a usar en la conversación.
+            </p>
           </div>
 
-
-          {/* Kanban Board */}
-          <div className="board-columns">
-            {KANBAN_COLUMNS.map(column => (
-              <div key={column.id} className="kanban-column" data-column={column.id}>
-                <div className="column-header">
-                  <div>
-                    <h3>{column.label}</h3>
-                    <span className="card-count">({kanbanState[column.id].length})</span>
-                  </div>
-                  {column.wipLimit && (
-                    <div className={`wip-limit ${kanbanState[column.id].length > column.wipLimit ? 'exceeded' : ''}`}>
-                      WIP: {kanbanState[column.id].length}/{column.wipLimit}
-                    </div>
-                  )}
+          <div className="metrics-grid">
+            {DASHBOARD_METRICS.map((metric) => (
+              <div
+                key={metric.id}
+                className={`metric-card ${metric.status}`}
+                onClick={() => setSelectedMetric(metric)}
+              >
+                <div className="metric-header">
+                  <span className="metric-icon">{metric.icon}</span>
                 </div>
-
-                <div
-                  className="column-cards"
-                  onDragOver={handleDragOver}
-                  onDrop={(e) => handleDrop(e, column.id)}
-                >
-                  {kanbanState[column.id].map(card => {
-                    const member = card.assignee ? MEMBER_MAP[card.assignee] : null
-                    const priorityIcon = card.priority === 'high' ? '↑' : card.priority === 'medium' ? '=' : '↓'
-
-                    return (
-                      <div
-                        key={card.id}
-                        className={`kanban-card ${card.status} ${selectedCard === card.id ? 'selected' : ''}`}
-                        draggable
-                        onDragStart={() => handleDragStart(card, column.id)}
-                        onClick={() => handleCardClick(card.id)}
-                      >
-                        {/* Title */}
-                        <div className="card-header">
-                          <div className="card-title">{card.title}</div>
-                        </div>
-
-                        {/* ID + Assignee + Priority */}
-                        <div className="card-meta">
-                          <span className="card-id">{card.id}</span>
-
-                          {member && (
-                            <div className="card-assignee">
-                              <div className="assignee-avatar" style={{ background: member.color }}>
-                                {member.init}
-                              </div>
-                              <span className="assignee-name">{member.name.split(' ')[0]}</span>
-                            </div>
-                          )}
-
-                          {card.priority && (
-                            <div className={`card-priority ${card.priority}`} title={`${card.priority} priority`}>
-                              {priorityIcon}
-                            </div>
-                          )}
-
-                          {card.blockedDays && (
-                            <div className="card-badge blocked">
-                              🔴 {card.blockedDays}d
-                            </div>
-                          )}
-
-                          {card.status === "idle" && (
-                            <div className="card-badge idle">
-                              💤 IDLE
-                            </div>
-                          )}
-
-                          {card.status === "waiting" && (
-                            <div className="card-badge waiting">
-                              ⏳ WAIT
-                            </div>
-                          )}
-
-                          {card.days > 0 && card.status === 'ok' && (
-                            <div className="card-days">
-                              {card.days}d
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    )
-                  })}
+                <h3 className="metric-title">{metric.title}</h3>
+                <p className="metric-summary">{metric.summary}</p>
+                <div style={{ fontSize: 11, color: T.dim, marginTop: 8, fontStyle: "italic" }}>
+                  Click para ver detalle
                 </div>
               </div>
             ))}
           </div>
 
-          {/* Card Details Panel */}
-          {selectedCard && CARD_DETAILS[selectedCard] && (
-            <div className="card-details-panel">
-              <div className="details-header">
-                <h4>{selectedCard} Details</h4>
-                <button onClick={() => setSelectedCard(null)}>×</button>
-              </div>
-              <div className="details-content">
-                <p><strong>Description:</strong> {CARD_DETAILS[selectedCard].description}</p>
-                {CARD_DETAILS[selectedCard].blockerReason && (
-                  <p className="blocker-reason"><strong>Blocker:</strong> {CARD_DETAILS[selectedCard].blockerReason}</p>
-                )}
-                {CARD_DETAILS[selectedCard].impact && (
-                  <p className="impact"><strong>Impact:</strong> {CARD_DETAILS[selectedCard].impact}</p>
-                )}
-                {CARD_DETAILS[selectedCard].history && (
-                  <div>
-                    <strong>History:</strong>
-                    <ul>
-                      {CARD_DETAILS[selectedCard].history.map((h, i) => (
-                        <li key={i}>{h}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
+          <div className="dashboard-actions">
+            <button className="btn-finish-dashboard" onClick={startConversation}>
+              Agendar 1-1 con Alan →
+            </button>
+          </div>
         </div>
 
-        {/* Right: Chat */}
-        <div className="kanban-chat">
-          <div className="chat-header">
-            <h3 className="chat-title">💬 Daily Standup</h3>
-            <p className="chat-subtitle">Hablale al equipo. Click en un avatar para dirigir tu mensaje.</p>
-          </div>
-
-          <div className="chat-messages" ref={chatRef}>
-            {chat.map((msg, i) => {
-              if (msg.narration) {
-                return (
-                  <div key={i} className="chat-message narration">
-                    <div className="chat-message-text">{msg.text}</div>
-                  </div>
-                )
-              }
-              if (msg.isYou) {
-                return (
-                  <div key={i} className="chat-message user">
-                    <div className="chat-message-author">
-                      Tú (SM){msg.targetName ? ` → ${msg.targetName}` : ''}
-                    </div>
-                    <div className="chat-message-text">{msg.text}</div>
-                  </div>
-                )
-              }
-              const m = MEMBER_MAP[msg.from]
-              if (!m) return null
-              return (
-                <div key={i} className="chat-message team" onClick={() => setReplyTarget(msg.from)} style={{ cursor: "pointer" }}>
-                  <Avatar member={m} size={28} />
-                  <div>
-                    <div className="chat-message-author" style={{ color: m.color }}>{m.name}</div>
-                    <div className="chat-message-text">{msg.text}</div>
-                  </div>
+        {selectedMetric && (
+          <div className="metric-modal-backdrop" onClick={() => setSelectedMetric(null)}>
+            <div className="metric-modal" onClick={(e) => e.stopPropagation()}>
+              <div className="metric-modal-header">
+                <h3>
+                  {selectedMetric.icon} {selectedMetric.title}
+                </h3>
+                <button onClick={() => setSelectedMetric(null)}>×</button>
+              </div>
+              <div className="metric-modal-body">
+                <div className="metric-detail-summary">
+                  <p>{selectedMetric.summary}</p>
                 </div>
-              )
-            })}
-            {loading && (
-              <div className="chat-message narration" style={{ fontStyle: "italic", opacity: 0.7 }}>
-                <div className="chat-message-text">El equipo está procesando…</div>
+                <div className="metric-detail-list">
+                  {selectedMetric.details.map((detail, i) => (
+                    <div key={i} className="metric-detail-item">
+                      {detail}
+                    </div>
+                  ))}
+                </div>
               </div>
-            )}
+            </div>
           </div>
+        )}
+      </div>
+    )
+  }
 
-          {/* ─── Chat Composer ─── */}
-          <div className="chat-composer">
-            {replyTarget && MEMBER_MAP[replyTarget] && (
-              <div className="reply-target-bar">
-                <span>Respondiendo a <strong style={{ color: MEMBER_MAP[replyTarget].color }}>{MEMBER_MAP[replyTarget].name}</strong></span>
-                <button onClick={() => setReplyTarget(null)} className="reply-target-clear" aria-label="Quitar destinatario">×</button>
-              </div>
-            )}
-            <div className="team-avatar-row">
-              {TEAM.map(m => (
-                <button
-                  key={m.id}
-                  className={`team-avatar-pick ${replyTarget === m.id ? 'active' : ''}`}
-                  onClick={() => setReplyTarget(replyTarget === m.id ? null : m.id)}
-                  title={`Hablar a ${m.name}`}
-                  style={{ borderColor: replyTarget === m.id ? m.color : 'transparent' }}
-                >
-                  <Avatar member={m} size={28} />
-                </button>
-              ))}
+  // ═════════════════════════════════════════════════════════════
+  // CONVERSATION 1-1 con Alan (chat libre)
+  // ═════════════════════════════════════════════════════════════
+
+  if (phase === "conversation") {
+    return (
+      <div className="challenge03-container">
+        <TopBar
+          title="🔥 Día 3 · 1-1 con Alan"
+          subtitle="1-1 con Alan"
+          currentStep={currentStep}
+          totalSteps={totalSteps}
+          timer={{ display: `${mm}:${ss}`, warning: timer < 180 }}
+        />
+
+        <div
+          style={{
+            maxWidth: 760,
+            margin: "0 auto",
+            padding: "20px 16px",
+            display: "flex",
+            flexDirection: "column",
+            height: "calc(100vh - 120px)",
+          }}
+        >
+          <div className="kanban-chat" style={{ flex: 1, minHeight: 0 }}>
+            <div className="chat-header">
+              <h3 className="chat-title">💬 1-1 con Alan</h3>
+              <p className="chat-subtitle">
+                Es una conversación privada. Cámara apagada del lado de Alan. Cada palabra cuenta.
+              </p>
             </div>
-            <div className="composer-input-row">
-              <textarea
-                className="composer-input"
-                value={smInput}
-                onChange={(e) => setSmInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) {
-                    e.preventDefault()
-                    if (smInput.trim() && !loading) {
-                      const msg = smInput
-                      const target = replyTarget
-                      setSmInput("")
-                      setReplyTarget(null)
-                      handleSMMessage(msg, target)
-                    }
-                  }
-                }}
-                placeholder={
-                  replyTarget && MEMBER_MAP[replyTarget]
-                    ? `Hablale a ${MEMBER_MAP[replyTarget].name}...`
-                    : "Hablale al equipo... (Enter para enviar)"
+
+            <div className="chat-messages" ref={chatRef}>
+              {chat.map((msg, i) => {
+                if (msg.narration) {
+                  return (
+                    <div key={i} className="chat-message narration">
+                      <div className="chat-message-text">{msg.text}</div>
+                    </div>
+                  )
                 }
-                rows={2}
-                disabled={loading}
-              />
-              <button
-                className="composer-send"
-                disabled={!smInput.trim() || loading}
-                onClick={() => {
-                  const msg = smInput
-                  const target = replyTarget
-                  setSmInput("")
-                  setReplyTarget(null)
-                  handleSMMessage(msg, target)
-                }}
-              >
-                Enviar
-              </button>
+                if (msg.isYou) {
+                  return (
+                    <div key={i} className="chat-message user">
+                      <div className="chat-message-author">Tú (SM) → Alan</div>
+                      <div className="chat-message-text">{msg.text}</div>
+                    </div>
+                  )
+                }
+                const m = MEMBER_MAP[msg.from]
+                if (!m) return null
+                return (
+                  <div key={i} className="chat-message team">
+                    <Avatar member={m} size={28} />
+                    <div>
+                      <div className="chat-message-author" style={{ color: m.color }}>
+                        {m.name}
+                      </div>
+                      <div className="chat-message-text">{msg.text}</div>
+                    </div>
+                  </div>
+                )
+              })}
+              {loading && (
+                <div className="chat-message narration" style={{ fontStyle: "italic", opacity: 0.7 }}>
+                  <div className="chat-message-text">Alan está pensando…</div>
+                </div>
+              )}
             </div>
-            {actionCount >= 4 && (
-              <button
-                className="composer-finish-btn"
-                onClick={finishChallenge}
-              >
-                Cerrar daily →
-              </button>
-            )}
+
+            <div className="chat-composer">
+              <div className="composer-input-row">
+                <textarea
+                  className="composer-input"
+                  value={smInput}
+                  onChange={(e) => setSmInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault()
+                      if (smInput.trim() && !loading) {
+                        const msg = smInput
+                        setSmInput("")
+                        handleSMMessage(msg)
+                      }
+                    }
+                  }}
+                  placeholder="Escribí lo que le dirías a Alan... (Enter para enviar)"
+                  rows={2}
+                  disabled={loading}
+                />
+                <button
+                  className="composer-send"
+                  disabled={!smInput.trim() || loading}
+                  onClick={() => {
+                    const msg = smInput
+                    setSmInput("")
+                    handleSMMessage(msg)
+                  }}
+                >
+                  Enviar
+                </button>
+              </div>
+              {turnCount >= 4 && (
+                <button className="composer-finish-btn" onClick={startActionPlan}>
+                  Cerrar 1-1 y armar plan →
+                </button>
+              )}
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* AI Coach flotante */}
-      <AICoach
-        challengeName="El bloqueo que nadie escala"
-        challengeContext="El SM está en un daily standup. Hay un dev bloqueado hace 3 días, el WIP limit está excedido, y el equipo está esperando que el SM facilite."
+        <AICoach
+          challengeName="Día 3 · 1-1 con Alan"
+          challengeContext="El SM está en un 1-1 con un dev que muestra señales claras de burnout. El dev llegó a Setlist arrastrando burnout de 1+ año a 14h/día en su empresa anterior — nadie del equipo sabe esto. Está agotado, callado, se siente culpable. Es la primera conversación a solas entre el SM y este dev."
+        />
+      </div>
+    )
+  }
+
+  // ═════════════════════════════════════════════════════════════
+  // ACTION PLAN (sin "recommended" leak)
+  // ═════════════════════════════════════════════════════════════
+
+  if (phase === "action_plan") {
+    return (
+      <div className="challenge03-container">
+        <TopBar
+          title="🔥 Día 3 · 1-1 con Alan"
+          subtitle="Tu plan después del 1-1"
+          currentStep={currentStep}
+          totalSteps={totalSteps}
+          timer={{ display: `${mm}:${ss}`, warning: timer < 180 }}
+        />
+        <div className="action-plan-phase">
+          <div className="action-plan-header">
+            <h2>📋 ¿Qué hacés después de hablar con Alan?</h2>
+            <p>Marcá las acciones que tomarías. No hay respuestas correctas marcadas — elegí según lo que pasó en la conversación.</p>
+          </div>
+
+          {ACTION_PLAN_CATEGORIES.map((category) => (
+            <div
+              key={category.id}
+              className="action-category"
+              style={{ borderLeftColor: category.color }}
+            >
+              <div className="category-header" style={{ color: category.color }}>
+                <h3>{category.title}</h3>
+                <p>{category.description}</p>
+              </div>
+              <div className="action-checklist">
+                {ACTION_PLAN_OPTIONS[category.id].map((action) => (
+                  <label
+                    key={action.id}
+                    className={`action-item ${
+                      selectedActions[category.id].includes(action.id) ? "selected" : ""
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedActions[category.id].includes(action.id)}
+                      onChange={() => toggleAction(category.id, action.id)}
+                    />
+                    <div className="action-content">
+                      <span className="action-text">{action.text}</span>
+                    </div>
+                  </label>
+                ))}
+              </div>
+            </div>
+          ))}
+
+          <div className="action-plan-footer">
+            <div className="actions-counter">
+              {Object.values(selectedActions).flat().length} acciones seleccionadas
+            </div>
+            <button
+              className="btn-finish-action-plan"
+              onClick={finishChallenge}
+              disabled={
+                Object.values(selectedActions).flat().length === 0 || loading
+              }
+            >
+              {loading ? "Cerrando..." : "Finalizar Challenge →"}
+            </button>
+          </div>
+        </div>
+
+        <AICoach
+          challengeName="Día 3 · 1-1 con Alan"
+          challengeContext="El SM acaba de tener el 1-1 con Alan y ahora está decidiendo qué acciones tomar: inmediatas, de corto plazo, y sistémicas. La elección debe reflejar lo que escuchó en la conversación."
+        />
+      </div>
+    )
+  }
+
+  // ═════════════════════════════════════════════════════════════
+  // RESULTS
+  // ═════════════════════════════════════════════════════════════
+
+  if (phase === "results") {
+    return (
+      <ChallengeComplete
+        challengeTitle="Día 3 · 1-1 con Alan"
+        challengeNumber={3}
+        accentColor="#ff8a80"
+        gradientStart="rgba(255, 138, 128, 0.85)"
+        gradientEnd="rgba(250, 128, 114, 0.80)"
+        isLastChallenge={isLastChallenge(2)}
       />
-    </div>
-  )
+    )
+  }
+
+  return null
 }

@@ -25,9 +25,9 @@ export const MOCK_RESULTS_KEY_PREFIX = "smatch_mock_results_"
 // dimensiones mixtas y al menos 1 área a desarrollar.
 
 const JOURNEY = [
-  // ─── C04 · Día 1 · Kickoff & Planning ───
+  // ─── C01 · Día 1 · Kickoff & Planning ───
   {
-    challenge_id: 4,
+    challenge_id: 1,
     minutes_ago: 95,
     time_used: 920,
     scores: [
@@ -71,12 +71,12 @@ const JOURNEY = [
         strengths: ["facilita decisión grupal sin imponer"],
         weaknesses: ["pierde algunas oportunidades de coachear sesgos cognitivos"],
         notable_moments: [
-          { challenge: "C04", note: "Detectó anclaje cuando Alan iba a copiar la estimación de Eric en SL-105 (Buscar canción)." },
+          { challenge: "C01", note: "Detectó anclaje cuando Alan iba a copiar la estimación de Eric en SL-105 (Buscar canción)." },
         ],
       },
       challenge_history: [
         {
-          challenge: "C04",
+          challenge: "C01",
           challenge_name: "Día 1 · Kickoff & Planning",
           completed_at: new Date().toISOString(),
           ai_fluency_score: 3,
@@ -98,9 +98,9 @@ const JOURNEY = [
     ],
   },
 
-  // ─── C03 · Día 3 · 1-1 con Alan ───
+  // ─── C02 · Día 3 · 1-1 con Alan ───
   {
-    challenge_id: 3,
+    challenge_id: 2,
     minutes_ago: 75,
     time_used: 840,
     scores: [
@@ -144,12 +144,12 @@ const JOURNEY = [
         strengths: ["crea espacio psicológicamente seguro rápido"],
         weaknesses: ["salta a ofrecer solución antes de profundizar (perdió 1 momento)"],
         notable_moments: [
-          { challenge: "C03", note: "Alan se abrió sobre el burnout que traía de su trabajo anterior. SM respetó el silencio en lugar de empujar." },
+          { challenge: "C02", note: "Alan se abrió sobre el burnout que traía de su trabajo anterior. SM respetó el silencio en lugar de empujar." },
         ],
       },
       challenge_history: [
         {
-          challenge: "C03",
+          challenge: "C02",
           challenge_name: "Día 3 · 1-1 con Alan",
           completed_at: new Date().toISOString(),
           ai_fluency_score: 4,
@@ -159,16 +159,16 @@ const JOURNEY = [
     },
     coach_interactions: [
       {
-        challenge: "El dev que se está apagando",
+        challenge: "Día 3 · 1-1 con Alan",
         sm_question: "¿Cómo abro un 1-1 sin que parezca interrogatorio de performance?",
         coach_response: "¿Qué pregunta haría un amigo, no un manager? Y si esa pregunta te sale natural, ¿por qué no esa?",
       },
     ],
   },
 
-  // ─── C02 · Día 5 · Daily con bloqueo ───
+  // ─── C03 · Día 5 · Daily con bloqueo ───
   {
-    challenge_id: 2,
+    challenge_id: 3,
     minutes_ago: 55,
     time_used: 720,
     scores: [
@@ -211,12 +211,12 @@ const JOURNEY = [
         patterns: ["lee el board antes de hablar"],
         strengths: ["detecta WIP overflow temprano", "propone planes B sin entrar en pánico"],
         notable_moments: [
-          { challenge: "C02", note: "Detectó WIP excedido (5/3 en DOING) y el bloqueo no escalado de SL-105 (Spotify) sin que el equipo lo señalara." },
+          { challenge: "C03", note: "Detectó WIP excedido (5/3 en DOING) y el bloqueo no escalado de SL-105 (Spotify) sin que el equipo lo señalara." },
         ],
       },
       challenge_history: [
         {
-          challenge: "C02",
+          challenge: "C03",
           challenge_name: "Día 5 · Daily con bloqueo",
           completed_at: new Date().toISOString(),
           ai_fluency_score: 3,
@@ -226,16 +226,16 @@ const JOURNEY = [
     },
     coach_interactions: [
       {
-        challenge: "El bloqueo que nadie escala",
+        challenge: "Día 5 · Daily con bloqueo",
         sm_question: "David no escala el bloqueo. ¿Lo confronto en público?",
         coach_response: "¿Qué creés que pasaría con la confianza del equipo si lo confrontás en público vs si lo notás vos primero?",
       },
     ],
   },
 
-  // ─── C05 · Día 7 · Reunión con Paula (EM) ───
+  // ─── C04 · Día 7 · Reunión con Paula (EM) ───
   {
-    challenge_id: 5,
+    challenge_id: 4,
     minutes_ago: 35,
     time_used: 1020,
     scores: [
@@ -279,12 +279,12 @@ const JOURNEY = [
         strengths: ["argumenta con métricas concretas", "propone trade-offs en vez de defender"],
         weaknesses: ["puede sonar técnico/defensivo en momentos altos de presión"],
         notable_moments: [
-          { challenge: "C05", note: "Rechazó +30% velocity argumentando con el bloqueo de SL-105 + scope creep en SL-104. Propuso mock de Spotify como plan B." },
+          { challenge: "C04", note: "Rechazó +30% velocity argumentando con el bloqueo de SL-105 + scope creep en SL-104. Propuso mock de Spotify como plan B." },
         ],
       },
       challenge_history: [
         {
-          challenge: "C05",
+          challenge: "C04",
           challenge_name: "Día 7 · Reunión con Paula",
           completed_at: new Date().toISOString(),
           ai_fluency_score: 4,
@@ -294,21 +294,21 @@ const JOURNEY = [
     },
     coach_interactions: [
       {
-        challenge: "La presión de velocidad",
+        challenge: "Día 7 · Reunión con Paula",
         sm_question: "Paula está en pánico y me pide +30%. ¿Cómo le digo que no sin que se sienta atacada?",
         coach_response: "¿Qué necesita Paula para sentir que la entendiste antes de escuchar un no? Si empezás por ahí, ¿el no es el mismo?",
       },
       {
-        challenge: "La presión de velocidad",
+        challenge: "Día 7 · Reunión con Paula",
         sm_question: "¿Qué métrica le importa más al CEO?",
         coach_response: "Más que adivinarlo, ¿qué métricas le diste a Paula para que ELLA pueda contarle al CEO?",
       },
     ],
   },
 
-  // ─── C01 · Día 10 · Retro del Sprint 1 ───
+  // ─── C05 · Día 10 · Retro del Sprint 1 ───
   {
-    challenge_id: 1,
+    challenge_id: 5,
     minutes_ago: 5,
     time_used: 1100,
     scores: [
@@ -351,13 +351,13 @@ const JOURNEY = [
         strengths: ["pregunta socrática poderosa al final", "convierte tensión en acuerdo concreto"],
         weaknesses: ["los action items tienen owner pero les falta criterio de éxito"],
         notable_moments: [
-          { challenge: "C01", note: "Conectó scope-in-comments (SL-104, SL-106) + deuda de documentación + carry-over de SL-105 en un único insight sistémico." },
-          { challenge: "C01", note: "Eric (callado todo el sprint) habló por primera vez después de invitación explícita del SM." },
+          { challenge: "C05", note: "Conectó scope-in-comments (SL-104, SL-106) + deuda de documentación + carry-over de SL-105 en un único insight sistémico." },
+          { challenge: "C05", note: "Eric (callado todo el sprint) habló por primera vez después de invitación explícita del SM." },
         ],
       },
       challenge_history: [
         {
-          challenge: "C01",
+          challenge: "C05",
           challenge_name: "Día 10 · Retro del Sprint 1",
           completed_at: new Date().toISOString(),
           ai_fluency_score: 3,
@@ -367,7 +367,7 @@ const JOURNEY = [
     },
     coach_interactions: [
       {
-        challenge: "La retro que parece perfecta",
+        challenge: "Día 10 · Retro del Sprint 1",
         sm_question: "¿Cierro con acuerdos generales o forzando 1-2 concretos?",
         coach_response: "Si volvieras en 2 semanas a mirar la retro, ¿cuál de los dos te diría más sobre si pasó algo?",
       },

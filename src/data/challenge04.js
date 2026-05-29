@@ -1,172 +1,169 @@
-import { T } from "../theme"
-import { TEAM, MEMBER_MAP, PBIS as SSOT_PBIS } from "./setlistSprint1"
+import {
+  TEAM,
+  MEMBER_MAP,
+  STAKEHOLDERS,
+  STAKEHOLDER_MAP,
+  TEAM_DESC_SHORT,
+} from "./setlistSprint1"
 
-// Re-export del equipo SSOT
-export { TEAM, MEMBER_MAP }
+// Re-export del equipo + stakeholders SSOT
+export { TEAM, MEMBER_MAP, STAKEHOLDERS, STAKEHOLDER_MAP }
 
-export const SESSION_CONTEXT = "Equipo Setlist, Sprint 1, Día 1 — Kickoff + Planning. Es la primera vez que el equipo trabaja junto y la primera vez que estiman y priorizan en común. La sesión tiene dos partes: PARTE 1 — Team Agreements rápidos (3 acuerdos básicos para arrancar bien); PARTE 2 — Planning Session (estimar y priorizar 12 PBIs con velocity proyectada ~30 pts). La meta del Sprint 1: MVP usable con flujo end-to-end (banda crea show → fan sugiere canciones → banda elige setlist)."
+// ─── CONTEXTO DEL SPRINT ───
+export const SPRINT_CONTEXT = "Setlist · Sprint 1, Día 7/10. Es el PRIMER sprint del equipo trabajando juntos (Mateo armó el equipo en las últimas 2-3 semanas). Se comprometieron 30 pts, hoy llevan 13 completados. Paula (Engineering Manager) convocó una reunión 1-1 con el SM en pánico: hizo una proyección lineal y le quedó que se va a entregar solo el 60% del scope comprometido. El show piloto real con audience pública es en 4 semanas. Causas reales del retraso: SL-105 (búsqueda Spotify) bloqueado 2 días por aprobación de la API; Alan arrastrando burnout de su empresa anterior (nadie en el equipo sabe esto); Gabriela agregó cambios de alcance mid-sprint sin actualizar AC. Paula trae presión de Mateo (CEO). La conversación define cómo se va a comunicar el estado a la banda y al equipo."
 
-// ─── TEAM AGREEMENT TOPICS (Parte 1 del Día 1) ───
-// 3 acuerdos básicos que el SM facilita antes de arrancar el Planning.
-// Cada topic tiene:
-//   - tensión real entre miembros del equipo
-//   - teamSuggestions: ideas que cada miembro propone (el SM puede tomarlas
-//     como acuerdo o ignorarlas — refleja la facilitación real)
-//   - El SM puede agregar sus propios acuerdos en texto libre además
-export const TEAM_AGREEMENT_TOPICS = [
+export const INITIAL_PAULA_STATE = {
+  pressure: 70,
+  satisfaction: 30,
+  trust: 50,
+}
+
+export const OPENING_NARRATION_PAULA =
+  "Entrás al meeting room virtual. Paula ya está conectada. Tiene 3 tabs de gráficos abiertos en su pantalla. Te saluda sin sonreír."
+
+export const OPENING_PAULA_MESSAGE = {
+  from: "paula",
+  text: "Gracias por venir rápido. Hice una proyección con lo que llevan hasta hoy y nos quedan 13 de 30 pts. ¿Vamos a tener que decirle a la banda que pateamos el demo? ¿O cómo subimos velocity?",
+}
+
+// ─── FASE 1: SPRINT SNAPSHOT & INVESTIGATION ───
+
+// Métricas observables al día 7 — el candidato investiga sin que le marquemos
+// cuáles son "críticas" como pista.
+export const SPRINT_SNAPSHOT = {
+  committed: 30,
+  completed: 13,
+  inProgress: 9,
+  todo: 8,
+  daysElapsed: 7,
+  daysRemaining: 3,
+  blockedDays: 2,
+  scopeChanges: 4,
+}
+
+export const INVESTIGATION_METRICS = [
   {
-    id: "communication",
-    icon: "💬",
-    title: "Comunicación & Working Hours",
-    question: "¿Cómo se comunica el equipo durante el sprint? ¿Slack? ¿Daily? ¿Horarios respetados?",
-    tension: "Eric vive online y responde de noche. Alan trabaja 9-18 y no le gusta que le pinguen tarde. Gabriela mete asks urgentes a las 22hs.",
-    teamSuggestions: [
-      { from: "eric", text: "Slack en cualquier momento — si no urge no respondo." },
-      { from: "alan", text: "Horario fijo 10-18hs. Después no respondo." },
-      { from: "gabriela", text: "Si es urgente, llamada directa." },
-      { from: "gian", text: "Todo lo no-urgente al daily, no Slack." },
-    ]
+    id: "blocker_spotify",
+    title: "Bloqueo SL-105 (Spotify API)",
+    icon: "🚫",
+    currentValue: "2 días",
+    previousValue: "—",
+    trend: "Bloqueo externo",
+    status: "critical",
+    insight: "SL-105 (8 pts) lleva 2 días esperando aprobación de Spotify Developer API. Es un bloqueo externo (no del equipo). Si no se cuenta el tiempo de bloqueo, el throughput del equipo es ~85% del esperado.",
   },
   {
-    id: "dor",
+    id: "scope_changes",
+    title: "Scope Changes mid-sprint",
+    icon: "🔄",
+    currentValue: "4 cambios",
+    previousValue: "0 esperado",
+    trend: "Sin actualizar AC",
+    status: "critical",
+    insight: "Gabriela introdujo 4 cambios de alcance via comentarios sin actualizar los criterios de aceptación. Generó retrabajo en SL-104 y SL-105. Costo estimado: 3-4 pts perdidos.",
+  },
+  {
+    id: "team_health",
+    title: "Estado del equipo",
+    icon: "🧠",
+    currentValue: "Alan en alerta",
+    previousValue: "—",
+    trend: "Arrastra burnout previo",
+    status: "critical",
+    insight: "Alan llegó arrastrando burnout de su empresa anterior (nadie del equipo sabe esto). PRs con bugs básicos, commits a la madrugada. Si pedimos 30% más de velocity, lo perdemos. Nacho propondría 'trabajar más horas' (insostenible).",
+  },
+  {
+    id: "first_sprint_data",
+    title: "Es el primer sprint",
+    icon: "📊",
+    currentValue: "Sin histórico",
+    previousValue: "—",
+    trend: "Velocity aún no es predictiva",
+    status: "warning",
+    insight: "El equipo está en Sprint 1. No hay velocity histórica. La 'proyección lineal' de Paula asume que los primeros días representan el ritmo del sprint, pero típicamente el throughput sube hacia el final. Velocity en Sprint 1 NO predice nada.",
+  },
+  {
+    id: "wip_doing",
+    title: "WIP actual",
     icon: "📋",
-    title: "Definition of Ready",
-    question: "¿Cuándo un PBI está LISTO para entrar al sprint?",
-    tension: "Gabriela mete PBIs sin criterios claros. El equipo descubre el alcance real en pleno desarrollo. Hoy 'Buscar canción' parece simple, pero ¿incluye autocompletado? ¿búsqueda por álbum?",
-    teamSuggestions: [
-      { from: "gian", text: "Tener criterios de aceptación escritos." },
-      { from: "eric", text: "Estimado en story points por el equipo." },
-      { from: "david", text: "Dependencias externas identificadas." },
-      { from: "alan", text: "Mockup/wireframe si es UI." },
-      { from: "gabriela", text: "Aprobado por PO sin scope creep oculto." },
-    ]
+    currentValue: "5 tickets en DOING",
+    previousValue: "Recomendado: 3",
+    trend: "WIP excedido",
+    status: "warning",
+    insight: "5 tickets en DOING simultáneamente excede el WIP saludable. Si bajamos WIP a 3, throughput probablemente sube. Es ajuste de proceso, no de esfuerzo.",
+  },
+]
+
+// Argumentos que el SM puede preparar antes de hablar con Paula.
+// Sin marcadores "recommended"/"❌": el candidato decide qué llevar.
+export const PREPARATION_ARGUMENTS = [
+  {
+    id: "arg_external_blocker",
+    title: "Bloqueo externo en SL-105",
+    text: "SL-105 (8 pts) lleva 2 días bloqueado por aprobación de Spotify API. Es externo. Si descontamos, throughput real es 85% del esperado.",
   },
   {
-    id: "estimation",
-    icon: "🃏",
-    title: "Cómo estimamos",
-    question: "¿Story points o tiempo? ¿Quién vota? ¿Qué hacemos con los desacuerdos?",
-    tension: "Nacho viene del mundo freelance y estima en horas. Eric quiere story points relativos. Alan no se anima a estimar fuerte por inseguridad.",
-    teamSuggestions: [
-      { from: "eric", text: "Story points relativos, comparando con PBIs conocidos." },
-      { from: "nacho", text: "Estimamos en horas, es más directo." },
-      { from: "gian", text: "Voto secreto Planning Poker, después discusión." },
-      { from: "alan", text: "Si hay desacuerdo grande, los extremos explican primero." },
-      { from: "david", text: "El estimado lo da quien vaya a hacer la tarea." },
-    ]
-  }
+    id: "arg_scope_creep",
+    title: "Scope creep sin trazabilidad",
+    text: "4 cambios de alcance mid-sprint sin actualizar AC. Costo estimado: 3-4 pts en re-trabajo.",
+  },
+  {
+    id: "arg_first_sprint",
+    title: "Sprint 1 no es predictivo",
+    text: "Velocity en el primer sprint del equipo no predice nada. Necesitamos 2-3 sprints para tener señal real.",
+  },
+  {
+    id: "arg_team_health",
+    title: "Riesgo humano",
+    text: "Alan venía con cansancio acumulado. Si subimos presión, lo perdemos. El costo de re-onboardar es semanas.",
+  },
+  {
+    id: "arg_realistic_plan",
+    title: "Plan realista para el demo",
+    text: "Propuesta: bajar scope del demo a las features votables core (login, crear show, RSVP, votar). Spotify search se demuestra con mock si la aprobación no llega. Banda ve algo real en 4 semanas.",
+  },
+  {
+    id: "arg_wip_reduction",
+    title: "Bajar WIP en DOING",
+    text: "5 en DOING vs 3 recomendado. Bajar WIP suele subir throughput. Ajuste de proceso, no de esfuerzo.",
+  },
+  {
+    id: "arg_more_hours",
+    title: "Trabajar más horas",
+    text: "Pedirle al equipo que estire la jornada para llegar a los 30 pts.",
+  },
+  {
+    id: "arg_cut_scope_silently",
+    title: "Cortar features sin avisar",
+    text: "Bajar la complejidad de las features ya en curso sin avisar al PO ni al stakeholder.",
+  },
+  {
+    id: "arg_blame_po",
+    title: "Apuntar a Gabriela",
+    text: "El problema es que la PO cambia el scope. Que Paula la llame al orden.",
+  },
 ]
 
-// ─── PRODUCT BACKLOG ITEMS — Setlist MVP Sprint 1 ───
-// El catálogo vive en setlistSprint1.js. Re-export para mantener compat con
-// el resto del módulo y los componentes que importan de acá.
-export const PBIS = SSOT_PBIS
+// ─── TEAM DESCRIPTION (para AI) ───
+export const TEAM_DESC = `${TEAM_DESC_SHORT}
 
-export const FIBONACCI = [1, 2, 3, 5, 8, 13, 21]
-export const TSHIRTS = ["XS", "S", "M", "L", "XL", "XXL"]
+STAKEHOLDERS PRESENTES EN ESTA REUNIÓN:
+- Paula Ríos (Engineering Manager) — bajo presión del CEO y de Mateo (founder). Mira solo proyección lineal de velocity. NO es la villana: es razonable si se le habla con datos. Pero también tiene a su jefe encima.
+- Mateo (Founder Setlist) — no está en la reunión, pero su pregunta "¿llegamos al demo de la banda piloto?" pesa sobre Paula.
 
-// ─── POKER VOTES (pre-set per PBI index) ───
-export const POKER_VOTES = {
-  0: { eric: 5, david: 8, gian: 8, nacho: 13, alan: 5 },
-  1: { eric: 3, david: 5, gian: 5, nacho: 8, alan: 3 },
-  2: { eric: 5, david: 8, gian: 8, nacho: 13, alan: 5 },
-  3: { eric: 13, david: 13, gian: 13, nacho: 21, alan: 8 },
-}
+ESTADO DEL EQUIPO AL DÍA 7:
+- Alan arrastra cansancio acumulado de los 2 meses previos. Si la decisión es "trabajar más", colapsa.
+- Eric apoyaría al SM si trae argumentos sistémicos.
+- Gian frustrado por scope creep en SL-104 y SL-106.
+- Gabriela preocupada por el piloto; su scope creep no es malicioso, es por presión de la banda.
+- Nacho sugeriría "trabajar más horas" si lo dejan.`
 
-// ─── DETECTION EVENTS (bad behaviors to catch during poker) ───
-export const EVENTS = [
-  { id: "e1", poker: 0, from: "alan", text: "Yo pongo lo mismo que Eric, él sabe más.", tip: "Sesgo de anclaje", delay: 2500 },
-  { id: "e2", poker: 0, from: "nacho", text: "Puse 13 porque me llevaría unos 13 días más o menos.", tip: "Confunde puntos con tiempo", delay: 5500 },
-  { id: "e3", poker: 1, from: "gabriela", text: "¿Pero cuándo va a estar todo esto? Mateo necesita una fecha para la banda piloto.", tip: "Confunde estimación con compromiso", delay: 3000 },
-  { id: "e4", poker: 2, from: "david", text: "Le sumo un par de puntos extra porque integrando con Spotify se complica.", tip: "Estima contexto personal, no complejidad", delay: 3000 },
-]
-
-// ─── PROACTIVE TEAM QUESTIONS (fire at intervals) ───
-export const TEAM_QUESTIONS = [
-  { id: "q1", from: "nacho", text: "¿Qué son los story points? No entiendo la diferencia con horas.", delay: 8000, mood: "🤔" },
-  { id: "q2", from: "gabriela", text: "¿Podemos empezar a estimar? Necesito saber cuánto entra en el sprint.", delay: 20000 },
-  { id: "q3", from: "alan", text: "¿Y si no estamos de acuerdo en la estimación qué hacemos?", delay: 35000 },
-  { id: "q4", from: "eric", text: "¿Vamos a usar algún framework para priorizar o decidimos a dedo?", delay: 55000, mood: "🤨" },
-  { id: "q5", from: "gian", text: "¿Cómo definimos qué es más importante? ¿Valor de negocio o complejidad técnica?", delay: 70000 },
-]
-
-// ─── DOCK TOOLS (estaciones de coaching: el SM las usa + las explica) ───
-export const DOCK_ITEMS = [
-  { id: "postit", label: "📝 Post-it", desc: "Nota libre", type: "postit" },
-  { id: "textbox", label: "📄 Nota libre", desc: "Explicá algo extenso", type: "textbox" },
-  { id: "div0", type: "divider" },
-  { id: "poker5", label: "🃏 5 pasos Poker", desc: "Procesos de PP", type: "challenge", color: "#e84393" },
-  { id: "fib", label: "🔢 Fibonacci", desc: "Por qué la secuencia", type: "challenge", color: "#00b894" },
-  { id: "relabs", label: "⚖️ Rel vs Abs", desc: "Estimación relativa", type: "challenge", color: "#0984e3" },
-  { id: "tshirt", label: "👕 T-shirt sizing", desc: "Facilitá desacuerdo", type: "challenge", color: "#6c5ce7" },
-  { id: "div1", type: "divider" },
-  { id: "kano", label: "🏨 Modelo Kano", desc: "Clasificá features", type: "challenge", color: "#f39c12" },
-  { id: "moscow", label: "🎯 MoSCoW", desc: "Priorizá el backlog", type: "challenge", color: "#e74c3c" },
-  { id: "div2", type: "divider" },
-  { id: "poker_start", label: "🃏 Iniciar Planning Poker", desc: "Estimar historias en vivo", type: "action" },
-]
-
-// ─── KANO ITEMS (no hay respuesta única correcta — el SM clasifica y EXPLICA) ───
-// Features de Setlist para clasificar Basic/Performance/Delighter
-export const KANO_ITEMS = [
-  { id: "k1", text: "Login funciona sin bugs" },
-  { id: "k2", text: "Búsqueda de canciones rápida" },
-  { id: "k3", text: "Dark mode" },
-  { id: "k4", text: "La banda recibe la sugerencia del fan al instante" },
-  { id: "k5", text: "Galería post-show con fotos colaborativas" },
-  { id: "k6", text: "Recomendar canciones según género de la banda" },
-]
-
-// ─── REL/ABS ITEMS ───
-export const RELABS_ITEMS = [
-  { id: "r1", text: "Story Points" },
-  { id: "r2", text: "Horas" },
-  { id: "r3", text: "Comparación entre items" },
-  { id: "r4", text: "Días en el calendario" },
-  { id: "r5", text: "Equipo decide juntos" },
-  { id: "r6", text: "Varía según la persona" },
-]
-
-// ─── T-SHIRT votes (simulan desacuerdo, el SM facilita) ───
-// Cada voto tiene una RAZÓN realista que el SM necesita conocer para facilitar.
-// Esto le da material concreto para el coaching.
-export const TSHIRT_TEAM_VOTES = {
-  eric: "M",
-  david: "L",
-  gian: "L",
-  nacho: "XL",
-  alan: "M",
-}
-
-export const TSHIRT_PBI_INFO = {
-  id: "SL-105",
-  title: "Buscar canción",
-  scope: "Buscador de canciones integrando Spotify Search API. Incluye autocompletado, info de álbum y artista, manejo de errores cuando el API no responde, y cache local para reducir llamadas.",
-}
-
-export const TSHIRT_VOTE_REASONS = {
-  eric:  "Ya integré Spotify API en proyectos anteriores. No le veo complejidad real, hay SDKs oficiales.",
-  david: "Si Spotify rate-limita o cambia la API, todo el flujo de sugerir canciones cae. Lo siento más arriesgado.",
-  gian:  "Hay edge cases de QA: queries vacíos, caracteres especiales, idiomas, API caída. Necesita tiempo de testing.",
-  nacho: "Es la primera vez que toco una API externa. No sé cómo manejar el cache ni el rate limit. Lo siento enorme.",
-  alan:  "En mobile el buscador es solo UI sobre lo que devuelva la API. Si David me lo expone bien, no es tanto.",
-}
-
-// ─── POKER STEPS prompts (sin keyword matching, el SM completa libre) ───
-export const POKER_STEPS_PROMPTS = [
-  "El PO ______ el PBI al equipo",
-  "El equipo ______ dudas",
-  "Cada uno ______ su carta individualmente",
-  "Se ______ todas las cartas al mismo tiempo",
-  "Los ______ explican por qué votaron distinto",
-]
-
-// ─── SCORING DIMENSIONS ───
-// Challenge identity: Scrum process mastery + Estimation coaching + Bias detection
+// ─── DIMENSIONES EVALUADAS ───
 export const DIMENSIONS = [
-  ["process_mastery", "Process Mastery (Scrum)"],
-  ["bias_coaching", "Coaching de Sesgos"],
-  ["facilitation", "Facilitación"],
+  ["stakeholder_management", "Gestión de Stakeholders"],
+  ["negotiation", "Negociación"],
+  ["metrics_literacy", "Literacy de Métricas"],
+  ["boundary_setting", "Protección del Equipo"],
   ["systems_thinking", "Pensamiento Sistémico"],
   ["ai_fluency", "Uso de IA"],
 ]

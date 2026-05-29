@@ -1,125 +1,172 @@
 import { T } from "../theme"
-import { TEAM, MEMBER_MAP, TEAM_DESC_SHORT } from "./setlistSprint1"
+import { TEAM, MEMBER_MAP, PBIS as SSOT_PBIS } from "./setlistSprint1"
 
-// Re-export del equipo SSOT para los componentes que ya lo importan acá.
+// Re-export del equipo SSOT
 export { TEAM, MEMBER_MAP }
 
-// ─── CONTEXTO DEL SPRINT ───
-export const SPRINT_CONTEXT =
-  "Setlist · Sprint 1 cerrando (Día 10/10). Es la PRIMERA retro del equipo. Entregaron 22 de 30 puntos comprometidos. En papel, aceptable. Pero hay tensión que nadie nombra. Nacho entregó SL-103 (Compartir link) tarde sin avisar. Alan hizo trabajo extra para cubrir y no lo dijo. Gian levantó un bug en SL-107 (Votar canciones) que fue ignorado en el planning. Eric está callado. Gabriela celebra el sprint. SL-105 (Buscar canción) sigue bloqueada esperando Spotify API y va a quedar como carry-over. El SM tiene que ir más abajo de la superficie. El piloto con la primera banda arranca en 4 semanas."
+export const SESSION_CONTEXT = "Equipo Setlist, Sprint 1, Día 1 — Kickoff + Planning. Es la primera vez que el equipo trabaja junto y la primera vez que estiman y priorizan en común. La sesión tiene dos partes: PARTE 1 — Team Agreements rápidos (3 acuerdos básicos para arrancar bien); PARTE 2 — Planning Session (estimar y priorizar 12 PBIs con velocity proyectada ~30 pts). La meta del Sprint 1: MVP usable con flujo end-to-end (banda crea show → fan sugiere canciones → banda elige setlist)."
 
-export const SPRINT_STATS = [
-  { icon: "🎯", label: "Comprometido", value: "30 pts" },
-  { icon: "✅", label: "Completado", value: "22 pts" },
-  { icon: "🔄", label: "Carry-over", value: "SL-105 + 1" },
+// ─── TEAM AGREEMENT TOPICS (Parte 1 del Día 1) ───
+// 3 acuerdos básicos que el SM facilita antes de arrancar el Planning.
+// Cada topic tiene:
+//   - tensión real entre miembros del equipo
+//   - teamSuggestions: ideas que cada miembro propone (el SM puede tomarlas
+//     como acuerdo o ignorarlas — refleja la facilitación real)
+//   - El SM puede agregar sus propios acuerdos en texto libre además
+export const TEAM_AGREEMENT_TOPICS = [
+  {
+    id: "communication",
+    icon: "💬",
+    title: "Comunicación & Working Hours",
+    question: "¿Cómo se comunica el equipo durante el sprint? ¿Slack? ¿Daily? ¿Horarios respetados?",
+    tension: "Eric vive online y responde de noche. Alan trabaja 9-18 y no le gusta que le pinguen tarde. Gabriela mete asks urgentes a las 22hs.",
+    teamSuggestions: [
+      { from: "eric", text: "Slack en cualquier momento — si no urge no respondo." },
+      { from: "alan", text: "Horario fijo 10-18hs. Después no respondo." },
+      { from: "gabriela", text: "Si es urgente, llamada directa." },
+      { from: "gian", text: "Todo lo no-urgente al daily, no Slack." },
+    ]
+  },
+  {
+    id: "dor",
+    icon: "📋",
+    title: "Definition of Ready",
+    question: "¿Cuándo un PBI está LISTO para entrar al sprint?",
+    tension: "Gabriela mete PBIs sin criterios claros. El equipo descubre el alcance real en pleno desarrollo. Hoy 'Buscar canción' parece simple, pero ¿incluye autocompletado? ¿búsqueda por álbum?",
+    teamSuggestions: [
+      { from: "gian", text: "Tener criterios de aceptación escritos." },
+      { from: "eric", text: "Estimado en story points por el equipo." },
+      { from: "david", text: "Dependencias externas identificadas." },
+      { from: "alan", text: "Mockup/wireframe si es UI." },
+      { from: "gabriela", text: "Aprobado por PO sin scope creep oculto." },
+    ]
+  },
+  {
+    id: "estimation",
+    icon: "🃏",
+    title: "Cómo estimamos",
+    question: "¿Story points o tiempo? ¿Quién vota? ¿Qué hacemos con los desacuerdos?",
+    tension: "Nacho viene del mundo freelance y estima en horas. Eric quiere story points relativos. Alan no se anima a estimar fuerte por inseguridad.",
+    teamSuggestions: [
+      { from: "eric", text: "Story points relativos, comparando con PBIs conocidos." },
+      { from: "nacho", text: "Estimamos en horas, es más directo." },
+      { from: "gian", text: "Voto secreto Planning Poker, después discusión." },
+      { from: "alan", text: "Si hay desacuerdo grande, los extremos explican primero." },
+      { from: "david", text: "El estimado lo da quien vaya a hacer la tarea." },
+    ]
+  }
 ]
 
-export const SPRINT_SIGNALS = [
-  {
-    from: "eric",
-    text: "En la estimación, el equipo discutió fuerte la complejidad de SL-107 (Votar). Los devs se plantaron y no cedieron ante la presión.",
-    ts: "Día 1",
-  },
-  {
-    from: "gian",
-    text: "SL-104 (RSVP) rebotó 2 veces en QA. Los criterios de aceptación cambiaron en comentarios sin actualizar la descripción del ticket.",
-    ts: "Día 6",
-  },
-  {
-    from: "david",
-    text: "Alan estuvo trabado medio día con un edge case del RSVP. Me metí 30 min y lo resolvimos juntos.",
-    ts: "Día 8",
-  },
-  {
-    from: "alan",
-    text: "SL-105 (Buscar canción) sigue esperando aprobación de Spotify. Es el bloqueo del sprint.",
-    ts: "Día 9",
-  },
-]
+// ─── PRODUCT BACKLOG ITEMS — Setlist MVP Sprint 1 ───
+// El catálogo vive en setlistSprint1.js. Re-export para mantener compat con
+// el resto del módulo y los componentes que importan de acá.
+export const PBIS = SSOT_PBIS
 
-// ─── TEAM DESCRIPTION (para el prompt de AI) ───
-export const TEAM_DESC = TEAM_DESC_SHORT
+export const FIBONACCI = [1, 2, 3, 5, 8, 13, 21]
+export const TSHIRTS = ["XS", "S", "M", "L", "XL", "XXL"]
 
-// ─── FORMATOS DE RETRO ───
-export const FORMATS = [
-  {
-    id: "sailboat",
-    name: "Sailboat",
-    cols: ["Wind 🌬️", "Anchor ⚓", "Rocks 🪨", "Island 🏝️"],
-    desc: "Metáfora del barco: viento que impulsa, ancla que frena, rocas de riesgo, isla como meta.",
-    hint: "Ideal para visualizar fuerzas y dirección del equipo.",
-  },
-  {
-    id: "glad_sad_mad",
-    name: "Glad / Sad / Mad",
-    cols: ["Glad 😊", "Sad 😔", "Mad 😤"],
-    desc: "Basado en emociones: abre canales para lo que el equipo siente.",
-    hint: "Ideal cuando hay tensión bajo la superficie.",
-  },
-  {
-    id: "start_stop_continue",
-    name: "Start / Stop / Continue",
-    cols: ["Start", "Stop", "Continue"],
-    desc: "Orientado a la acción: impulsa cambios concretos de comportamiento.",
-    hint: "Ideal para equipos que necesitan cambiar hábitos.",
-  },
-]
-
-// ─── STICKIES POR FORMATO (referencian PBIs canónicos del SSOT) ───
-export const STICKIES = {
-  sailboat: {
-    initial: [
-      // Wind 🌬️ — Lo que nos impulsa
-      { col: 0, author: "gian", text: "SL-101 (Crear show) y SL-102 (Login) salieron limpios. Los fans pueden sumarse al show con 1 tap.", color: T.sY, votes: ["eric", "david", "alan", "gabriela"] },
-      { col: 0, author: "eric", text: "El backend de Crear Show quedó armado rápido. Buena arquitectura, endpoints limpios.", color: T.sB, votes: ["david", "gian", "nacho"] },
-      { col: 0, author: "david", text: "David y Alan se juntaron 30 min para resolver un edge case del RSVP. Ese pairing nos salvó.", color: T.sY, votes: ["alan", "gian", "eric", "gabriela", "nacho"] },
-      { col: 0, author: "gabriela", text: "Buen ritmo. La banda piloto ya vio una demo del flujo de crear show.", color: T.sV, votes: ["gian"] },
-
-      // Anchor ⚓ — Lo que nos frena
-      { col: 1, author: "alan", text: "Los criterios de aceptación de SL-104 (RSVP) cambiaron en comentarios. Nadie actualizó la descripción.", color: T.sO, votes: ["eric", "gian", "gabriela"] },
-      { col: 1, author: "gian", text: "SL-107 (Votar) llegó tarde con un bug que ya había reportado en el planning. Rebotó 2 veces.", color: T.sP, votes: ["nacho", "eric", "alan"] },
-      { col: 1, author: "nacho", text: "SL-106 (Sugerir canción) cambió de alcance solo en comentarios. Los AC nunca se actualizaron.", color: T.sP, votes: ["alan", "gian"] },
-
-      // Rocks 🪨 — Riesgos
-      { col: 2, author: "david", text: "SL-105 (Buscar canción / Spotify) sigue bloqueada. Si no aprueban la API en 1 semana, el demo va sin búsqueda.", color: T.sB, votes: ["eric", "gabriela"] },
-      { col: 2, author: "eric", text: "Si seguimos sin doc central de features complejas, cada ticket va a tener carry-over.", color: T.sG, votes: ["alan", "gian", "gabriela"] },
-
-      // Island 🏝️ — Meta
-      { col: 3, author: "nacho", text: "Piloto con la primera banda en 4 semanas — flujo completo: crear show, RSVP, sugerir, votar.", color: T.sY, votes: ["gian", "eric"] },
-      { col: 3, author: "gian", text: "Tener una fuente de verdad para criterios de aceptación. Hoy no existe.", color: T.sG, votes: ["alan", "gabriela", "eric", "david"] },
-    ],
-  },
-  glad_sad_mad: {
-    initial: [
-      { col: 0, author: "gian", text: "Orgullo: SL-101 + SL-102 + SL-103 en prod. Los fans ya pueden sumarse a un show.", color: T.sY, votes: ["eric", "david", "gabriela"] },
-      { col: 0, author: "eric", text: "Contento: el equipo se plantó en la estimación de SL-107 (Votar). Mostramos criterio técnico.", color: T.sG, votes: ["eric", "gian", "david"] },
-      { col: 0, author: "nacho", text: "Buen ambiente. Contento de ser parte de este equipo.", color: T.sO, votes: [] },
-      { col: 0, author: "david", text: "David y Alan resolviendo el RSVP en 30 min — eso es ownership del equipo de verdad.", color: T.sY, votes: ["alan", "gian", "eric", "gabriela", "nacho"] },
-      { col: 1, author: "alan", text: "Triste por SL-105 (Buscar canción) bloqueada todo el sprint. No depende de nosotros y eso frustra.", color: T.sO, votes: ["gabriela", "gian", "eric"] },
-      { col: 1, author: "gian", text: "Me entristece que el bug de SL-107 que reporté en el planning no se priorizó. Después rebotó.", color: T.sP, votes: ["alan", "gabriela", "david"] },
-      { col: 2, author: "nacho", text: "Me frustra que Gabriela cambie el alcance en comentarios y nadie se entere. Genera retrabajo.", color: T.sP, votes: ["nacho", "gian", "eric"] },
-      { col: 2, author: "eric", text: "Me molesta que tengamos carry-over por falta de documentación, no por falta de capacidad.", color: T.sB, votes: ["alan", "david", "gabriela", "gian"] },
-    ],
-  },
-  start_stop_continue: {
-    initial: [
-      { col: 2, author: "gian", text: "Continuar el pairing espontáneo — David y Alan en el RSVP fue clave.", color: T.sY, votes: ["alan", "eric", "gabriela", "nacho", "david"] },
-      { col: 2, author: "eric", text: "Continuar manteniendo el criterio técnico en estimaciones. No ceder ante presión externa.", color: T.sY, votes: ["david", "gian", "nacho"] },
-      { col: 2, author: "gabriela", text: "Continuar el buen ritmo de entregas. La banda piloto vio progreso real.", color: T.sV, votes: ["gian"] },
-      { col: 0, author: "alan", text: "Empezar a centralizar los criterios de features complejas. Hoy están dispersos en comentarios.", color: T.sO, votes: ["eric", "gabriela", "gian", "david"] },
-      { col: 0, author: "gian", text: "Empezar a actualizar los AC cuando el alcance cambia. Que no quede solo en comentarios del PO.", color: T.sP, votes: ["nacho", "eric", "alan"] },
-      { col: 0, author: "eric", text: "Empezar a priorizar bugs reportados en planning. No esperar a que reboten en QA.", color: T.sG, votes: ["alan", "david", "gian"] },
-      { col: 1, author: "eric", text: "Dejar de asumir que todos leen los comentarios de los tickets. No es un canal confiable.", color: T.sB, votes: ["gian", "nacho", "alan", "gabriela"] },
-      { col: 1, author: "gian", text: "Dejar de cerrar retros sin action items con dueño y fecha. Las cosas no cambian solas.", color: T.sP, votes: ["eric", "david", "gabriela"] },
-    ],
-  },
+// ─── POKER VOTES (pre-set per PBI index) ───
+export const POKER_VOTES = {
+  0: { eric: 5, david: 8, gian: 8, nacho: 13, alan: 5 },
+  1: { eric: 3, david: 5, gian: 5, nacho: 8, alan: 3 },
+  2: { eric: 5, david: 8, gian: 8, nacho: 13, alan: 5 },
+  3: { eric: 13, david: 13, gian: 13, nacho: 21, alan: 8 },
 }
 
-// ─── DIMENSIONES EVALUADAS ───
+// ─── DETECTION EVENTS (bad behaviors to catch during poker) ───
+export const EVENTS = [
+  { id: "e1", poker: 0, from: "alan", text: "Yo pongo lo mismo que Eric, él sabe más.", tip: "Sesgo de anclaje", delay: 2500 },
+  { id: "e2", poker: 0, from: "nacho", text: "Puse 13 porque me llevaría unos 13 días más o menos.", tip: "Confunde puntos con tiempo", delay: 5500 },
+  { id: "e3", poker: 1, from: "gabriela", text: "¿Pero cuándo va a estar todo esto? Mateo necesita una fecha para la banda piloto.", tip: "Confunde estimación con compromiso", delay: 3000 },
+  { id: "e4", poker: 2, from: "david", text: "Le sumo un par de puntos extra porque integrando con Spotify se complica.", tip: "Estima contexto personal, no complejidad", delay: 3000 },
+]
+
+// ─── PROACTIVE TEAM QUESTIONS (fire at intervals) ───
+export const TEAM_QUESTIONS = [
+  { id: "q1", from: "nacho", text: "¿Qué son los story points? No entiendo la diferencia con horas.", delay: 8000, mood: "🤔" },
+  { id: "q2", from: "gabriela", text: "¿Podemos empezar a estimar? Necesito saber cuánto entra en el sprint.", delay: 20000 },
+  { id: "q3", from: "alan", text: "¿Y si no estamos de acuerdo en la estimación qué hacemos?", delay: 35000 },
+  { id: "q4", from: "eric", text: "¿Vamos a usar algún framework para priorizar o decidimos a dedo?", delay: 55000, mood: "🤨" },
+  { id: "q5", from: "gian", text: "¿Cómo definimos qué es más importante? ¿Valor de negocio o complejidad técnica?", delay: 70000 },
+]
+
+// ─── DOCK TOOLS (estaciones de coaching: el SM las usa + las explica) ───
+export const DOCK_ITEMS = [
+  { id: "postit", label: "📝 Post-it", desc: "Nota libre", type: "postit" },
+  { id: "textbox", label: "📄 Nota libre", desc: "Explicá algo extenso", type: "textbox" },
+  { id: "div0", type: "divider" },
+  { id: "poker5", label: "🃏 5 pasos Poker", desc: "Procesos de PP", type: "challenge", color: "#e84393" },
+  { id: "fib", label: "🔢 Fibonacci", desc: "Por qué la secuencia", type: "challenge", color: "#00b894" },
+  { id: "relabs", label: "⚖️ Rel vs Abs", desc: "Estimación relativa", type: "challenge", color: "#0984e3" },
+  { id: "tshirt", label: "👕 T-shirt sizing", desc: "Facilitá desacuerdo", type: "challenge", color: "#6c5ce7" },
+  { id: "div1", type: "divider" },
+  { id: "kano", label: "🏨 Modelo Kano", desc: "Clasificá features", type: "challenge", color: "#f39c12" },
+  { id: "moscow", label: "🎯 MoSCoW", desc: "Priorizá el backlog", type: "challenge", color: "#e74c3c" },
+  { id: "div2", type: "divider" },
+  { id: "poker_start", label: "🃏 Iniciar Planning Poker", desc: "Estimar historias en vivo", type: "action" },
+]
+
+// ─── KANO ITEMS (no hay respuesta única correcta — el SM clasifica y EXPLICA) ───
+// Features de Setlist para clasificar Basic/Performance/Delighter
+export const KANO_ITEMS = [
+  { id: "k1", text: "Login funciona sin bugs" },
+  { id: "k2", text: "Búsqueda de canciones rápida" },
+  { id: "k3", text: "Dark mode" },
+  { id: "k4", text: "La banda recibe la sugerencia del fan al instante" },
+  { id: "k5", text: "Galería post-show con fotos colaborativas" },
+  { id: "k6", text: "Recomendar canciones según género de la banda" },
+]
+
+// ─── REL/ABS ITEMS ───
+export const RELABS_ITEMS = [
+  { id: "r1", text: "Story Points" },
+  { id: "r2", text: "Horas" },
+  { id: "r3", text: "Comparación entre items" },
+  { id: "r4", text: "Días en el calendario" },
+  { id: "r5", text: "Equipo decide juntos" },
+  { id: "r6", text: "Varía según la persona" },
+]
+
+// ─── T-SHIRT votes (simulan desacuerdo, el SM facilita) ───
+// Cada voto tiene una RAZÓN realista que el SM necesita conocer para facilitar.
+// Esto le da material concreto para el coaching.
+export const TSHIRT_TEAM_VOTES = {
+  eric: "M",
+  david: "L",
+  gian: "L",
+  nacho: "XL",
+  alan: "M",
+}
+
+export const TSHIRT_PBI_INFO = {
+  id: "SL-105",
+  title: "Buscar canción",
+  scope: "Buscador de canciones integrando Spotify Search API. Incluye autocompletado, info de álbum y artista, manejo de errores cuando el API no responde, y cache local para reducir llamadas.",
+}
+
+export const TSHIRT_VOTE_REASONS = {
+  eric:  "Ya integré Spotify API en proyectos anteriores. No le veo complejidad real, hay SDKs oficiales.",
+  david: "Si Spotify rate-limita o cambia la API, todo el flujo de sugerir canciones cae. Lo siento más arriesgado.",
+  gian:  "Hay edge cases de QA: queries vacíos, caracteres especiales, idiomas, API caída. Necesita tiempo de testing.",
+  nacho: "Es la primera vez que toco una API externa. No sé cómo manejar el cache ni el rate limit. Lo siento enorme.",
+  alan:  "En mobile el buscador es solo UI sobre lo que devuelva la API. Si David me lo expone bien, no es tanto.",
+}
+
+// ─── POKER STEPS prompts (sin keyword matching, el SM completa libre) ───
+export const POKER_STEPS_PROMPTS = [
+  "El PO ______ el PBI al equipo",
+  "El equipo ______ dudas",
+  "Cada uno ______ su carta individualmente",
+  "Se ______ todas las cartas al mismo tiempo",
+  "Los ______ explican por qué votaron distinto",
+]
+
+// ─── SCORING DIMENSIONS ───
+// Challenge identity: Scrum process mastery + Estimation coaching + Bias detection
 export const DIMENSIONS = [
+  ["process_mastery", "Process Mastery (Scrum)"],
+  ["bias_coaching", "Coaching de Sesgos"],
   ["facilitation", "Facilitación"],
-  ["safety", "Seguridad Psicológica"],
-  ["process", "Diseño de Procesos"],
   ["systems_thinking", "Pensamiento Sistémico"],
   ["ai_fluency", "Uso de IA"],
 ]

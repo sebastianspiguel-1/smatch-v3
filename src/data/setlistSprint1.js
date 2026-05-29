@@ -150,11 +150,11 @@ export const SPRINT_COMMIT = {
 
 // ─── TIMELINE DEL SPRINT ───
 export const SPRINT_DAYS = {
-  D1: { label: "Día 1 · Kickoff & Planning", challenge: 4 },
-  D3: { label: "Día 3 · 1-1 con Alan", challenge: 3 },
-  D5: { label: "Día 5 · Daily con bloqueo", challenge: 2 },
-  D7: { label: "Día 7 · Reunión con Paula (EM)", challenge: 5 },
-  D10: { label: "Día 10 · Retro del Sprint 1", challenge: 1 },
+  D1: { label: "Día 1 · Kickoff & Planning", challenge: 1 },
+  D3: { label: "Día 3 · 1-1 con Alan", challenge: 2 },
+  D5: { label: "Día 5 · Daily con bloqueo", challenge: 3 },
+  D7: { label: "Día 7 · Reunión con Paula (EM)", challenge: 4 },
+  D10: { label: "Día 10 · Retro del Sprint 1", challenge: 5 },
 }
 
 // ─── TENSIONES CANÓNICAS DEL SPRINT ───

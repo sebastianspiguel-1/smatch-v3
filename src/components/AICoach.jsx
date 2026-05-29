@@ -7,7 +7,7 @@ import "./AICoach.css"
  * AI Coach unified component for all challenges.
  *
  * Props:
- *   - challengeName: string, e.g. "El bloqueo que nadie escala"
+ *   - challengeName: string, e.g. "Día 5 · Daily con bloqueo"
  *   - challengeContext: string with current state summary for the coach prompt
  *   - candidateId: optional, defaults to DEFAULT_CANDIDATE_ID
  *   - maxInteractions: optional cap, default 10

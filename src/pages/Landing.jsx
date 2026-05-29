@@ -116,12 +116,12 @@ export default function Landing() {
         <div className="hero-v3-stars hero-v3-stars-2" aria-hidden="true" />
         <div className="hero-v3-text hero-v3-text-center">
           <h1 className="hero-v3-headline">
-            <span className="hero-v3-line">Contratá Scrum Masters y PMs</span>
+            <span className="hero-v3-line">Contratá Scrum Masters y Project Managers</span>
             <span className="hero-v3-line">que generen <em className="hero-v3-accent">impacto real</em></span>
           </h1>
           <p className="hero-v3-sub">
-            El assessment situacional para Scrum Masters y Project Managers.
-            Los ves trabajar antes de contratar.
+            El assessment con IA para evaluar roles de liderazgo en situaciones
+            y contextos con desafíos reales. Evaluá lo correcto antes de contratar.
           </p>
           <a
             href="#producto"
@@ -138,7 +138,7 @@ export default function Landing() {
       <section id="problema" className="v3-section v3-section-light v3-problema">
         <div className="v3-container">
           <div className="v3-section-intro">
-            <p className="v3-eyebrow">Por qué existe Smatch</p>
+            <p className="v3-eyebrow">Contratar SMs y PMs es difícil</p>
             <h2 className="v3-section-headline">
               Contratar talento ágil<br />no debería ser una apuesta.
             </h2>

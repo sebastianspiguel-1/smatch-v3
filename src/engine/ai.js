@@ -79,7 +79,7 @@ export async function callAIText(systemPrompt, userMessage, maxTokens = 300) {
   }
 }
 
-// ─── Evaluar intervenciones en Challenge02 (Kanban blocker) ───
+// ─── Evaluar intervenciones en C03 (Daily / Kanban blocker, Día 5) ───
 export function buildBlockerChallengePrompt(teamDesc, kanbanState, smAction, chatContext, candidateContext = "") {
   // Serialize board state
   const boardSummary = Object.entries(kanbanState)
@@ -178,8 +178,8 @@ Respondé SOLO con JSON (sin markdown):
 IMPORTANTE: NO incluyas el campo "quality" en el JSON. NO incluyas feedback. El candidato NUNCA debe ver evaluación durante el challenge.`
 }
 
-// ─── C04 Planning / Estimación prompt (chat libre + AI per turn) ───
-// Reemplaza el keyword-matching que tenía C04. Evalúa qué dijo el SM con
+// ─── C01 Planning / Estimación prompt (chat libre + AI per turn, Día 1) ───
+// Reemplaza el keyword-matching original. Evalúa qué dijo el SM con
 // criterios reales: process mastery (Scrum), bias coaching, facilitation,
 // systems thinking. ai_fluency se mide post-challenge.
 export function buildEstimationFacilitationPrompt(teamDesc, sessionState, smAction, chatContext, candidateContext = "") {
@@ -279,7 +279,7 @@ Respondé SOLO con JSON (sin markdown):
 IMPORTANTE: NO incluyas el campo "quality" ni "feedback". El candidato NUNCA debe ver evaluación durante el challenge.`
 }
 
-// ─── C01 Retro prompt (chat libre + AI per turn) ───
+// ─── C05 Retro prompt (chat libre + AI per turn, Día 10) ───
 // Reemplaza el flujo MOMENTS scripted. Evalúa la facilitación de la retro
 // con criterios reales: facilitación, seguridad psicológica, pensamiento sistémico, diseño de procesos.
 // ai_fluency se mide post-challenge.
@@ -382,8 +382,8 @@ Respondé SOLO con JSON (sin markdown):
 IMPORTANTE: NO incluyas "quality" ni "feedback". El candidato NUNCA debe ver evaluación durante el challenge.`
 }
 
-// ─── C03 Burnout 1-1 prompt (chat libre + AI per turn) ───
-// Reemplaza el árbol de decisiones scripted de C03. Evalúa la conversación 1-1 con Alan:
+// ─── C02 Burnout 1-1 prompt (chat libre + AI per turn, Día 3) ───
+// Evalúa la conversación 1-1 con Alan:
 // coaching, empatía, seguridad psicológica, discreción, pensamiento sistémico.
 // ai_fluency se mide post-challenge.
 export function buildBurnout1on1Prompt(teamDesc, sprintContext, alanState, smAction, chatContext, candidateContext = "") {
@@ -496,8 +496,8 @@ Reglas:
 - NO incluyas "quality" ni "feedback". El candidato NUNCA debe ver evaluación.`
 }
 
-// ─── C05 Velocity Negotiation prompt (chat libre + AI per turn) ───
-// Reemplaza la conversación scripted con Paula. Evalúa silenciosamente:
+// ─── C04 Velocity Negotiation prompt (chat libre + AI per turn, Día 7) ───
+// Conversación 1-1 con Paula (EM). Evalúa silenciosamente:
 // stakeholder_management, negotiation, metrics_literacy, boundary_setting, systems_thinking.
 // ai_fluency se mide post-challenge.
 export function buildVelocityNegotiationPrompt(teamDesc, sprintContext, paulaState, preparedArgs, smAction, chatContext, candidateContext = "") {
@@ -519,7 +519,7 @@ Paula convocó la reunión en pánico: solo se completaron 13 de 30 pts comprome
 
 Causas reales (que el SM tiene que descubrir/articular con datos):
 - SL-105 bloqueado 2 días esperando aprobación de Spotify API (afuera del control del equipo)
-- Alan venía con burnout previo arrastrado de 2 meses de trabajo solitario (C03)
+- Alan venía con burnout arrastrado de su empresa anterior (visto en C02, 1-1 Día 3)
 - Scope creep de Gabriela mid-sprint (cambios sin actualizar AC)
 - Es el PRIMER sprint del equipo: ni hay historia de velocity ni acuerdos consolidados de cómo estimar
 

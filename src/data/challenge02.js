@@ -1,190 +1,186 @@
-import {
-  TEAM as TEAM_BASE,
-  STAKEHOLDERS,
-  MEMBER_MAP as MEMBER_MAP_BASE,
-  TEAM_DESC_SHORT,
-} from "./setlistSprint1"
+import { TEAM, MEMBER_MAP, TEAM_DESC_SHORT } from "./setlistSprint1"
 
-// El stakeholder externo del sprint es Mateo (founder). Lo agregamos al map
-// del challenge para que aparezca en el chat cuando se lo invoca.
-const mateo = STAKEHOLDERS.find((s) => s.id === "mateo")
+// Re-export del equipo SSOT
+export { TEAM, MEMBER_MAP }
 
-export const TEAM = mateo ? [...TEAM_BASE, mateo] : TEAM_BASE
-export const MEMBER_MAP = mateo
-  ? { ...MEMBER_MAP_BASE, mateo }
-  : MEMBER_MAP_BASE
-
-// ─── KANBAN BOARD STRUCTURE ───
-export const KANBAN_COLUMNS = [
-  { id: "TODO", label: "To Do", wipLimit: null, color: "#94a3b8" },
-  { id: "DOING", label: "In Progress", wipLimit: 3, color: "#60a5fa" },
-  { id: "IN_REVIEW", label: "In Review", wipLimit: 2, color: "#a78bfa" },
-  { id: "BLOCKED", label: "Blocked", wipLimit: null, color: "#ef4444" },
-  { id: "DONE", label: "Done", wipLimit: null, color: "#10b981" },
-]
-
-// ─── INITIAL KANBAN STATE (Sprint 1, Day 5 — MID-SPRINT) ───
-// Producto Setlist: bandas crean shows y los fans co-crean el setlist votando canciones.
-// SL-105 (Buscar canción / Spotify API) está bloqueada hace 2 días.
-export const INITIAL_KANBAN_STATE = {
-  TODO: [
-    { id: "SL-109", title: "Notificación push 'Setlist listo'", assignee: null, priority: "medium", status: "ok", points: 5 },
-    { id: "SL-110", title: "Galería de fotos post-show", assignee: null, priority: "low", status: "ok", points: 8 },
-    { id: "SL-111", title: "Perfil de banda", assignee: null, priority: "low", status: "ok", points: 3 },
-  ],
-  DOING: [
-    { id: "SL-101", title: "Crear show", assignee: "eric", priority: "high", status: "ok", days: 2, points: 5 },
-    { id: "SL-105", title: "Buscar canción (Spotify Search API)", assignee: "alan", priority: "high", status: "blocked", blockedDays: 2, dependencies: ["Aprobación Spotify Developer API"], points: 8 },
-    { id: "SL-103", title: "Compartir link de show", assignee: "nacho", priority: "high", status: "ok", days: 1, points: 3 },
-    { id: "SL-104", title: "RSVP del fan", assignee: "alan", priority: "high", status: "ok", days: 1, points: 3 },
-    { id: "SL-102", title: "Login y registro", assignee: "david", priority: "high", status: "ok", days: 1, points: 5 },
-  ],
-  IN_REVIEW: [
-    { id: "SL-106", title: "Sugerir canción al show", assignee: "nacho", priority: "high", status: "waiting", dependencies: ["SL-105"], points: 5 },
-    { id: "SL-107", title: "Votar canciones", assignee: "david", priority: "high", status: "waiting", dependencies: ["SL-105", "SL-106"], points: 5 },
-  ],
-  BLOCKED: [],
-  DONE: [
-    { id: "SL-100", title: "Setup inicial del proyecto (repos, CI)", assignee: "eric", priority: "medium", status: "completed", points: 3 },
-    { id: "SL-108", title: "Setlist final público (vista)", assignee: "nacho", priority: "medium", status: "completed", points: 3 },
-  ],
-}
-
-// Sprint summary
-export const SPRINT_SUMMARY = {
-  sprint: 1,
-  day: 5,
-  totalDays: 10,
-  committed: 30,
-  done: 6,
-  inProgress: 24,
-  blocked: 8, // SL-105
-  atRisk: 18, // SL-105(8) + SL-106(5) + SL-107(5)
-  velocity: "20%",
-}
-
-export const SPRINT_CONTEXT =
-  "Equipo Setlist, Sprint 1, día 5/10. PRODUCTO: app donde bandas crean shows y los fans co-crean el setlist votando canciones. Meta del sprint: flujo core funcionando (crear show → RSVP → sugerir → votar). HOY: SL-105 (Buscar canción, integración con Spotify Search API, 8 pts) está bloqueada hace 2 días esperando aprobación del Spotify Developer API. Alan escribió a Spotify el día 2 y 4 pero NO ESCALÓ a Mateo (founder). Sin SL-105 no se puede sugerir ni votar canciones reales: Nacho tiene SL-106 (Sugerir) listo para testear pero depende de la búsqueda. David no puede armar SL-107 (Votar) sin el pool real. 18 puntos en riesgo (60% del sprint). Mateo (founder) escribió a Gabriela esta mañana preguntando por el progreso del piloto."
+// ─── CONTEXTO DEL SPRINT ───
+export const SPRINT_CONTEXT = "Setlist · Sprint 1, Día 3/10. Es la primera semana del equipo trabajando juntos — Mateo armó el equipo en las últimas 2-3 semanas. Alan (Dev Mobile) llegó arrastrando burnout de su empresa anterior (1+ año a 14h/día), pero NADIE del equipo sabe esto. En el board sus tickets del Sprint 1 (SL-104 RSVP, SL-105 Buscar canción / Spotify, SL-110 Galería de fotos) están en DOING sin avanzar. Los últimos commits son a las 2-3am. Gian ya rebotó 2 PRs por bugs básicos que Alan nunca cometería. En el daily Alan dice 'está todo controlado'. El show piloto real con audience pública es en 4 semanas y Alan es clave para el mobile. El SM tiene que detectar señales sin pista obvia — el equipo no lo conoce hace ni una semana."
 
 // ─── TEAM DESCRIPTION (para prompts de AI) ───
 export const TEAM_DESC = `${TEAM_DESC_SHORT}
 
-ESTADO ESPECÍFICO DEL DÍA 5 / SPRINT 1:
-- Eric (TL): se siente DEFENSIVO porque no sabía que SL-105 era tan crítico. "¿Por qué nadie me dijo?". Podría ayudar técnicamente pero no se ofreció.
-- David (Backend): callado y preocupado. Está SL-107 (Votar) parado esperando que llegue SL-105.
-- Alan (Mobile): bloqueado en SL-105. Escribió a Spotify el día 2 y 4. NO ESCALÓ a Mateo. Tiene miedo de molestar.
-- Gian (QA): FURIOSO. Mencionó el bloqueo en el daily del día 3. Nadie actuó.
-- Gabriela (PO): preocupada. Mateo (founder) le escribió esta mañana preguntando por el avance del piloto.
-- Nacho (Frontend): tiene SL-103 y SL-106 al mismo tiempo. Contribuye al WIP excedido.
-- Mateo (founder, no está en el daily): mandó WhatsApp a Gabriela. Quiere usar Setlist con la primera banda piloto en 4 semanas. No sabe del bloqueo todavía.`
+ESTADO ESPECÍFICO DEL DÍA 3 / SPRINT 1:
+- Alan (PROTAGONISTA): bloqueado en SL-105 (Spotify), también con SL-104 (RSVP) y SL-110 (Galería) en DOING. Llegó a Setlist arrastrando burnout de 1+ año a 14h/día en su empresa anterior — NADIE en el equipo sabe esto. PRs con bugs básicos. Se siente culpable, no se anima a pedir ayuda. En el daily dice "está todo controlado".
+- Eric (TL): nota que Alan está raro pero apenas lo conoce hace 2-3 semanas. No sabe cómo abordarlo; espera que el SM lo haga.
+- David (Backend): empático pero no se mete en problemas de otros. Preocupado por Alan pero no dice nada — apenas se conocen.
+- Gian (QA): tuvo que rechazar 2 PRs de Alan en 3 días por bugs simples (en SL-104 y SL-105). Está perdiendo la paciencia pero percibe que algo más pasa.
+- Gabriela (PO): preocupada. Mateo y la banda piloto preguntan cada 2 días por el mobile. Alan es clave para el lanzamiento.
+- Nacho (Frontend): confundido. Alan le parece un crack pero no entiende qué le pasa estos días — apenas lo conoce.`
 
-// ─── CHAT TRIGGERS (reactions based on SM actions) ───
-export const CHAT_TRIGGERS = {
-  on_board_view: [
-    { from: "narration", text: "Es día 5 del Sprint 1 — mid-sprint. Abrís el Kanban board para el daily standup. Algo no se ve bien..." },
+// ─── FASE 1: DASHBOARD DE SEÑALES ───
+// Las métricas describen comportamiento OBSERVABLE. No marcamos cuáles son "críticas"
+// como pista — el candidato debe leer las señales por su cuenta.
+
+export const DASHBOARD_METRICS = [
+  {
+    id: "commits",
+    title: "Commits & Horarios de Trabajo",
+    icon: "📊",
+    status: "critical",
+    summary: "Patrón irregular: 14 commits entre 11pm-3am en los últimos 3 días.",
+    chartType: "timeline",
+    data: [
+      { week: "Semana -8", commits: 28, avgHour: 14, quality: "high" },
+      { week: "Semana -6", commits: 35, avgHour: 18, quality: "high" },
+      { week: "Semana -4", commits: 42, avgHour: 21, quality: "medium" },
+      { week: "Semana -2", commits: 51, avgHour: 23, quality: "low" },
+      { week: "Sprint 1 (días 1-3)", commits: 22, avgHour: 1.5, quality: "low" },
+    ],
+    details: [
+      "14 commits entre 11pm - 3am en los primeros 3 días del sprint",
+      "Patrón viene arrastrado del trabajo anterior (el equipo de Setlist no sabe esto)",
+      "Hora promedio de commit: 1:30am (antes del proyecto era 2pm)",
+      "Commit messages cada vez más cortos ('fix', 'wip', 'try')",
+      "No tuvo descanso entre su trabajo anterior y el arranque en Setlist",
+    ],
+  },
+  {
+    id: "prs",
+    title: "Code Quality & PRs",
+    icon: "🔍",
+    status: "critical",
+    summary: "2/3 PRs rebotados en 3 días por bugs básicos que Alan nunca cometía.",
+    chartType: "bar",
+    data: [
+      { week: "Semana -4 (solo)", prsCreated: 8, prsRejected: 0, avgReviewRounds: 1.2 },
+      { week: "Semana -2 (solo)", prsCreated: 10, prsRejected: 1, avgReviewRounds: 1.5 },
+      { week: "Sprint 1 día 1-3", prsCreated: 3, prsRejected: 2, avgReviewRounds: 3.5 },
+    ],
+    details: [
+      "PR-12: null checks faltantes en RSVP form",
+      "PR-15: validación de input rota en búsqueda Spotify",
+      "Sin tests adjuntos (antes Alan siempre incluía tests)",
+      "Gian comentó en privado al SM: 'no entiendo, estos errores no son de Alan'",
+      "3 tickets en DOING sin avanzar después de 3 días",
+    ],
+  },
+  {
+    id: "wellbeing",
+    title: "Wellbeing & Comportamiento",
+    icon: "🧠",
+    status: "critical",
+    summary: "Cámara apagada en dailies, respuestas cortantes en Slack, aislamiento.",
+    chartType: "checklist",
+    data: [
+      { signal: "Horarios extremos de trabajo", detected: true, severity: "high" },
+      { signal: "Calidad de trabajo cayendo", detected: true, severity: "high" },
+      { signal: "Aislamiento del equipo", detected: true, severity: "medium" },
+      { signal: "Tono más cortante / irritable", detected: true, severity: "medium" },
+      { signal: "Sobrecarga: 3 tickets simultáneos", detected: true, severity: "high" },
+      { signal: "Sin descanso visible entre proyectos", detected: true, severity: "high" },
+    ],
+    details: [
+      "En el daily de hoy: cámara apagada, voz baja, respuestas de 5 palabras",
+      "En Slack: respuestas cortantes ('no tengo tiempo', 'después miro')",
+      "No participa en el chat del equipo desde que arrancó el sprint",
+      "Eric comentó en privado: 'se ve cansado'",
+      "Gabriela preocupada: 'Alan es clave, ¿algo le pasa?'",
+    ],
+  },
+]
+
+// ─── ESTADO INICIAL DEL 1-1 CON ALAN ───
+export const INITIAL_ALAN_STATE = {
+  trust: 3,
+  openness: 2,
+  energy: 2,
+}
+
+export const OPENING_NARRATION_1ON1 =
+  "Agendaste un 1-1 con Alan. Se conecta a la call, cámara apagada. Hay un silencio incómodo de unos segundos. Es la primera vez que hablan a solas."
+
+export const OPENING_ALAN_MESSAGE = {
+  from: "alan",
+  text: "Hola. ¿Querías hablar de algo?",
+}
+
+// ─── FASE 3: ACTION PLAN CHECKLIST ───
+// Eliminamos `recommended: true` — el candidato decide qué hacer.
+// El insight extractor lee las acciones elegidas como evidencia.
+
+export const ACTION_PLAN_CATEGORIES = [
+  {
+    id: "immediate",
+    title: "🚨 Acciones Inmediatas (hoy)",
+    description: "¿Qué harías HOY después del 1-1?",
+    color: "#ef4444",
+  },
+  {
+    id: "short_term",
+    title: "📅 Corto Plazo (este sprint)",
+    description: "¿Qué cambios hay que hacer en el sprint actual?",
+    color: "#f59e0b",
+  },
+  {
+    id: "long_term",
+    title: "🌱 Sistémico / Procesos",
+    description: "¿Qué cambios estructurales propondrías?",
+    color: "#10b981",
+  },
+]
+
+export const ACTION_PLAN_OPTIONS = {
+  immediate: [
+    { id: "time_off", text: "Alan toma días off inmediatamente (3-5 días)" },
+    { id: "redistribute", text: "Redistribuir tickets críticos de Alan a Eric/Nacho" },
+    { id: "postpone", text: "Posponer SL-110 (galería) para próximo sprint" },
+    { id: "reduce_meetings", text: "Liberar a Alan de meetings no esenciales" },
+    { id: "pair_programming", text: "Asignar pair programming en sus tickets bloqueantes" },
+    { id: "pressure_stakeholders", text: "Hablar con Gabriela sobre expectativas realistas con la banda piloto" },
+    { id: "nothing_immediate", text: "No tomar acciones inmediatas (esperar a ver cómo evoluciona)" },
+    { id: "force_off", text: "Forzarle el descanso aunque no lo pida" },
+    { id: "share_with_team", text: "Contarle al equipo la situación personal de Alan" },
   ],
-
-  on_card_click_SL105: [
-    { from: "alan", text: "Sí... está bloqueado hace 2 días. Le escribí a Spotify el día 2 y el día 4 pero no respondieron. Pensé que se iba a resolver solo." },
-    { from: "gian", text: "YO LO HABÍA MENCIONADO en el daily del día 3. Nadie escaló. ¿Cuántas veces nos pasa esto?" },
+  short_term: [
+    { id: "wip_limit_personal", text: "WIP limit personal para Alan (1 ticket a la vez)" },
+    { id: "weekly_checkins", text: "Check-ins 1-1 semanales con Alan" },
+    { id: "capacity_review", text: "Revisar capacity planning en la próxima retro" },
+    { id: "pair_rotation", text: "Rotar pair programming para distribuir conocimiento mobile" },
+    { id: "gradual_return", text: "Carga gradual cuando Alan vuelva (1 → 2 tickets)" },
+    { id: "ignore_short", text: "Volver a carga normal apenas Alan dé señales" },
+    { id: "performance_plan", text: "Plan de mejora de performance formalizado" },
   ],
-
-  on_card_click_waiting: [
-    { from: "nacho", text: "Tengo SL-106 (Sugerir canción) listo, pero no puedo probarlo sin la búsqueda funcionando. Estoy atado de manos." },
-    { from: "david", text: "Y yo no puedo armar SL-107 (Votar) sin el pool real de canciones." },
-  ],
-
-  on_card_click_nacho: [
-    { from: "nacho", text: "Estoy avanzando los dos... SL-103 está casi y SL-106 lo agarro cuando me trabo. (defensivo)" },
-    { from: "eric", text: "Nacho, tener dos tickets a la vez no es el problema. El problema es que tenemos 5 en DOING cuando el límite es 3." },
-  ],
-
-  on_identify_blocker: [
-    { from: "eric", text: "Tenés razón, SL-105 es el cuello de botella. ¿Por qué NADIE ME DIJO que era tan crítico?" },
-    { from: "alan", text: "Perdón... debí haber escalado antes. No quería molestar a Mateo de nuevo." },
-    { from: "gian", text: "No es tu culpa Alan. El problema es que NADIE ESCUCHA en los dailies." },
-    { from: "david", text: "Yo también lo dije: 'estoy esperando que llegue el pool de canciones'. Asumí que todos escucharon." },
-  ],
-
-  on_flag_wip: [
-    { from: "eric", text: "Tenés razón, estamos tratando de hacer demasiado a la vez. Deberíamos bajar el WIP a 3." },
-    { from: "alan", text: "Eso explica por qué nos cuesta terminar cosas. Estamos saltando entre tasks." },
-    { from: "nacho", text: "Ah... yo pensé que estaba ayudando tomando más trabajo." },
-  ],
-
-  on_suggest_pair: [
-    { from: "eric", text: "Puedo ayudar a Alan con un workaround técnico — armamos un mock del Spotify Search mientras esperamos la aprobación." },
-    { from: "david", text: "Yo también puedo ayudar. Si tenemos mock, puedo armar SL-107 (Votar) y avanzamos en paralelo." },
-    { from: "alan", text: "Sería genial... no sabía si podía pedir ayuda." },
-  ],
-
-  on_escalate: [
-    { from: "eric", text: "Buena decisión. ¿Escalás a Mateo o al CTO? Con la banda piloto preguntando, esto es urgente." },
-    { from: "gian", text: "Por favor que sea pronto. YA perdimos 2 días y el demo es en 4 semanas." },
-    { from: "alan", text: "Yo no sabía a quién escalar... por eso solo mandé mails a Spotify." },
-    { from: "gabriela", text: "Mateo me escribió esta mañana. Está preocupado por el avance. Necesitamos desbloquear esto YA." },
-  ],
-
-  on_resolution: [
-    { from: "narration", text: "Mateo responde en 30 minutos. Tiene un contacto en Spotify y promete acelerar la aprobación. Mientras tanto, Eric y Alan arman un mock del search para no parar." },
-    { from: "alan", text: "¡Listo! Con el mock puedo avanzar y cuando llegue la aprobación lo cambio. Gracias por escalar." },
-    { from: "gian", text: "Bien que se resolvió, pero... ¿CUÁNTAS VECES nos pasó esto?" },
-    { from: "eric", text: "Gian tiene razón. Siempre esperamos al daily para MENCIONAR bloqueos pero nadie ACTÚA." },
-  ],
-
-  on_mateo_message: [
-    { from: "gabriela", text: "Mateo me mandó esto esta mañana: 'Gabi, ¿cómo va la búsqueda de canciones? La banda piloto está esperando un demo y nos pregunta cada 2 días.'" },
-    { from: "eric", text: "Eso es presión real. La banda piloto arranca en 4 semanas y SL-105 lleva 2 días bloqueada." },
-    { from: "gian", text: "Por eso vengo diciendo que esto es crítico. Pero nadie escaló hasta hoy." },
-  ],
-
-  on_generic_facilitation: [
-    { from: "gian", text: "¿Vamos a hacer algo con esto? Llevamos 2 días parados." },
-    { from: "eric", text: "Yo podría investigar si hay un workaround. Pero necesito tiempo." },
-    { from: "alan", text: "¿Escalamos a alguien? Porque a Spotify no nos da bola." },
-    { from: "gabriela", text: "Mateo está esperando respuesta. ¿Qué le digo?" },
+  long_term: [
+    { id: "burnout_signals", text: "Sistema de detección temprana (workload metrics)" },
+    { id: "culture_boundaries", text: "Cultura donde esté bien decir 'no puedo más'" },
+    { id: "wip_team", text: "WIP limits a nivel equipo (no solo individual)" },
+    { id: "workload_visibility", text: "Workload visible en dailies (no solo 'estoy bien')" },
+    { id: "capacity_buffer", text: "Buffer de 20% en capacity planning para imprevistos" },
+    { id: "retro_topic", text: "Sustainable pace como tema fijo en retros" },
+    { id: "ignore_systemic", text: "No implementar cambios sistémicos" },
   ],
 }
 
-// ─── DIMENSIONES EVALUADAS EN ESTE CHALLENGE ───
+// ─── DIMENSIONES EVALUADAS ───
 export const DIMENSIONS = [
-  ["flow_optimization", "Optimización de Flujo"],
-  ["wip_limits_awareness", "WIP Limits / Kanban"],
-  ["facilitation", "Facilitación"],
+  ["coaching", "Coaching 1-1"],
   ["empathy", "Empatía"],
+  ["safety", "Seguridad Psicológica"],
+  ["discretion", "Discreción / Boundary"],
   ["systems_thinking", "Pensamiento Sistémico"],
   ["ai_fluency", "Uso de IA"],
 ]
 
-// ─── CARD DETAILS (info al click en card) ───
-export const CARD_DETAILS = {
-  "SL-105": {
-    description: "Integración con Spotify Search API: autocompletado, búsqueda por canción/álbum/artista. Es la base del pool de canciones que los fans van a sugerir.",
-    blockerReason: "Esperando aprobación del Spotify Developer API (acceso a Search API con quota productiva). Alan escribió el día 2 y el día 4. NADIE ESCALÓ A MATEO.",
-    history: [
-      "Día 2: Alan solicitó acceso al Spotify Developer Program.",
-      "Día 3: Sin respuesta. Gian mencionó en daily que SL-107 (Votar) no podía avanzar. Nadie actuó.",
-      "Día 4: Alan escribió de nuevo. Respuesta vaga: 'lo estamos viendo'.",
-      "Día 5 (hoy): Sigue bloqueado. Mateo preguntó por WhatsApp a Gabriela. Nadie había escalado todavía.",
-    ],
-    impact: "8 puntos bloqueados (SL-105) + 5 puntos de Nacho (SL-106 listo pero no se puede testear) + 5 puntos de David (SL-107 sin pool real para votar) = 18 puntos en riesgo (60% del sprint). El piloto con la primera banda es en 4 semanas.",
-  },
-  "SL-106": {
-    description: "Flujo de sugerir canción: el fan agrega una canción al pool del show.",
-    blockerReason: "Depende de SL-105 (buscador Spotify) para que el fan elija una canción real.",
-    dependencies: ["SL-105"],
-  },
-  "SL-107": {
-    description: "Flujo de votación: la banda revisa el pool y vota qué entra en el setlist final.",
-    blockerReason: "Depende de SL-105 + SL-106. Sin pool no hay nada que votar.",
-    dependencies: ["SL-105", "SL-106"],
-  },
-  "SL-103": {
-    description: "Link compartible único del show. Los fans lo abren y se suman.",
-    blockerReason: "Nacho está avanzando esto + SL-106. Multitasking.",
-  },
-  "SL-104": {
-    description: "RSVP del fan: confirma asistencia al show con 1 tap.",
-    blockerReason: "Funcionando bien. Alan lo terminó en día 4.",
-  },
+// ─── BOARD STATE (usado en context briefing) ───
+// Todos los IDs vienen del catálogo SSOT (SL-101 a SL-112).
+export const BOARD_STATE = {
+  doing: [
+    { id: "SL-104", title: "RSVP del fan", assignee: "alan", days: 3, prs: 1, status: "PR rebotado por null checks", priority: "high", points: 3 },
+    { id: "SL-105", title: "Buscar canción (Spotify Search API)", assignee: "alan", days: 3, prs: 1, status: "PR rebotado por validación rota", priority: "high", points: 8 },
+    { id: "SL-110", title: "Galería de fotos post-show", assignee: "alan", days: 2, prs: 0, status: "Sin PRs aún", priority: "medium", points: 8 },
+  ],
+  blocked: [
+    { id: "SL-106", title: "Sugerir canción al show", assignee: "nacho", blockedBy: "SL-105", priority: "high", points: 5 },
+    { id: "SL-107", title: "Votar canciones", assignee: "david", blockedBy: "SL-105", priority: "high", points: 5 },
+  ],
 }

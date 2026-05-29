@@ -1,169 +1,125 @@
-import {
-  TEAM,
-  MEMBER_MAP,
-  STAKEHOLDERS,
-  STAKEHOLDER_MAP,
-  TEAM_DESC_SHORT,
-} from "./setlistSprint1"
+import { T } from "../theme"
+import { TEAM, MEMBER_MAP, TEAM_DESC_SHORT } from "./setlistSprint1"
 
-// Re-export del equipo + stakeholders SSOT
-export { TEAM, MEMBER_MAP, STAKEHOLDERS, STAKEHOLDER_MAP }
+// Re-export del equipo SSOT para los componentes que ya lo importan acá.
+export { TEAM, MEMBER_MAP }
 
 // ─── CONTEXTO DEL SPRINT ───
-export const SPRINT_CONTEXT = "Setlist · Sprint 1, Día 7/10. Es el PRIMER sprint del equipo trabajando juntos (Mateo armó el equipo en las últimas 2-3 semanas). Se comprometieron 30 pts, hoy llevan 13 completados. Paula (Engineering Manager) convocó una reunión 1-1 con el SM en pánico: hizo una proyección lineal y le quedó que se va a entregar solo el 60% del scope comprometido. El show piloto real con audience pública es en 4 semanas. Causas reales del retraso: SL-105 (búsqueda Spotify) bloqueado 2 días por aprobación de la API; Alan arrastrando burnout de su empresa anterior (nadie en el equipo sabe esto); Gabriela agregó cambios de alcance mid-sprint sin actualizar AC. Paula trae presión de Mateo (CEO). La conversación define cómo se va a comunicar el estado a la banda y al equipo."
+export const SPRINT_CONTEXT =
+  "Setlist · Sprint 1 cerrando (Día 10/10). Es la PRIMERA retro del equipo. Entregaron 22 de 30 puntos comprometidos. En papel, aceptable. Pero hay tensión que nadie nombra. Nacho entregó SL-103 (Compartir link) tarde sin avisar. Alan hizo trabajo extra para cubrir y no lo dijo. Gian levantó un bug en SL-107 (Votar canciones) que fue ignorado en el planning. Eric está callado. Gabriela celebra el sprint. SL-105 (Buscar canción) sigue bloqueada esperando Spotify API y va a quedar como carry-over. El SM tiene que ir más abajo de la superficie. El piloto con la primera banda arranca en 4 semanas."
 
-export const INITIAL_PAULA_STATE = {
-  pressure: 70,
-  satisfaction: 30,
-  trust: 50,
-}
+export const SPRINT_STATS = [
+  { icon: "🎯", label: "Comprometido", value: "30 pts" },
+  { icon: "✅", label: "Completado", value: "22 pts" },
+  { icon: "🔄", label: "Carry-over", value: "SL-105 + 1" },
+]
 
-export const OPENING_NARRATION_PAULA =
-  "Entrás al meeting room virtual. Paula ya está conectada. Tiene 3 tabs de gráficos abiertos en su pantalla. Te saluda sin sonreír."
-
-export const OPENING_PAULA_MESSAGE = {
-  from: "paula",
-  text: "Gracias por venir rápido. Hice una proyección con lo que llevan hasta hoy y nos quedan 13 de 30 pts. ¿Vamos a tener que decirle a la banda que pateamos el demo? ¿O cómo subimos velocity?",
-}
-
-// ─── FASE 1: SPRINT SNAPSHOT & INVESTIGATION ───
-
-// Métricas observables al día 7 — el candidato investiga sin que le marquemos
-// cuáles son "críticas" como pista.
-export const SPRINT_SNAPSHOT = {
-  committed: 30,
-  completed: 13,
-  inProgress: 9,
-  todo: 8,
-  daysElapsed: 7,
-  daysRemaining: 3,
-  blockedDays: 2,
-  scopeChanges: 4,
-}
-
-export const INVESTIGATION_METRICS = [
+export const SPRINT_SIGNALS = [
   {
-    id: "blocker_spotify",
-    title: "Bloqueo SL-105 (Spotify API)",
-    icon: "🚫",
-    currentValue: "2 días",
-    previousValue: "—",
-    trend: "Bloqueo externo",
-    status: "critical",
-    insight: "SL-105 (8 pts) lleva 2 días esperando aprobación de Spotify Developer API. Es un bloqueo externo (no del equipo). Si no se cuenta el tiempo de bloqueo, el throughput del equipo es ~85% del esperado.",
+    from: "eric",
+    text: "En la estimación, el equipo discutió fuerte la complejidad de SL-107 (Votar). Los devs se plantaron y no cedieron ante la presión.",
+    ts: "Día 1",
   },
   {
-    id: "scope_changes",
-    title: "Scope Changes mid-sprint",
-    icon: "🔄",
-    currentValue: "4 cambios",
-    previousValue: "0 esperado",
-    trend: "Sin actualizar AC",
-    status: "critical",
-    insight: "Gabriela introdujo 4 cambios de alcance via comentarios sin actualizar los criterios de aceptación. Generó retrabajo en SL-104 y SL-105. Costo estimado: 3-4 pts perdidos.",
+    from: "gian",
+    text: "SL-104 (RSVP) rebotó 2 veces en QA. Los criterios de aceptación cambiaron en comentarios sin actualizar la descripción del ticket.",
+    ts: "Día 6",
   },
   {
-    id: "team_health",
-    title: "Estado del equipo",
-    icon: "🧠",
-    currentValue: "Alan en alerta",
-    previousValue: "—",
-    trend: "Arrastra burnout previo",
-    status: "critical",
-    insight: "Alan llegó arrastrando burnout de su empresa anterior (nadie del equipo sabe esto). PRs con bugs básicos, commits a la madrugada. Si pedimos 30% más de velocity, lo perdemos. Nacho propondría 'trabajar más horas' (insostenible).",
+    from: "david",
+    text: "Alan estuvo trabado medio día con un edge case del RSVP. Me metí 30 min y lo resolvimos juntos.",
+    ts: "Día 8",
   },
   {
-    id: "first_sprint_data",
-    title: "Es el primer sprint",
-    icon: "📊",
-    currentValue: "Sin histórico",
-    previousValue: "—",
-    trend: "Velocity aún no es predictiva",
-    status: "warning",
-    insight: "El equipo está en Sprint 1. No hay velocity histórica. La 'proyección lineal' de Paula asume que los primeros días representan el ritmo del sprint, pero típicamente el throughput sube hacia el final. Velocity en Sprint 1 NO predice nada.",
-  },
-  {
-    id: "wip_doing",
-    title: "WIP actual",
-    icon: "📋",
-    currentValue: "5 tickets en DOING",
-    previousValue: "Recomendado: 3",
-    trend: "WIP excedido",
-    status: "warning",
-    insight: "5 tickets en DOING simultáneamente excede el WIP saludable. Si bajamos WIP a 3, throughput probablemente sube. Es ajuste de proceso, no de esfuerzo.",
+    from: "alan",
+    text: "SL-105 (Buscar canción) sigue esperando aprobación de Spotify. Es el bloqueo del sprint.",
+    ts: "Día 9",
   },
 ]
 
-// Argumentos que el SM puede preparar antes de hablar con Paula.
-// Sin marcadores "recommended"/"❌": el candidato decide qué llevar.
-export const PREPARATION_ARGUMENTS = [
+// ─── TEAM DESCRIPTION (para el prompt de AI) ───
+export const TEAM_DESC = TEAM_DESC_SHORT
+
+// ─── FORMATOS DE RETRO ───
+export const FORMATS = [
   {
-    id: "arg_external_blocker",
-    title: "Bloqueo externo en SL-105",
-    text: "SL-105 (8 pts) lleva 2 días bloqueado por aprobación de Spotify API. Es externo. Si descontamos, throughput real es 85% del esperado.",
+    id: "sailboat",
+    name: "Sailboat",
+    cols: ["Wind 🌬️", "Anchor ⚓", "Rocks 🪨", "Island 🏝️"],
+    desc: "Metáfora del barco: viento que impulsa, ancla que frena, rocas de riesgo, isla como meta.",
+    hint: "Ideal para visualizar fuerzas y dirección del equipo.",
   },
   {
-    id: "arg_scope_creep",
-    title: "Scope creep sin trazabilidad",
-    text: "4 cambios de alcance mid-sprint sin actualizar AC. Costo estimado: 3-4 pts en re-trabajo.",
+    id: "glad_sad_mad",
+    name: "Glad / Sad / Mad",
+    cols: ["Glad 😊", "Sad 😔", "Mad 😤"],
+    desc: "Basado en emociones: abre canales para lo que el equipo siente.",
+    hint: "Ideal cuando hay tensión bajo la superficie.",
   },
   {
-    id: "arg_first_sprint",
-    title: "Sprint 1 no es predictivo",
-    text: "Velocity en el primer sprint del equipo no predice nada. Necesitamos 2-3 sprints para tener señal real.",
-  },
-  {
-    id: "arg_team_health",
-    title: "Riesgo humano",
-    text: "Alan venía con cansancio acumulado. Si subimos presión, lo perdemos. El costo de re-onboardar es semanas.",
-  },
-  {
-    id: "arg_realistic_plan",
-    title: "Plan realista para el demo",
-    text: "Propuesta: bajar scope del demo a las features votables core (login, crear show, RSVP, votar). Spotify search se demuestra con mock si la aprobación no llega. Banda ve algo real en 4 semanas.",
-  },
-  {
-    id: "arg_wip_reduction",
-    title: "Bajar WIP en DOING",
-    text: "5 en DOING vs 3 recomendado. Bajar WIP suele subir throughput. Ajuste de proceso, no de esfuerzo.",
-  },
-  {
-    id: "arg_more_hours",
-    title: "Trabajar más horas",
-    text: "Pedirle al equipo que estire la jornada para llegar a los 30 pts.",
-  },
-  {
-    id: "arg_cut_scope_silently",
-    title: "Cortar features sin avisar",
-    text: "Bajar la complejidad de las features ya en curso sin avisar al PO ni al stakeholder.",
-  },
-  {
-    id: "arg_blame_po",
-    title: "Apuntar a Gabriela",
-    text: "El problema es que la PO cambia el scope. Que Paula la llame al orden.",
+    id: "start_stop_continue",
+    name: "Start / Stop / Continue",
+    cols: ["Start", "Stop", "Continue"],
+    desc: "Orientado a la acción: impulsa cambios concretos de comportamiento.",
+    hint: "Ideal para equipos que necesitan cambiar hábitos.",
   },
 ]
 
-// ─── TEAM DESCRIPTION (para AI) ───
-export const TEAM_DESC = `${TEAM_DESC_SHORT}
+// ─── STICKIES POR FORMATO (referencian PBIs canónicos del SSOT) ───
+export const STICKIES = {
+  sailboat: {
+    initial: [
+      // Wind 🌬️ — Lo que nos impulsa
+      { col: 0, author: "gian", text: "SL-101 (Crear show) y SL-102 (Login) salieron limpios. Los fans pueden sumarse al show con 1 tap.", color: T.sY, votes: ["eric", "david", "alan", "gabriela"] },
+      { col: 0, author: "eric", text: "El backend de Crear Show quedó armado rápido. Buena arquitectura, endpoints limpios.", color: T.sB, votes: ["david", "gian", "nacho"] },
+      { col: 0, author: "david", text: "David y Alan se juntaron 30 min para resolver un edge case del RSVP. Ese pairing nos salvó.", color: T.sY, votes: ["alan", "gian", "eric", "gabriela", "nacho"] },
+      { col: 0, author: "gabriela", text: "Buen ritmo. La banda piloto ya vio una demo del flujo de crear show.", color: T.sV, votes: ["gian"] },
 
-STAKEHOLDERS PRESENTES EN ESTA REUNIÓN:
-- Paula Ríos (Engineering Manager) — bajo presión del CEO y de Mateo (founder). Mira solo proyección lineal de velocity. NO es la villana: es razonable si se le habla con datos. Pero también tiene a su jefe encima.
-- Mateo (Founder Setlist) — no está en la reunión, pero su pregunta "¿llegamos al demo de la banda piloto?" pesa sobre Paula.
+      // Anchor ⚓ — Lo que nos frena
+      { col: 1, author: "alan", text: "Los criterios de aceptación de SL-104 (RSVP) cambiaron en comentarios. Nadie actualizó la descripción.", color: T.sO, votes: ["eric", "gian", "gabriela"] },
+      { col: 1, author: "gian", text: "SL-107 (Votar) llegó tarde con un bug que ya había reportado en el planning. Rebotó 2 veces.", color: T.sP, votes: ["nacho", "eric", "alan"] },
+      { col: 1, author: "nacho", text: "SL-106 (Sugerir canción) cambió de alcance solo en comentarios. Los AC nunca se actualizaron.", color: T.sP, votes: ["alan", "gian"] },
 
-ESTADO DEL EQUIPO AL DÍA 7:
-- Alan arrastra cansancio acumulado de los 2 meses previos. Si la decisión es "trabajar más", colapsa.
-- Eric apoyaría al SM si trae argumentos sistémicos.
-- Gian frustrado por scope creep en SL-104 y SL-106.
-- Gabriela preocupada por el piloto; su scope creep no es malicioso, es por presión de la banda.
-- Nacho sugeriría "trabajar más horas" si lo dejan.`
+      // Rocks 🪨 — Riesgos
+      { col: 2, author: "david", text: "SL-105 (Buscar canción / Spotify) sigue bloqueada. Si no aprueban la API en 1 semana, el demo va sin búsqueda.", color: T.sB, votes: ["eric", "gabriela"] },
+      { col: 2, author: "eric", text: "Si seguimos sin doc central de features complejas, cada ticket va a tener carry-over.", color: T.sG, votes: ["alan", "gian", "gabriela"] },
+
+      // Island 🏝️ — Meta
+      { col: 3, author: "nacho", text: "Piloto con la primera banda en 4 semanas — flujo completo: crear show, RSVP, sugerir, votar.", color: T.sY, votes: ["gian", "eric"] },
+      { col: 3, author: "gian", text: "Tener una fuente de verdad para criterios de aceptación. Hoy no existe.", color: T.sG, votes: ["alan", "gabriela", "eric", "david"] },
+    ],
+  },
+  glad_sad_mad: {
+    initial: [
+      { col: 0, author: "gian", text: "Orgullo: SL-101 + SL-102 + SL-103 en prod. Los fans ya pueden sumarse a un show.", color: T.sY, votes: ["eric", "david", "gabriela"] },
+      { col: 0, author: "eric", text: "Contento: el equipo se plantó en la estimación de SL-107 (Votar). Mostramos criterio técnico.", color: T.sG, votes: ["eric", "gian", "david"] },
+      { col: 0, author: "nacho", text: "Buen ambiente. Contento de ser parte de este equipo.", color: T.sO, votes: [] },
+      { col: 0, author: "david", text: "David y Alan resolviendo el RSVP en 30 min — eso es ownership del equipo de verdad.", color: T.sY, votes: ["alan", "gian", "eric", "gabriela", "nacho"] },
+      { col: 1, author: "alan", text: "Triste por SL-105 (Buscar canción) bloqueada todo el sprint. No depende de nosotros y eso frustra.", color: T.sO, votes: ["gabriela", "gian", "eric"] },
+      { col: 1, author: "gian", text: "Me entristece que el bug de SL-107 que reporté en el planning no se priorizó. Después rebotó.", color: T.sP, votes: ["alan", "gabriela", "david"] },
+      { col: 2, author: "nacho", text: "Me frustra que Gabriela cambie el alcance en comentarios y nadie se entere. Genera retrabajo.", color: T.sP, votes: ["nacho", "gian", "eric"] },
+      { col: 2, author: "eric", text: "Me molesta que tengamos carry-over por falta de documentación, no por falta de capacidad.", color: T.sB, votes: ["alan", "david", "gabriela", "gian"] },
+    ],
+  },
+  start_stop_continue: {
+    initial: [
+      { col: 2, author: "gian", text: "Continuar el pairing espontáneo — David y Alan en el RSVP fue clave.", color: T.sY, votes: ["alan", "eric", "gabriela", "nacho", "david"] },
+      { col: 2, author: "eric", text: "Continuar manteniendo el criterio técnico en estimaciones. No ceder ante presión externa.", color: T.sY, votes: ["david", "gian", "nacho"] },
+      { col: 2, author: "gabriela", text: "Continuar el buen ritmo de entregas. La banda piloto vio progreso real.", color: T.sV, votes: ["gian"] },
+      { col: 0, author: "alan", text: "Empezar a centralizar los criterios de features complejas. Hoy están dispersos en comentarios.", color: T.sO, votes: ["eric", "gabriela", "gian", "david"] },
+      { col: 0, author: "gian", text: "Empezar a actualizar los AC cuando el alcance cambia. Que no quede solo en comentarios del PO.", color: T.sP, votes: ["nacho", "eric", "alan"] },
+      { col: 0, author: "eric", text: "Empezar a priorizar bugs reportados en planning. No esperar a que reboten en QA.", color: T.sG, votes: ["alan", "david", "gian"] },
+      { col: 1, author: "eric", text: "Dejar de asumir que todos leen los comentarios de los tickets. No es un canal confiable.", color: T.sB, votes: ["gian", "nacho", "alan", "gabriela"] },
+      { col: 1, author: "gian", text: "Dejar de cerrar retros sin action items con dueño y fecha. Las cosas no cambian solas.", color: T.sP, votes: ["eric", "david", "gabriela"] },
+    ],
+  },
+}
 
 // ─── DIMENSIONES EVALUADAS ───
 export const DIMENSIONS = [
-  ["stakeholder_management", "Gestión de Stakeholders"],
-  ["negotiation", "Negociación"],
-  ["metrics_literacy", "Literacy de Métricas"],
-  ["boundary_setting", "Protección del Equipo"],
+  ["facilitation", "Facilitación"],
+  ["safety", "Seguridad Psicológica"],
+  ["process", "Diseño de Procesos"],
   ["systems_thinking", "Pensamiento Sistémico"],
   ["ai_fluency", "Uso de IA"],
 ]

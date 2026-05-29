@@ -36,18 +36,20 @@ La IA comprime equipos de ejecución (de 10 devs a 2 seniors) pero **aumenta la 
 SMATCH-V2/
 ├── api/                          # Funciones serverless Vercel
 ├── src/
-│   ├── challenges/
-│   │   ├── Challenge01.jsx + .css   # Retro Facilitation (Equipo Fenix)
-│   │   ├── Challenge02.jsx + .css   # Daily / Bloqueos (Equipo Fenix)
-│   │   ├── Challenge03.jsx          # Team Agreements Workshop (Equipo Valkyrie)
-│   │   └── Challenge04.jsx          # Estimation & Prioritization (Equipo Valkyrie)
+│   ├── challenges/                  # Orden cronológico Sprint 1
+│   │   ├── Challenge01.jsx          # Día 1 · Kickoff + Planning
+│   │   ├── Challenge02.jsx + .css   # Día 3 · 1-1 con Alan (burnout)
+│   │   ├── Challenge03.jsx + .css   # Día 5 · Daily con bloqueo Spotify
+│   │   ├── Challenge04.jsx + .css   # Día 7 · 1-1 con Paula (presión EM)
+│   │   └── Challenge05.jsx + .css   # Día 10 · Retro del Sprint 1
 │   ├── components/
 │   │   └── index.jsx                # Avatar, StickyCard, ChatBubble, MiniBoard, ScoreBadges
-│   ├── data/
-│   │   ├── challenge01.js
-│   │   ├── challenge02.js
-│   │   ├── challenge03.js
-│   │   └── challenge04.js
+│   ├── data/                        # 1:1 con archivos de challenge
+│   │   ├── challenge01.js           # Planning
+│   │   ├── challenge02.js           # 1-1 Alan
+│   │   ├── challenge03.js           # Daily
+│   │   ├── challenge04.js           # Paula
+│   │   └── challenge05.js           # Retro
 │   ├── engine/                      # Lógica de scoring
 │   ├── pages/
 │   │   ├── ChallengeMenu.jsx + .css
@@ -68,12 +70,13 @@ SMATCH-V2/
 ```
 /             → Landing
 /challenges   → ChallengeMenu
-/challenge/1  → Challenge01
-/challenge/2  → Challenge02
-/challenge/3  → Challenge03
-/challenge/4  → Challenge04
-/report/:id   → CandidateReport (PENDIENTE — crear)
-/recruiter    → RecruiterDashboard (PENDIENTE — crear)
+/challenge/1  → Challenge01 (Día 1 · Planning)
+/challenge/2  → Challenge02 (Día 3 · 1-1 Alan)
+/challenge/3  → Challenge03 (Día 5 · Daily)
+/challenge/4  → Challenge04 (Día 7 · Paula)
+/challenge/5  → Challenge05 (Día 10 · Retro)
+/report/:id   → CandidateReport
+/recruiter    → RecruiterDashboard (PENDIENTE)
 ```
 
 ---
@@ -112,38 +115,40 @@ export const DIM_LABELS = {
 **Reglas de styling:**
 - Colores → SIEMPRE desde `theme.js` (`import { T } from "../theme"`)
 - NO usar variables CSS custom (`--var`), usar tokens de `T` directamente
-- C01 y C02 tienen CSS files; C03 y C04 usan inline styles → **unificar todo a CSS files**
+- C01 no tiene CSS file (legacy del Planning, usa inline + globals); C02-C05 sí.
 - Gradiente principal: `linear-gradient(135deg, #ffffff 0%, #00d4aa 50%, #60a5fa 100%)`
 - Animaciones globales: `pulse` (opacity 0.4→1), `fadeSlide` (translateY 6px→0)
 
 ---
 
-## Los 4 Challenges existentes
+## Los 5 Challenges del Sprint 1 (orden cronológico)
 
-### Challenge 01 — Retro Facilitation (~12 min)
-- **Equipo Fenix**: Marcus Chen/TL, Diego Herrera/Dev, Valentina Torres/QA, Lucas Vargas/Dev, Mateo Silva/Dev Jr, Sofía Park/QA Lead, Ryan Davies/DevOps
-- **Escenario**: Sprint 17, 31/37 pts, 3 carry-overs. Scope creep del PO. Deuda de documentación.
-- **Flujo**: Context → elegir formato (Sailboat/Glad Sad Mad/Start Stop Continue) → tablero stickies → 4 MOMENTS → chat AI → score
-- **Dimensiones**: facilitation, systems, safety, coaching, process
+Equipo Setlist (SSOT en `src/data/setlistSprint1.js`): Eric (TL), David (Backend), Alan (Mobile), Nacho (Frontend), Gian (QA), Gabriela (PO). Stakeholders: Paula (EM), Mateo (CEO).
 
-### Challenge 02 — Daily / Bloqueos (~10 min)
-- **Equipo Fenix** (mismo)
-- **Escenario**: Sprint 18, día 5/10. FEN-403 bloqueado 2 días. 38% en riesgo.
-- **Flujo**: Sprint board visual → DAILY_SEQUENCE animado → 4 MOMENTS → chat AI
-- **Dimensiones**: stakeholder, conflict, decision, systems, facilitation
+### Challenge 01 — Día 1 · Kickoff & Planning (~15 min)
+- Primera sesión del equipo. 2 partes: Team Agreements (3 acuerdos básicos) + Planning Poker con dock de herramientas.
+- **Bad behaviors a detectar**: anclaje, pts vs días, contexto personal, estimación ≠ compromiso.
+- **Dimensiones**: process_mastery, bias_coaching, facilitation, systems_thinking, ai_fluency.
 
-### Challenge 03 — Team Agreements Workshop (~15 min)
-- **Equipo Valkyrie**: Gaby Mechiar/TL escéptica, Tomás Dubno/Sr Dev remoto, Camila Ortega/QA, Gian Franco/Dev Jr, Marcos Avelo/Backend pasivo, Lucia Chen/PO
-- **Escenario**: Día 1, equipo nuevo. Workshop 45 min.
-- **Flujo**: SM propone temas → TOPIC_TRIGGERS → AI evalúa contra QUALITY_CHECKLIST
-- **Dimensiones**: facilitation, process, coaching, safety, scrum_maturity
+### Challenge 02 — Día 3 · 1-1 con Alan (~10 min)
+- Alan llega con burnout previo de su empresa anterior (nadie sabe). PRs rebotados, commits 2-3am.
+- **Flujo**: Dashboard de señales → 1-1 chat libre → Action plan checklist.
+- **Dimensiones**: coaching, empathy, safety, discretion, systems_thinking, ai_fluency.
 
-### Challenge 04 — Estimation & Prioritization (~15 min)
-- **Equipo Valkyrie** (mismo)
-- **Escenario**: Sprint 1. 12 PBIs, velocity ~30 pts.
-- **Flujo**: Dock herramientas → Planning Poker → EVENTS con bad behaviors → SM detecta → achievements
-- **Bad behaviors**: anclaje (Marcos copia a Gaby), pts vs días (Gianfranco), contexto personal (Tomás), estimación ≠ compromiso (Lucia)
-- **Dimensiones**: coaching, scrum_maturity, facilitation, systems, safety
+### Challenge 03 — Día 5 · Daily con bloqueo (~10 min)
+- Mid-sprint. SL-105 (Spotify API) bloqueada 2 días, Alan no escaló. WIP excedido.
+- **Flujo**: Kanban board → daily chat libre con AI per turn.
+- **Dimensiones**: flow_optimization, wip_limits, facilitation, empathy, systems_thinking, ai_fluency.
+
+### Challenge 04 — Día 7 · 1-1 con Paula (EM) (~12 min)
+- Paula entra en pánico con proyección lineal de velocity. Trae presión del CEO. Pide +30%.
+- **Flujo**: Sprint snapshot + investigación → preparación de argumentos → 1-1 chat libre.
+- **Dimensiones**: stakeholder_management, negotiation, metrics_literacy, boundary_setting, systems_thinking, ai_fluency.
+
+### Challenge 05 — Día 10 · Retro del Sprint 1 (~20 min)
+- Sprint 1 cierra: 22/30 pts. Tensión latente nadie nombra (Nacho entregó tarde, Gian bug ignorado, Eric callado).
+- **Flujo**: Context → elegir formato (Sailboat / Glad-Sad-Mad / Start-Stop-Continue) → tablero stickies → facilitación libre.
+- **Dimensiones**: facilitation, safety, process, systems_thinking, ai_fluency.
 
 ---
 
@@ -153,7 +158,7 @@ export const DIM_LABELS = {
 Avatar({member, size})           // círculo iniciales + color
 StickyCard({sticky, memberMap, delay})  // post-it con rotación, votos
 ChatBubble({msg, memberMap})     // narration (italic teal) | isYou | miembro
-MiniBoard({cols, active})        // preview tablero C01
+MiniBoard({cols, active})        // preview tablero C05 (retro)
 ScoreBadges({scores})            // badges dimensiones con semáforo
 ```
 
