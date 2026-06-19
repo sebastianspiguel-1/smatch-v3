@@ -3052,11 +3052,20 @@
   color: #ffffff;
   animation: heroV3FadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
   text-shadow: 0 2px 24px rgba(0, 0, 0, 0.3);
+  text-align: center;
+  text-wrap: balance;
 }
 
-/* Cada línea en su propio renglón sin wrap (desktop) */
+/* Cada línea en su propio renglón; wrap balanceado si no entra */
 .hero-v3-line {
   display: block;
+  white-space: normal;
+}
+
+/* Mantener los nombres de rol como una sola unidad para que el wrap
+   quiebre limpio entre "Scrum Masters" y "Project Managers" y la línea
+   quede siempre centrada y equilibrada */
+.hero-v3-nowrap {
   white-space: nowrap;
 }
 

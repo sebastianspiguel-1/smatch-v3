@@ -116,7 +116,7 @@ export default function Landing() {
         <div className="hero-v3-stars hero-v3-stars-2" aria-hidden="true" />
         <div className="hero-v3-text hero-v3-text-center">
           <h1 className="hero-v3-headline">
-            <span className="hero-v3-line">Contratá Scrum Masters y Project Managers</span>
+            <span className="hero-v3-line">Contratá <span className="hero-v3-nowrap">Scrum Masters</span> y <span className="hero-v3-nowrap">Project Managers</span></span>
             <span className="hero-v3-line">que generen <em className="hero-v3-accent">impacto real</em></span>
           </h1>
           <p className="hero-v3-sub">
