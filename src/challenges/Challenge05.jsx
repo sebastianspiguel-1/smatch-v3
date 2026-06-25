@@ -30,6 +30,7 @@ import {
   FORMATS,
   STICKIES,
   DIMENSIONS,
+  HIDDEN_TENSIONS,
 } from "../data/challenge05"
 import "./Challenge05.css"
 import "./Challenge03.css"
@@ -42,6 +43,9 @@ const OPENING_CHAT = [
   { from: "nacho", text: "Sí, los resultados están buenos. Sigamos así." },
   { from: "eric", text: "Buenos resultados. Hay que estar orgullosos." },
 ]
+
+const OPENING_PUSH =
+  "Todos celebran y Gabriela ya quiere cerrar. Si nadie lo frena, la retro termina en 2 minutos sin tocar lo que importa. Te toca a vos: escribí abajo para abrir la conversación de verdad."
 
 export default function Challenge05() {
   const nav = useNavigate()
@@ -59,6 +63,14 @@ export default function Challenge05() {
   const [startTime] = useState(Date.now())
   const [actionCount, setActionCount] = useState(0)
   const [evaling, setEvaling] = useState(false)
+  // ─── "Lo no dicho": tensiones latentes que el candidato saca facilitando ───
+  const [revealedTensions, setRevealedTensions] = useState([])
+  // ─── Action items (el artefacto de cierre): {id, what, owner, metric, date} ───
+  const [actionItems, setActionItems] = useState([
+    { id: 1, what: "", owner: "", metric: "", date: "" },
+    { id: 2, what: "", owner: "", metric: "", date: "" },
+    { id: 3, what: "", owner: "", metric: "", date: "" },
+  ])
 
   const chatRef = useRef(null)
   const timerRef = useRef(null)
@@ -73,7 +85,7 @@ export default function Challenge05() {
         setTimer((t) => {
           if (t <= 1) {
             clearInterval(timerRef.current)
-            finishChallenge()
+            goToActions()
             return 0
           }
           return t - 1
@@ -112,6 +124,7 @@ export default function Challenge05() {
       setChat([
         { narration: true, text: OPENING_NARRATION },
         ...OPENING_CHAT.map((c) => ({ from: c.from, text: c.text })),
+        { narration: true, text: OPENING_PUSH },
       ])
     }, 400)
   }
@@ -178,7 +191,9 @@ export default function Challenge05() {
       formatName,
       actionForPrompt,
       chatContext,
-      candidateContext
+      candidateContext,
+      HIDDEN_TENSIONS,
+      revealedTensions
     )
     const res = await callAI(sys, action.message || "Retro turn")
     if (!res) return
@@ -188,6 +203,15 @@ export default function Challenge05() {
         ...p,
         ...res.reactions.map((r) => ({ from: r.from, text: r.text })),
       ])
+    }
+
+    // ─── ¿El SM sacó una tensión latente? Se revela en el panel "lo no dicho" ───
+    if (
+      res.revealedTension &&
+      HIDDEN_TENSIONS.some((t) => t.id === res.revealedTension) &&
+      !revealedTensions.includes(res.revealedTension)
+    ) {
+      setRevealedTensions((p) => [...p, res.revealedTension])
     }
     const vs = {}
     if (res.scores)
@@ -208,6 +232,72 @@ export default function Challenge05() {
       setStickies((p) => [...p, ...res.newStickies])
     }
     setActionCount((c) => c + 1)
+  }
+
+  // ─── Cierre: de la facilitación al artefacto (action items) ───
+  function goToActions() {
+    clearInterval(timerRef.current)
+    setPhase("actions")
+  }
+
+  function updateItem(id, field, value) {
+    setActionItems((items) =>
+      items.map((it) => (it.id === id ? { ...it, [field]: value } : it))
+    )
+  }
+
+  const isValidItem = (it) =>
+    it.what.trim() && it.owner && it.metric.trim() && it.date.trim()
+
+  const validItems = actionItems.filter(isValidItem)
+
+  function serializeActionItems() {
+    return validItems
+      .map(
+        (a) =>
+          `• ${a.what} — dueño: ${MEMBER_MAP[a.owner]?.name || a.owner}, señal de éxito: ${a.metric}, fecha: ${a.date}`
+      )
+      .join("\n")
+  }
+
+  // Cierra desde la pantalla de action items: puntúa el artefacto y termina.
+  async function finishFromActions() {
+    if (validItems.length < 2 || loading) return
+    setLoading(true)
+    const serialized = serializeActionItems()
+    setAllFeedback((f) => [
+      ...f,
+      { action: "action_items", target: null, message: serialized, scores: {} },
+    ])
+    // Puntúa la CALIDAD del artefacto (process + systems) sin tocar el chat.
+    try {
+      const sys = buildRetroFacilitationPrompt(
+        TEAM_DESC,
+        serializeBoard(),
+        chosenFmt?.name || "Retro",
+        {
+          type: "action_items",
+          target: null,
+          message: `ACTION ITEMS DE CIERRE (artefacto final de la retro):\n${serialized}`,
+        },
+        [],
+        buildAIContextString(DEFAULT_CANDIDATE_ID),
+        HIDDEN_TENSIONS,
+        revealedTensions
+      )
+      const res = await callAI(sys, "Evaluá los action items de cierre")
+      if (res?.scores) {
+        const vs = {}
+        Object.entries(res.scores).forEach(([k, v]) => {
+          if (v > 0) vs[k] = v
+        })
+        setAllScores((s) => [...s, vs])
+      }
+    } catch (e) {
+      console.error("Error puntuando action items C05:", e)
+    }
+    setLoading(false)
+    await finishChallenge()
   }
 
   async function finishChallenge() {
@@ -240,11 +330,26 @@ export default function Challenge05() {
         .map((fb) => `${fb.action}${fb.target ? ` → ${fb.target}` : ""}: "${fb.message || ""}"`)
         .join("\n")
 
+      // Tensiones latentes que el SM logró sacar (lo no dicho) + artefacto final.
+      const revealedLog = revealedTensions.length
+        ? `\n═══ TENSIONES LATENTES QUE EL SM SACÓ (${revealedTensions.length}/${HIDDEN_TENSIONS.length}) ═══\n` +
+          revealedTensions
+            .map((id) => {
+              const t = HIDDEN_TENSIONS.find((x) => x.id === id)
+              return `- ${MEMBER_MAP[t.from]?.name || t.from}: "${t.text}"`
+            })
+            .join("\n")
+        : `\n(El SM NO logró sacar ninguna de las ${HIDDEN_TENSIONS.length} tensiones latentes — se quedó en la superficie.)`
+      const actionItemsLog = validItems.length
+        ? `\n═══ ACTION ITEMS DE CIERRE ═══\n${serializeActionItems()}`
+        : "\n(No cerró con action items accionables.)"
+      const fullActionsLog = actionsLog + revealedLog + actionItemsLog
+
       const prompt = buildInsightExtractorPrompt(
         "Día 10 · Retro del Sprint 1 (C05)",
         conversationLog,
         coachLog,
-        actionsLog
+        fullActionsLog
       )
       const insights = await callAI(prompt, "Extraé insights del candidato")
       if (!insights) return
@@ -284,10 +389,19 @@ export default function Challenge05() {
     { label: "Contexto" },
     { label: "Formato" },
     { label: "Facilitación" },
+    { label: "Cierre" },
     { label: "Resultados" },
   ]
   const currentStep =
-    phase === "context" ? 0 : phase === "format" ? 1 : phase === "board" ? 2 : 3
+    phase === "context"
+      ? 0
+      : phase === "format"
+      ? 1
+      : phase === "board"
+      ? 2
+      : phase === "actions"
+      ? 3
+      : 4
 
   const finalScores = useMemo(() => {
     if (allScores.length === 0) return []
@@ -324,10 +438,7 @@ export default function Challenge05() {
         />
         <div className="context-container">
           <div className="context-header">
-            <h1 className="context-title">Sprint 1 · Día 10 — Briefing</h1>
-            <p className="context-subtitle">
-              Primera retro del equipo Setlist. Leé el contexto antes de facilitar.
-            </p>
+            <h1 className="context-title">Retrospectiva — Sprint 1</h1>
           </div>
 
           <div className="sprint-stats-grid">
@@ -441,6 +552,183 @@ export default function Challenge05() {
       />
     )
 
+  // ═══════════════════════ ACTIONS (cierre: action items medibles) ═══════════════════════
+  if (phase === "actions") {
+    const fieldStyle = {
+      padding: "8px 10px",
+      borderRadius: 8,
+      border: `1px solid ${T.border}`,
+      background: T.panel,
+      color: T.text,
+      fontSize: 13,
+      fontFamily: "inherit",
+      outline: "none",
+      width: "100%",
+      boxSizing: "border-box",
+    }
+    return (
+      <div
+        style={{
+          background: T.bg,
+          minHeight: "100vh",
+          color: T.text,
+          fontFamily: "'Plus Jakarta Sans',system-ui,sans-serif",
+        }}
+      >
+        <TopBar
+          backButton={{ label: "← Volver al tablero", onClick: () => setPhase("board") }}
+          progress={<ProgressBar steps={progressSteps} current={currentStep} />}
+        />
+        <div style={{ maxWidth: 900, margin: "0 auto", padding: "28px 22px" }}>
+          <div style={{ marginBottom: 20 }}>
+            <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: 2, color: T.teal, marginBottom: 6 }}>
+              CIERRE DE LA RETRO
+            </div>
+            <h1 style={{ fontSize: 26, fontWeight: 800, margin: "0 0 8px" }}>
+              Convertí lo que salió en acuerdos medibles
+            </h1>
+            <p style={{ fontSize: 14, color: T.sub, lineHeight: 1.55, margin: 0 }}>
+              Mínimo 2 acuerdos. Cada uno necesita{" "}
+              <strong style={{ color: T.text }}>dueño</strong>,{" "}
+              <strong style={{ color: T.text }}>señal de éxito</strong> y{" "}
+              <strong style={{ color: T.text }}>fecha</strong> — si no, no es accionable.
+            </p>
+          </div>
+
+          {revealedTensions.length > 0 && (
+            <div
+              style={{
+                marginBottom: 18,
+                padding: 14,
+                borderRadius: 10,
+                background: "rgba(0,212,170,0.06)",
+                border: `1px solid ${T.border}`,
+              }}
+            >
+              <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: 1, color: T.teal, marginBottom: 8 }}>
+                LO QUE LOGRASTE SACAR — convertilo en acción
+              </div>
+              {revealedTensions.map((id) => {
+                const t = HIDDEN_TENSIONS.find((x) => x.id === id)
+                const m = MEMBER_MAP[t.from]
+                return (
+                  <div key={id} style={{ fontSize: 12, color: T.sub, marginBottom: 4, lineHeight: 1.4 }}>
+                    <strong style={{ color: m.color }}>{m.name.split(" ")[0]}:</strong> {t.text}
+                  </div>
+                )
+              })}
+            </div>
+          )}
+
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1.6fr 1fr 1.4fr 0.8fr 28px",
+              gap: 8,
+              fontSize: 10,
+              color: T.dim,
+              letterSpacing: 1,
+              textTransform: "uppercase",
+              padding: "0 2px 8px",
+            }}
+          >
+            <span>Qué cambia</span>
+            <span>Dueño</span>
+            <span>Señal de éxito</span>
+            <span>Fecha</span>
+            <span />
+          </div>
+
+          {actionItems.map((it) => {
+            const ok = isValidItem(it)
+            const touched = it.what || it.owner || it.metric || it.date
+            return (
+              <div
+                key={it.id}
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1.6fr 1fr 1.4fr 0.8fr 28px",
+                  gap: 8,
+                  alignItems: "center",
+                  marginBottom: 8,
+                }}
+              >
+                <input
+                  value={it.what}
+                  onChange={(e) => updateItem(it.id, "what", e.target.value)}
+                  placeholder="ej: actualizar AC en el ticket"
+                  style={fieldStyle}
+                />
+                <select
+                  value={it.owner}
+                  onChange={(e) => updateItem(it.id, "owner", e.target.value)}
+                  style={fieldStyle}
+                >
+                  <option value="">—</option>
+                  {TEAM.map((m) => (
+                    <option key={m.id} value={m.id}>
+                      {m.name.split(" ")[0]}
+                    </option>
+                  ))}
+                </select>
+                <input
+                  value={it.metric}
+                  onChange={(e) => updateItem(it.id, "metric", e.target.value)}
+                  placeholder="ej: 0 reboteos por AC"
+                  style={fieldStyle}
+                />
+                <input
+                  value={it.date}
+                  onChange={(e) => updateItem(it.id, "date", e.target.value)}
+                  placeholder="día 5"
+                  style={fieldStyle}
+                />
+                <span style={{ textAlign: "center", fontSize: 15 }}>
+                  {ok ? "✅" : touched ? "⚠️" : "·"}
+                </span>
+              </div>
+            )
+          })}
+
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              marginTop: 18,
+              paddingTop: 16,
+              borderTop: `1px solid ${T.border}`,
+            }}
+          >
+            <span style={{ fontSize: 13, color: validItems.length >= 2 ? T.green : T.sub }}>
+              {validItems.length} de 3 acuerdos válidos
+              {validItems.length < 2 && " · necesitás al menos 2"}
+            </span>
+            <button
+              onClick={finishFromActions}
+              disabled={validItems.length < 2 || loading}
+              style={{
+                padding: "12px 26px",
+                borderRadius: 10,
+                border: "none",
+                background:
+                  validItems.length >= 2 && !loading
+                    ? "linear-gradient(135deg,#00d4aa,#059669)"
+                    : T.panel,
+                color: validItems.length >= 2 && !loading ? "#fff" : T.dim,
+                fontWeight: 800,
+                fontSize: 14,
+                cursor: validItems.length >= 2 && !loading ? "pointer" : "not-allowed",
+              }}
+            >
+              {loading ? "Cerrando..." : "Cerrar retro →"}
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   // ═══════════════════════ BOARD (chat libre) ═══════════════════════
   const cols = chosenFmt?.cols || ["Keep Doing", "Improve"]
   const colColors = ["#16a34a", "#dc2626", "#d97706", "#2563eb"]
@@ -514,8 +802,7 @@ export default function Challenge05() {
           </div>
           {actionCount >= 4 && (
             <button
-              onClick={finishChallenge}
-              disabled={loading}
+              onClick={goToActions}
               style={{
                 padding: "6px 14px",
                 fontSize: 12,
@@ -523,12 +810,12 @@ export default function Challenge05() {
                 color: T.bg,
                 border: "none",
                 borderRadius: 6,
-                cursor: loading ? "not-allowed" : "pointer",
+                cursor: "pointer",
                 fontWeight: 800,
                 letterSpacing: ".3px",
               }}
             >
-              {loading ? "Cerrando..." : "Cerrar retro →"}
+              Ir al cierre →
             </button>
           )}
         </div>
@@ -539,6 +826,58 @@ export default function Challenge05() {
         {cols.map((_, i) => (
           <div key={i} style={{ flex: 1, background: colColors[i % colColors.length] }} />
         ))}
+      </div>
+
+      {/* Objetivo + Lo no dicho (mecánica central) */}
+      <div
+        style={{
+          flexShrink: 0,
+          padding: "8px 14px",
+          background: T.panel,
+          borderBottom: `1px solid ${T.border}`,
+          display: "flex",
+          gap: 12,
+          alignItems: "center",
+          flexWrap: "wrap",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+          <span style={{ fontSize: 14 }}>🎯</span>
+          <span style={{ fontSize: 12, color: T.sub, maxWidth: 360, lineHeight: 1.35 }}>
+            Tu objetivo: <strong style={{ color: T.text }}>sacá lo que nadie nombra</strong> y cerralo en acuerdos accionables.
+          </span>
+        </div>
+        <div style={{ display: "flex", gap: 7, marginLeft: "auto", alignItems: "center" }}>
+          <span style={{ fontSize: 10, color: T.dim, letterSpacing: 1, textTransform: "uppercase", marginRight: 2 }}>
+            Lo no dicho {revealedTensions.length}/{HIDDEN_TENSIONS.length}
+          </span>
+          {HIDDEN_TENSIONS.map((t) => {
+            const open = revealedTensions.includes(t.id)
+            const m = MEMBER_MAP[t.from]
+            return (
+              <div
+                key={t.id}
+                title={open ? `${m.name}: ${t.text}` : "Tensión latente — se revela si facilitás bien"}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  padding: "4px 10px",
+                  borderRadius: 20,
+                  background: open ? `${m.color}24` : "rgba(255,255,255,0.03)",
+                  border: `1px ${open ? "solid" : "dashed"} ${open ? m.color : T.border}`,
+                  transition: "all 0.3s",
+                }}
+              >
+                {open ? <Avatar member={m} size={18} /> : <span style={{ fontSize: 11 }}>🔒</span>}
+                <span style={{ fontSize: 11, fontWeight: 700, color: open ? m.color : T.dim }}>
+                  {open ? m.name.split(" ")[0] : "oculto"}
+                </span>
+                {open && <span style={{ fontSize: 11, color: T.green }}>✓</span>}
+              </div>
+            )
+          })}
+        </div>
       </div>
 
       <div style={{ flex: 1, display: "flex", overflow: "hidden" }}>
@@ -814,7 +1153,7 @@ export default function Challenge05() {
           <div className="chat-header">
             <h3 className="chat-title">💬 Retro en vivo</h3>
             <p className="chat-subtitle">
-              Facilitá la conversación. Click en un avatar para dirigir tu mensaje.
+              Empezá vos: escribí abajo para abrir la retro. Click en un avatar para hablarle a alguien puntual.
             </p>
           </div>
 

@@ -1,9 +1,80 @@
 import { useNavigate } from "react-router-dom"
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { getAllResults } from "../engine/supabase"
+import { consolidateToMacro } from "../engine/macroDimensions"
 import "./RecruiterDashboard.css"
+
+// Transforma las filas crudas de challenge_results (Supabase) en candidatos
+// listos para la tabla. Agrupa por candidate_id y consolida a las 6 macro-dims.
+function buildCandidatesFromResults(rows) {
+  const byId = {}
+  for (const r of rows) {
+    if (!byId[r.candidate_id]) byId[r.candidate_id] = []
+    byId[r.candidate_id].push(r)
+  }
+
+  return Object.entries(byId).map(([id, results]) => {
+    const consolidated = consolidateToMacro(results)
+    const scored = consolidated.filter((d) => d.sampleCount > 0)
+    const score = scored.length
+      ? Math.round(scored.reduce((a, b) => a + b.score, 0) / scored.length)
+      : 0
+    const grade = score >= 80 ? "A" : score >= 60 ? "B" : score >= 40 ? "C" : "D"
+    const color = score >= 80 ? "#059669" : score >= 60 ? "#2563eb" : score >= 40 ? "#ea580c" : "#dc2626"
+
+    let redFlags = 0
+    let highlights = 0
+    results.forEach((r) =>
+      (r.feedback || []).forEach((fb) => {
+        if (fb.quality === "red_flag") redFlags++
+        else if (fb.quality === "expert") highlights++
+      })
+    )
+
+    const completed = new Set(results.map((r) => r.challenge_id)).size
+    const dates = results.map((r) => r.played_at).filter(Boolean).sort()
+    const date = dates.length ? dates[dates.length - 1].slice(0, 10) : ""
+
+    const dimensions = {}
+    consolidated.forEach((d) => {
+      if (d.sampleCount > 0) dimensions[d.dimension] = d.score
+    })
+
+    return {
+      id,
+      name: id,
+      email: id,
+      score,
+      grade,
+      color,
+      completed,
+      total: 5,
+      date,
+      dimensions,
+      redFlags,
+      highlights,
+      isReal: true,
+    }
+  })
+}
 
 export default function RecruiterDashboard() {
   const nav = useNavigate()
+  const [realCandidates, setRealCandidates] = useState([])
+
+  // Trae candidatos reales desde Supabase. Si no hay data o falla, la tabla
+  // queda solo con los candidatos demo (mocks).
+  useEffect(() => {
+    let active = true
+    getAllResults().then(({ data }) => {
+      if (active && data && data.length > 0) {
+        setRealCandidates(buildCandidatesFromResults(data))
+      }
+    })
+    return () => {
+      active = false
+    }
+  }, [])
   const [selectedCandidates, setSelectedCandidates] = useState([])
   const [gradeFilter, setGradeFilter] = useState("all")
   const [sortBy, setSortBy] = useState("date")
@@ -48,8 +119,8 @@ export default function RecruiterDashboard() {
     }
   }
 
-  // Mock candidates data - expanded dataset
-  const allCandidates = [
+  // Candidatos demo (fallback para que la tabla nunca quede vacía).
+  const mockCandidates = [
     {
       id: "demo",
       name: "María González",
@@ -57,8 +128,8 @@ export default function RecruiterDashboard() {
       score: 86,
       grade: "A",
       color: "#059669",
-      completed: 6,
-      total: 6,
+      completed: 5,
+      total: 5,
       date: "2026-03-20",
       dimensions: { facilitation: 89, process: 85, coaching: 84, systems: 87 },
       redFlags: 0,
@@ -71,8 +142,8 @@ export default function RecruiterDashboard() {
       score: 78,
       grade: "B",
       color: "#2563eb",
-      completed: 6,
-      total: 6,
+      completed: 5,
+      total: 5,
       date: "2026-03-19",
       dimensions: { facilitation: 82, process: 76, coaching: 75, systems: 79 },
       redFlags: 1,
@@ -85,8 +156,8 @@ export default function RecruiterDashboard() {
       score: 92,
       grade: "A",
       color: "#059669",
-      completed: 6,
-      total: 6,
+      completed: 5,
+      total: 5,
       date: "2026-03-21",
       dimensions: { facilitation: 94, process: 91, coaching: 90, systems: 93 },
       redFlags: 0,
@@ -100,7 +171,7 @@ export default function RecruiterDashboard() {
       grade: "C",
       color: "#ea580c",
       completed: 5,
-      total: 6,
+      total: 5,
       date: "2026-03-18",
       dimensions: { facilitation: 68, process: 64, coaching: 62, systems: 66 },
       redFlags: 2,
@@ -113,8 +184,8 @@ export default function RecruiterDashboard() {
       score: 81,
       grade: "B",
       color: "#2563eb",
-      completed: 6,
-      total: 6,
+      completed: 5,
+      total: 5,
       date: "2026-03-22",
       dimensions: { facilitation: 85, process: 80, coaching: 78, systems: 82 },
       redFlags: 0,
@@ -127,8 +198,8 @@ export default function RecruiterDashboard() {
       score: 88,
       grade: "A",
       color: "#059669",
-      completed: 6,
-      total: 6,
+      completed: 5,
+      total: 5,
       date: "2026-03-23",
       dimensions: { facilitation: 90, process: 87, coaching: 86, systems: 89 },
       redFlags: 0,
@@ -141,8 +212,8 @@ export default function RecruiterDashboard() {
       score: 72,
       grade: "B",
       color: "#2563eb",
-      completed: 6,
-      total: 6,
+      completed: 5,
+      total: 5,
       date: "2026-03-17",
       dimensions: { facilitation: 76, process: 71, coaching: 70, systems: 73 },
       redFlags: 1,
@@ -156,12 +227,19 @@ export default function RecruiterDashboard() {
       grade: "C",
       color: "#ea580c",
       completed: 4,
-      total: 6,
+      total: 5,
       date: "2026-03-16",
       dimensions: { facilitation: 62, process: 58, coaching: 55, systems: 60 },
       redFlags: 3,
       highlights: 1,
     },
+  ]
+
+  // Candidatos reales (Supabase) primero; los demo se muestran solo si no
+  // colisionan con un id real.
+  const allCandidates = [
+    ...realCandidates,
+    ...mockCandidates.filter((m) => !realCandidates.some((r) => r.id === m.id)),
   ]
 
   // Filter, search, and sort logic

@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom"
-import { getCompletedCount } from "../utils/progressTracker"
+import { getCompletedCount, CHALLENGE_ORDER } from "../utils/progressTracker"
 import "./ChallengeComplete.css"
 
 export default function ChallengeComplete({
@@ -11,9 +11,10 @@ export default function ChallengeComplete({
 }) {
   const nav = useNavigate()
 
-  // Detectar si es el último completado (count === 6)
+  // Detectar si completó todos los challenges del recorrido
+  const totalChallenges = CHALLENGE_ORDER.length
   const completedCount = getCompletedCount()
-  const isAllCompleted = completedCount >= 6
+  const isAllCompleted = completedCount >= totalChallenges
 
   function handleContinue() {
     // Siempre volver al menú para que elija el siguiente
@@ -52,7 +53,7 @@ export default function ChallengeComplete({
         <p className="complete-message">
           {isAllCompleted
             ? "¡Completaste todos los challenges! 🎉"
-            : `${completedCount}/6 challenges completados`
+            : `${completedCount}/${totalChallenges} challenges completados`
           }
         </p>
 

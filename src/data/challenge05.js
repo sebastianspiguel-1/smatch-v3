@@ -11,7 +11,6 @@ export const SPRINT_CONTEXT =
 export const SPRINT_STATS = [
   { icon: "🎯", label: "Comprometido", value: "30 pts" },
   { icon: "✅", label: "Completado", value: "22 pts" },
-  { icon: "🔄", label: "Carry-over", value: "SL-105 + 1" },
 ]
 
 export const SPRINT_SIGNALS = [
@@ -34,6 +33,32 @@ export const SPRINT_SIGNALS = [
     from: "alan",
     text: "SL-105 (Buscar canción) sigue esperando aprobación de Spotify. Es el bloqueo del sprint.",
     ts: "Día 9",
+  },
+]
+
+// ─── TENSIONES LATENTES ("lo no dicho") ───
+// NO están en el tablero. Son lo personal/emocional que el equipo se calla.
+// Solo emergen si el candidato facilita lo suficientemente bien para sacarlas.
+// La IA decide si una acción del SM las "gana" (ver buildRetroFacilitationPrompt).
+// Este es el núcleo evaluable de la retro: ¿detecta y crea seguridad para lo no dicho?
+export const HIDDEN_TENSIONS = [
+  {
+    id: "gian_bug",
+    from: "gian",
+    text: "El bug de SL-107 lo reporté en el planning y nadie lo priorizó. Después rebotó dos veces y quedé yo como el que frena todo. Me re calentó, pero no lo dije.",
+    hint: "Emerge si el SM le pregunta a Gian directo por el bug, por qué rebotó SL-107, o si nota que está incómodo y le abre espacio. NO emerge si solo se celebra el sprint.",
+  },
+  {
+    id: "nacho_late",
+    from: "nacho",
+    text: "Entregué SL-103 tarde y no avisé. Me trabé y me dio vergüenza pedir ayuda siendo el nuevo. Alan me cubrió y ni se lo agradecí en público.",
+    hint: "Emerge SOLO si el SM toca la entrega tardía SIN culpar, creando seguridad. Si el SM acusa o lo expone, Nacho se cierra y NO se revela.",
+  },
+  {
+    id: "eric_silence",
+    from: "eric",
+    text: "Estoy callado porque cuando digo lo que pienso se arman roces y prefiero evitarlo. Pero hay varias cosas de este sprint que no comparto.",
+    hint: "Emerge si el SM invita explícitamente la voz de Eric ('Eric, ¿vos qué ves?', 'te noto callado'). NO emerge si el SM deja que Gabriela y Nacho dominen la sala.",
   },
 ]
 

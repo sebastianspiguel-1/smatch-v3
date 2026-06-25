@@ -4,3 +4,18 @@ dist
 .env.local
 .vercel
 .claude/settings.local.json
+
+# Archivos de negocio / planificación (no son parte del producto)
+.claude/launch.json
+Smatch-Keynote-Lanzamiento.pptx
+Smatch-Video-Lanzamiento-Guion-y-Plan.md
+smatch-market-research.html
+DIAGNOSTICO-Y-PLAN-MVP.md
+Smatch-PRD-MVP.docx
+Smatch-PRD-MVP-v2.docx
+Smatch-Journey-MVP.png
+Smatch-PRD-MVP-v3.docx
+Smatch-IA-Especificaciones-Tecnicas.md
+Smatch-IA-en-criollo.md
+Smatch-Revision-Challenges.md
+Smatch-C01-Wireframe.png

@@ -16,7 +16,7 @@ import {
 } from "../engine/candidateProfile"
 import {
   TEAM, MEMBER_MAP, PBIS, FIBONACCI,
-  POKER_VOTES, EVENTS, TEAM_QUESTIONS,
+  POKER_VOTES, EVENTS, POKER_STORIES, TEAM_QUESTIONS,
   DIMENSIONS, DOCK_ITEMS,
   KANO_ITEMS, RELABS_ITEMS, TSHIRT_TEAM_VOTES, TSHIRT_VOTE_REASONS, TSHIRT_PBI_INFO, POKER_STEPS_PROMPTS,
   TEAM_AGREEMENT_TOPICS,
@@ -102,38 +102,39 @@ function SMAgreementInput({ topicId, onAdd }) {
 //   - Por qué importa
 //   - Cuál es el rol del SM al usarla
 //   - Quién en el equipo la necesita más
-function ToolIntroStep({ accent, icon, name, whatIs, whyMatters, smRole, hookMember, onStart }) {
+function ToolIntroStep({ accent, icon, name, hookMember, onStart }) {
+  const [whatAns, setWhatAns] = useState("")
+  const [whyAns, setWhyAns] = useState("")
+  const ready = whatAns.trim() && whyAns.trim()
+  const taStyle = { width: "100%", padding: 10, borderRadius: 8, border: "1.5px solid #d1d5db", fontSize: 13, fontFamily: "inherit", resize: "none", outline: "none", boxSizing: "border-box", color: "#0f172a", background: "#ffffff", lineHeight: 1.4 }
+
   return (
     <div style={{ padding: 16, minWidth: 380, maxWidth: 440 }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
         <div style={{ fontSize: 26 }}>{icon}</div>
         <div style={{ fontSize: 18, fontWeight: 800, color: accent }}>{name}</div>
       </div>
 
-      <div style={{ marginBottom: 10 }}>
-        <div style={{ fontSize: 10, fontWeight: 800, color: "#64748b", letterSpacing: 1, marginBottom: 3, textTransform: "uppercase" }}>¿Qué es?</div>
-        <div style={{ fontSize: 13, color: "#334155", lineHeight: 1.5 }}>{whatIs}</div>
-      </div>
-
-      <div style={{ marginBottom: 10 }}>
-        <div style={{ fontSize: 10, fontWeight: 800, color: "#64748b", letterSpacing: 1, marginBottom: 3, textTransform: "uppercase" }}>¿Por qué importa?</div>
-        <div style={{ fontSize: 13, color: "#334155", lineHeight: 1.5 }}>{whyMatters}</div>
-      </div>
-
-      <div style={{ marginBottom: 14, padding: 10, background: `${accent}10`, borderLeft: `3px solid ${accent}`, borderRadius: 6 }}>
-        <div style={{ fontSize: 10, fontWeight: 800, color: accent, letterSpacing: 1, marginBottom: 3, textTransform: "uppercase" }}>Tu rol acá</div>
-        <div style={{ fontSize: 13, color: "#0f172a", lineHeight: 1.5, fontWeight: 500 }}>{smRole}</div>
-      </div>
-
       {hookMember && (
-        <div style={{ marginBottom: 14, fontSize: 12, color: "#64748b", fontStyle: "italic", textAlign: "center", padding: 6 }}>
+        <div style={{ marginBottom: 14, fontSize: 12, color: "#64748b", fontStyle: "italic", padding: "8px 10px", background: `${accent}0d`, borderRadius: 8, lineHeight: 1.4 }}>
           💬 {hookMember}
         </div>
       )}
 
+      <div style={{ marginBottom: 12 }}>
+        <div style={{ fontSize: 13, fontWeight: 800, color: "#0f172a", marginBottom: 6 }}>¿Qué es {name}?</div>
+        <textarea autoFocus value={whatAns} onChange={e => setWhatAns(e.target.value)} rows={2} placeholder="Explicalo con tus palabras, como se lo dirías al equipo..." style={taStyle} />
+      </div>
+
+      <div style={{ marginBottom: 14 }}>
+        <div style={{ fontSize: 13, fontWeight: 800, color: "#0f172a", marginBottom: 6 }}>¿Por qué le importa al equipo?</div>
+        <textarea value={whyAns} onChange={e => setWhyAns(e.target.value)} rows={2} placeholder="¿Qué problema evita o qué mejora trae?" style={taStyle} />
+      </div>
+
       <button
-        onClick={onStart}
-        style={{ width: "100%", padding: "10px 0", background: accent, color: "#fff", fontWeight: 800, fontSize: 13, border: "none", borderRadius: 8, cursor: "pointer", letterSpacing: 0.3 }}
+        onClick={() => ready && onStart({ whatAns: whatAns.trim(), whyAns: whyAns.trim() })}
+        disabled={!ready}
+        style={{ width: "100%", padding: "10px 0", background: ready ? accent : "#e5e7eb", color: ready ? "#fff" : "#9ca3af", fontWeight: 800, fontSize: 13, border: "none", borderRadius: 8, cursor: ready ? "pointer" : "not-allowed", letterSpacing: 0.3 }}
       >
         Usar herramienta →
       </button>
@@ -177,6 +178,7 @@ function ExplainStep({ accent, prompt, onSubmit }) {
 // ═══════════════════ 1. POKER STEPS TOOL ═══════════════════
 function PokerStepsTool({ onComplete }) {
   const [introDone, setIntroDone] = useState(false)
+  const [introAns, setIntroAns] = useState(null)
   const [answers, setAnswers] = useState(["", "", "", "", ""])
   const [mechanicDone, setMechanicDone] = useState(false)
   const filled = answers.filter(a => a.trim()).length
@@ -194,7 +196,7 @@ function PokerStepsTool({ onComplete }) {
         whyMatters="El equipo nunca hizo Planning Poker juntos. Si arrancan sin entender los pasos, los más experimentados imponen su voto y los demás se anclan."
         smRole="Mostrale al equipo los 5 pasos en orden. Esto los prepara para el Planning Poker real que vas a abrir después."
         hookMember="Nacho está confundido. Eric va a querer saltar pasos. Tu chance de poner orden sin imponer."
-        onStart={() => setIntroDone(true)}
+        onStart={(ans) => { setIntroAns(ans); setIntroDone(true) }}
       />
     )
   }
@@ -221,7 +223,7 @@ function PokerStepsTool({ onComplete }) {
         <ExplainStep
           accent={accent}
           prompt="Eric dice: 'En mi anterior trabajo saltábamos directo a votar, ¿para qué tantos pasos?'. ¿Cómo le explicás POR QUÉ cada paso importa y qué pasa si te salteás uno?"
-          onSubmit={explanation => onComplete({ answers, explanation })}
+          onSubmit={explanation => onComplete({ answers, explanation, intro: introAns })}
         />
       )}
     </div>
@@ -230,10 +232,9 @@ function PokerStepsTool({ onComplete }) {
 
 // ═══════════════════ 2. FIBONACCI TOOL ═══════════════════
 function FibonacciTool({ onComplete }) {
-  const shuffled = [8, 2, 21, 5, 1, 13, 3]
   const [introDone, setIntroDone] = useState(false)
-  const [slots, setSlots] = useState(Array(7).fill(null))
-  const [pool, setPool] = useState([...shuffled])
+  const [introAns, setIntroAns] = useState(null)
+  const [nums, setNums] = useState(["", "", "", "", ""])
   const [mechanicDone, setMechanicDone] = useState(false)
   const accent = "#00b894"
 
@@ -243,49 +244,45 @@ function FibonacciTool({ onComplete }) {
         accent={accent}
         icon="🔢"
         name="Secuencia Fibonacci"
-        whatIs="La secuencia 1, 2, 3, 5, 8, 13, 21 que usamos para estimar story points. Cada número es la suma de los dos anteriores."
-        whyMatters="Refleja la realidad de la incertidumbre: cuanto más grande algo, menos preciso podés estimar. Los saltos crecientes obligan al equipo a no obsesionarse con precisión falsa."
-        smRole="Mostrá la secuencia al equipo y guiá una conversación de por qué NO usamos 1-2-3-4-5. Es el primer concepto que va a fallar en el Planning Poker."
-        hookMember="Nacho ya dijo que prefiere estimar en horas. Esta es tu chance de mostrarle el WHY antes de que arranquen las cartas."
-        onStart={() => setIntroDone(true)}
+        hookMember="Nacho ya dijo que prefiere estimar en horas. Definí la escala antes de que arranquen las cartas."
+        onStart={(ans) => { setIntroAns(ans); setIntroDone(true) }}
       />
     )
   }
 
-  function place(num) {
-    const i = slots.indexOf(null); if (i === -1) return
-    setSlots(p => { const n = [...p]; n[i] = num; return n })
-    setPool(p => { const idx = p.indexOf(num); return p.filter((_, j) => j !== idx) })
-  }
-  function remove(idx) {
-    if (mechanicDone || slots[idx] === null) return
-    setPool(p => [...p, slots[idx]])
-    setSlots(p => { const n = [...p]; n[idx] = null; return n })
-  }
-  function finishMechanic() { setMechanicDone(true) }
+  const filled = nums.map(n => n.trim()).filter(Boolean)
+  const ready = filled.length >= 3
 
   return (
-    <div style={{ padding: 12 }}>
-      <div style={{ fontSize: 14, fontWeight: 700, color: accent, marginBottom: 10 }}>🔢 Secuencia Fibonacci</div>
-      <div style={{ fontSize: 12, color: "#666", marginBottom: 10, lineHeight: 1.4 }}>Ordená los números como creas que va la secuencia que se usa en Planning Poker:</div>
-      <div style={{ display: "flex", gap: 5, marginBottom: 10, flexWrap: "wrap" }}>
-        {slots.map((v, i) => (
-          <div key={i} onClick={() => remove(i)} style={{ width: 46, height: 56, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", background: v !== null ? `${accent}15` : "#f8f8f8", border: `2px ${v !== null ? "solid" : "dashed"} ${v !== null ? accent : "#ddd"}`, fontSize: 18, fontWeight: 900, color: accent, cursor: v && !mechanicDone ? "pointer" : "default" }}>{v ?? ""}</div>
+    <div style={{ padding: 14, minWidth: 360 }}>
+      <div style={{ fontSize: 14, fontWeight: 700, color: accent, marginBottom: 8 }}>🔢 Secuencia Fibonacci</div>
+      <div style={{ fontSize: 13, color: "#475569", marginBottom: 12, lineHeight: 1.5 }}>
+        Definí vos la secuencia de story points. <strong style={{ color: "#0f172a" }}>Completá los números</strong> — usá el "+" si necesitás más casilleros.
+      </div>
+      <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 12, alignItems: "center" }}>
+        {nums.map((v, i) => (
+          <input
+            key={i}
+            value={v}
+            disabled={mechanicDone}
+            inputMode="numeric"
+            onChange={e => { const val = e.target.value.replace(/[^0-9.]/g, ""); setNums(p => p.map((x, j) => j === i ? val : x)) }}
+            placeholder="—"
+            style={{ width: 46, height: 56, borderRadius: 8, border: `2px ${v.trim() ? "solid" : "dashed"} ${v.trim() ? accent : "#d1d5db"}`, textAlign: "center", fontSize: 18, fontWeight: 900, color: accent, background: v.trim() ? `${accent}12` : "#f8fafc", outline: "none", fontFamily: "inherit", boxSizing: "border-box" }}
+          />
         ))}
+        {!mechanicDone && (
+          <button onClick={() => setNums(p => [...p, ""])} title="Agregar casillero" style={{ width: 46, height: 56, borderRadius: 8, border: "2px dashed #cbd5e1", background: "#fff", color: "#94a3b8", fontSize: 24, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>+</button>
+        )}
       </div>
       {!mechanicDone && (
-        <div style={{ display: "flex", gap: 5, flexWrap: "wrap", marginBottom: 8 }}>
-          {pool.map((n, i) => <button key={i} onClick={() => place(n)} style={{ width: 46, height: 46, borderRadius: 8, border: "2px solid #ccc", background: "#fff", fontSize: 17, fontWeight: 800, color: "#333", cursor: "pointer", fontFamily: "inherit" }}>{n}</button>)}
-        </div>
-      )}
-      {!mechanicDone && pool.length === 0 && (
-        <button onClick={finishMechanic} style={{ padding: "8px 22px", borderRadius: 8, border: "none", background: accent, color: "#fff", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>Guardar</button>
+        <button onClick={() => ready && setMechanicDone(true)} disabled={!ready} style={{ padding: "8px 22px", borderRadius: 8, border: "none", background: ready ? accent : "#e5e7eb", color: ready ? "#fff" : "#9ca3af", fontWeight: 700, fontSize: 13, cursor: ready ? "pointer" : "not-allowed" }}>Guardar secuencia</button>
       )}
       {mechanicDone && (
         <ExplainStep
           accent={accent}
-          prompt="Nacho dice: 'No entiendo, prefiero 1-2-3-4-5 que es más simple'. ¿Cómo le explicás POR QUÉ Fibonacci es mejor para estimar?"
-          onSubmit={explanation => onComplete({ order: slots, explanation })}
+          prompt="Nacho dice: 'No entiendo, prefiero 1-2-3-4-5 que es más simple'. ¿Cómo le explicás POR QUÉ conviene esta secuencia y no una lineal?"
+          onSubmit={explanation => onComplete({ sequence: filled.join(", "), explanation, intro: introAns })}
         />
       )}
     </div>
@@ -295,6 +292,7 @@ function FibonacciTool({ onComplete }) {
 // ═══════════════════ 3. REL VS ABS TOOL ═══════════════════
 function RelAbsTool({ onComplete }) {
   const [introDone, setIntroDone] = useState(false)
+  const [introAns, setIntroAns] = useState(null)
   const [placed, setPlaced] = useState({})
   const [sel, setSel] = useState(null)
   const [mechanicDone, setMechanicDone] = useState(false)
@@ -310,7 +308,7 @@ function RelAbsTool({ onComplete }) {
         whyMatters="Los equipos jóvenes confunden ambas. Estimar en horas (absoluta) genera promesas falsas; estimar en story points (relativa) refleja complejidad real del trabajo."
         smRole="Clasificá los conceptos en el board y después coacheá al equipo. La diferencia es contraintuitiva — un dev nuevo necesita verla, no solo escucharla."
         hookMember="Alan viene del mundo freelance donde todo era 'son 3 días'. Esta es la conversación clave para que entienda story points."
-        onStart={() => setIntroDone(true)}
+        onStart={(ans) => { setIntroAns(ans); setIntroDone(true) }}
       />
     )
   }
@@ -346,7 +344,7 @@ function RelAbsTool({ onComplete }) {
         <ExplainStep
           accent={accent}
           prompt="Alan dice: 'Yo siempre estimé en días en mi trabajo anterior y funcionaba'. ¿Cómo le mostrás POR QUÉ acá usamos estimación relativa?"
-          onSubmit={explanation => onComplete({ placed, explanation })}
+          onSubmit={explanation => onComplete({ placed, explanation, intro: introAns })}
         />
       )}
     </div>
@@ -356,6 +354,7 @@ function RelAbsTool({ onComplete }) {
 // ═══════════════════ 4. T-SHIRT SIZING TOOL ═══════════════════
 function TshirtTool({ onComplete }) {
   const [introDone, setIntroDone] = useState(false)
+  const [introAns, setIntroAns] = useState(null)
   const [step, setStep] = useState(0) // 0: pre-reveal, 1: revealed, 2: razones visibles
   const [revealed, setRevealed] = useState(false)
   const [showReasons, setShowReasons] = useState(false)
@@ -372,7 +371,7 @@ function TshirtTool({ onComplete }) {
         whyMatters="Cuando hay desacuerdo en la estimación, las razones DEBAJO del número son lo que importa. Un mismo PBI puede ser 'M' para Eric y 'XL' para Nacho — y AMBOS pueden tener razón parcialmente."
         smRole="Facilitá la conversación cuando el equipo vota distinto. El equipo votó SL-105 (Buscar canción) con dispersión M/L/XL. Hay 5 razones distintas detrás."
         hookMember="Eric ya integró Spotify antes (cree que es fácil), Nacho nunca tocó una API externa (le aterra). Tu chance: hacer visible POR QUÉ votaron distinto."
-        onStart={() => setIntroDone(true)}
+        onStart={(ans) => { setIntroAns(ans); setIntroDone(true) }}
       />
     )
   }
@@ -441,7 +440,7 @@ function TshirtTool({ onComplete }) {
         <ExplainStep
           accent={accent}
           prompt="El equipo votó disparejo (M/L/XL) por razones legítimamente distintas. ¿Cómo facilitás este desacuerdo SIN imponer un número? ¿Qué decís primero? ¿A quién le hablás?"
-          onSubmit={explanation => onComplete({ votes: TSHIRT_TEAM_VOTES, reasons: TSHIRT_VOTE_REASONS, explanation })}
+          onSubmit={explanation => onComplete({ votes: TSHIRT_TEAM_VOTES, reasons: TSHIRT_VOTE_REASONS, explanation, intro: introAns })}
         />
       )}
     </div>
@@ -456,6 +455,7 @@ function KanoTool({ onComplete }) {
     { id: "delight", l: "🍪 Delighters (sorprende positivo)", bg: "#fef9c3", bc: "#ca8a04" },
   ]
   const [introDone, setIntroDone] = useState(false)
+  const [introAns, setIntroAns] = useState(null)
   const [placed, setPlaced] = useState({})
   const [sel, setSel] = useState(null)
   const [mechanicDone, setMechanicDone] = useState(false)
@@ -471,7 +471,7 @@ function KanoTool({ onComplete }) {
         whyMatters="Sin Kano, todo parece 'importante'. Con Kano, el equipo ve que Login es Basic (no negociable), Búsqueda rápida es Performance (mejor invertir más), Dark mode es Delighter (nice-to-have)."
         smRole="Clasificá 6 features de Setlist y después coacheá al equipo. Esto los ayuda a priorizar mejor en MoSCoW después."
         hookMember="Gabriela quiere TODO ya. Eric prioriza lo técnicamente interesante. Tu chance: hacer visible que NO todo es lo mismo."
-        onStart={() => setIntroDone(true)}
+        onStart={(ans) => { setIntroAns(ans); setIntroDone(true) }}
       />
     )
   }
@@ -509,7 +509,7 @@ function KanoTool({ onComplete }) {
         <ExplainStep
           accent={accent}
           prompt="Eric dice: 'Dark Mode es Basic, todas las apps modernas lo tienen'. ¿Cómo le explicás POR QUÉ es Delighter y no Basic? Y conectalo: ¿cómo cambia esto la priorización en MoSCoW?"
-          onSubmit={explanation => onComplete({ placed, explanation })}
+          onSubmit={explanation => onComplete({ placed, explanation, intro: introAns })}
         />
       )}
     </div>
@@ -520,6 +520,7 @@ function KanoTool({ onComplete }) {
 function MoscowTool({ onComplete }) {
   const items = PBIS.slice(0, 8)
   const [introDone, setIntroDone] = useState(false)
+  const [introAns, setIntroAns] = useState(null)
   const [placed, setPlaced] = useState({})
   const [sel, setSel] = useState(null)
   const [mechanicDone, setMechanicDone] = useState(false)
@@ -535,7 +536,7 @@ function MoscowTool({ onComplete }) {
         whyMatters="Sin un criterio explícito, todo termina siendo 'Must' y el sprint colapsa. MoSCoW fuerza al equipo a tomar decisiones difíciles antes de empezar."
         smRole="Priorizá 8 PBIs con el equipo. Velocity = 30 pts. Lo que entre en Must + Should + Could debe sumar ~30 pts. Tu rol: hacer cumplir el límite."
         hookMember="Gabriela ya dijo que la banda piloto quiere todo para el show en 4 semanas. Va a presionar para que casi todo sea Must. Tu chance: defender la priorización con datos."
-        onStart={() => setIntroDone(true)}
+        onStart={(ans) => { setIntroAns(ans); setIntroDone(true) }}
       />
     )
   }
@@ -603,7 +604,7 @@ function MoscowTool({ onComplete }) {
         <ExplainStep
           accent={accent}
           prompt={`Gabriela presiona: 'Mateo le prometió a la banda piloto el flujo completo. ¿Por qué dejaste cosas en Could/Won't?' Tu propuesta tiene ${totalPts} pts comprometidos. ¿Cómo defendés tu priorización sin ceder al scope creep?`}
-          onSubmit={explanation => onComplete({ placed, totalPts, explanation })}
+          onSubmit={explanation => onComplete({ placed, totalPts, explanation, intro: introAns })}
         />
       )}
     </div>
@@ -621,6 +622,8 @@ export default function Challenge01() {
   const [pokerActive, setPokerActive] = useState(false)
   const [pokerIdx, setPokerIdx] = useState(0)
   const [revealed, setRevealed] = useState(false)
+  const [pokerFinal, setPokerFinal] = useState(null)
+  const [pokerJustif, setPokerJustif] = useState("")
   const [estimated, setEstimated] = useState({})
   const [chat, setChat] = useState([])
   const [allScores, setAllScores] = useState([])
@@ -631,11 +634,14 @@ export default function Challenge01() {
   const [actionCount, setActionCount] = useState(0)
   const [timer, setTimer] = useState(2400)
   const [firedQuestions, setFiredQuestions] = useState([])
+  const chatFeedRef = useRef(null)
   // ─── Tool explanations: lo que el SM escribe después de usar cada herramienta ───
   const [toolExplanations, setToolExplanations] = useState({})
   // ─── Team agreements (Parte 1 del Día 1) ───
   // state: { topicId: [{text, source: "sm"|<memberId>}, ...] }
   const [teamAgreements, setTeamAgreements] = useState({})
+  // Acuerdo final redactado por el SM (síntesis), por categoría
+  const [agreementSynthesis, setAgreementSynthesis] = useState({})
   const boardRef = useRef(null)
   const nextId = useRef(100)
   const startTime = useRef(null)
@@ -657,6 +663,10 @@ export default function Challenge01() {
     }, 2000)
     return () => clearInterval(interval)
   }, [phase, firedQuestions])
+
+  useEffect(() => {
+    if (chatFeedRef.current) chatFeedRef.current.scrollTop = chatFeedRef.current.scrollHeight
+  }, [chat, loading])
 
   const mm = String(Math.floor(timer / 60)).padStart(2, "0")
   const ss = String(timer % 60).padStart(2, "0")
@@ -689,7 +699,7 @@ export default function Challenge01() {
   function onDockStart(item, e) {
     if (item.type === "divider") return
     if (item.type === "action") {
-      if (item.id === "poker_start" && !pokerActive && Object.keys(estimated).length < 4) startPoker()
+      if (item.id === "poker_start" && !pokerActive && Object.keys(estimated).length < POKER_STORIES.length) startPoker()
       return
     }
     // No volver a abrir si ya se completó
@@ -701,41 +711,50 @@ export default function Challenge01() {
 
   function startPoker() {
     setPokerActive(true)
-    const initialMsg = `${PBIS[0].id}: ${PBIS[0].title}`
-    setChat(p => [...p, { from: "gabriela", text: initialMsg }])
-    bubble("gabriela", initialMsg)
+    setPokerIdx(0)
+    setRevealed(false)
+    setPokerFinal(null)
+    setPokerJustif("")
+    const s = POKER_STORIES[0]
+    setChat(p => [...p, { from: "gabriela", text: `Arranquemos con ${s.pbi.id} — ${s.pbi.title}.` }])
   }
 
   function revealCards() {
     setRevealed(true)
-    EVENTS.filter(e => e.poker === pokerIdx).forEach(e => {
-      // Bad behaviors aparecen como mensajes de chat normales (no popups gritando)
-      setTimeout(() => {
-        setChat(p => [...p, { from: e.from, text: e.text }])
-        bubble(e.from, e.text, 10000)
-      }, e.delay)
+    // La conversación precargada del escenario entra al chat, escalonada
+    const s = POKER_STORIES[pokerIdx]
+    s.discussion.forEach((d, i) => {
+      setTimeout(() => setChat(p => [...p, { from: d.from, text: d.text }]), 400 + i * 1100)
     })
   }
 
-  function confirmPts(pts) {
+  // Re-estimación final + justificación obligatoria (lo que evalúa criterio)
+  async function confirmPts(pts, justif) {
+    const s = POKER_STORIES[pokerIdx]
+    const isLast = pokerIdx >= POKER_STORIES.length - 1
     setEstimated(p => ({ ...p, [pokerIdx]: pts }))
+    setChat(p => [...p, { isYou: true, text: `Estimación final de ${s.pbi.id}: ${pts} pts. ${justif}` }])
     setRevealed(false)
-    const confirmMsg = `${PBIS[pokerIdx].id} → ${pts} pts`
-    setChat(p => [...p, { from: "narration", text: `Acuerdo: ${confirmMsg}` }])
-    if (pokerIdx < 3) {
+    setPokerFinal(null)
+    setPokerJustif("")
+    setLoading(true)
+    await evaluateAction({
+      type: "poker_estimate",
+      target: null,
+      message: `Cerró la estimación de ${s.pbi.id} (${s.pbi.title}) en ${pts} pts tras un escenario de "${s.scenario}". Su justificación: "${justif}"`,
+    })
+    setLoading(false)
+    if (!isLast) {
       setPokerIdx(p => p + 1)
       setTimeout(() => {
-        const next = `Siguiente: ${PBIS[pokerIdx + 1].id}: ${PBIS[pokerIdx + 1].title}`
-        setChat(p => [...p, { from: "gabriela", text: next }])
-        bubble("gabriela", next)
-      }, 800)
+        const next = POKER_STORIES[pokerIdx + 1]
+        setChat(p => [...p, { from: "gabriela", text: `Siguiente: ${next.pbi.id} — ${next.pbi.title}.` }])
+      }, 700)
     } else {
       setTimeout(() => {
-        const done = "Estimación lista. ¿Priorizamos juntos?"
-        setChat(p => [...p, { from: "gabriela", text: done }])
-        bubble("gabriela", done)
+        setChat(p => [...p, { from: "gabriela", text: "Listo, estimamos las 3 historias. Buen laburo." }])
         setPokerActive(false)
-      }, 800)
+      }, 700)
     }
   }
 
@@ -767,17 +786,18 @@ export default function Challenge01() {
     // Construir el contexto de team agreements para el prompt
     // Cada categoría tiene un array de acuerdos. La AI los usa para
     // evaluar si el SM hace cumplir lo que él mismo facilitó.
-    const hasAgreements = TEAM_AGREEMENT_TOPICS.some(t => (teamAgreements[t.id] || []).length > 0)
-    const agreementsContext = hasAgreements
-      ? "\n\n═══ TEAM AGREEMENTS (acordados al inicio del Día 1) ═══\n" +
-        TEAM_AGREEMENT_TOPICS.filter(t => (teamAgreements[t.id] || []).length > 0).map(t => {
-          const lines = teamAgreements[t.id].map(a => {
-            const sourceTag = a.source === "sm" ? "[propuesta del SM]" : `[propuesto por ${MEMBER_MAP[a.source]?.name || a.source}, aceptado por el SM]`
-            return `   - "${a.text}" ${sourceTag}`
+    const topicsForCtx = TEAM_AGREEMENT_TOPICS.filter(t => (agreementSynthesis[t.id] || "").trim() || (teamAgreements[t.id] || []).length > 0)
+    const agreementsContext = topicsForCtx.length > 0
+      ? "\n\n═══ TEAM AGREEMENTS (Día 1) ═══\n" +
+        topicsForCtx.map(t => {
+          const picks = (teamAgreements[t.id] || []).map(a => {
+            const who = a.source === "sm" ? "SM" : (MEMBER_MAP[a.source]?.name || a.source)
+            return `     · "${a.text}" [tomado de ${who}${a.bad ? " — ⚠️ ANTI-PATRÓN que el SM aceptó como válido" : ""}]`
           }).join("\n")
-          return `• ${t.title}:\n${lines}`
+          const final = (agreementSynthesis[t.id] || "").trim()
+          return `• ${t.title}:\n   Acuerdo final redactado por el SM: "${final || "(no redactó acuerdo)"}"` + (picks ? `\n   Insumos que tomó del muro:\n${picks}` : "")
         }).join("\n") +
-        "\n\nEvaluá si el SM hace cumplir estos acuerdos durante el Planning. Si los acordó pero NO los hace respetar (ej: acordó 'story points' pero deja que Nacho hable en días sin coachearlo), bajá puntaje en facilitation y bias_coaching. Si NO acordó algo (categoría vacía), eso también es info — el equipo no tiene guía en ese aspecto."
+        "\n\nEvaluá: (1) si el acuerdo final redactado es concreto y RECONCILIA las contradicciones del equipo (ej: Eric 'Slack a cualquier hora' vs Alan 'horario fijo' → una sola norma); (2) si el SM aceptó algún ANTI-PATRÓN como válido (red flag fuerte en bias_coaching y process_mastery); (3) si hace cumplir estos acuerdos durante el Planning. Premiá síntesis clara y discernimiento; penalizá copiar sin criterio o aceptar ruido."
       : ""
 
     const sessionState = { pokerActive, pokerIdx, revealed }
@@ -891,9 +911,13 @@ export default function Challenge01() {
         moscow: "Priorización MoSCoW",
       }
       const toolExplanationsLog = Object.entries(toolExplanations)
-        .map(([toolId, data]) =>
-          `[${TOOL_LABELS[toolId] || toolId}]\nExplicación del SM: "${data.explanation}"`
-        ).join("\n\n")
+        .map(([toolId, data]) => {
+          const intro = data.intro
+            ? `Qué es (definición del SM): "${data.intro.whatAns}"\nPor qué importa (según el SM): "${data.intro.whyAns}"\n`
+            : ""
+          const seq = data.sequence ? `Secuencia que eligió el SM: "${data.sequence}"\n` : ""
+          return `[${TOOL_LABELS[toolId] || toolId}]\n${intro}${seq}Explicación al equipo: "${data.explanation}"`
+        }).join("\n\n")
 
       const fullActionsLog = [
         actionsLog,
@@ -1030,22 +1054,14 @@ export default function Challenge01() {
 
   // ═══════════════════ PHASE: TEAM AGREEMENTS (Parte 1 del Día 1) ═══════════════════
   if (phase === "agreements") {
-    const topicsWithAgreements = TEAM_AGREEMENT_TOPICS.filter(t => (teamAgreements[t.id] || []).length > 0)
-    const allDone = topicsWithAgreements.length === TEAM_AGREEMENT_TOPICS.length
-    const totalAgreements = TEAM_AGREEMENT_TOPICS.reduce((s, t) => s + (teamAgreements[t.id] || []).length, 0)
+    const synthDone = TEAM_AGREEMENT_TOPICS.filter(t => (agreementSynthesis[t.id] || "").trim().length >= 12)
+    const allDone = synthDone.length === TEAM_AGREEMENT_TOPICS.length
 
-    function addAgreement(topicId, text, source) {
+    function addAgreement(topicId, text, source, bad = false) {
       setTeamAgreements(prev => ({
         ...prev,
-        [topicId]: [...(prev[topicId] || []), { text, source, addedAt: Date.now() }]
+        [topicId]: [...(prev[topicId] || []), { text, source, bad, addedAt: Date.now() }]
       }))
-      // Si la sugerencia vino de un miembro, reacción del miembro
-      if (source !== "sm" && MEMBER_MAP[source]) {
-        const m = MEMBER_MAP[source]
-        const msg = `Gracias, lo tomamos.`
-        setChat(p => [...p, { from: source, text: msg }])
-        bubble(source, msg, 4000)
-      }
     }
 
     function removeAgreement(topicId, index) {
@@ -1059,19 +1075,19 @@ export default function Challenge01() {
       <div style={{ background: T.bg, minHeight: "100vh", color: T.text, fontFamily: "'Plus Jakarta Sans',system-ui,sans-serif" }}>
         <TopBar
           title="Día 1 · Kickoff del equipo"
-          subtitle={`Parte 1/2 · Team Agreements Board (${topicsWithAgreements.length}/${TEAM_AGREEMENT_TOPICS.length} categorías · ${totalAgreements} acuerdos)`}
+          subtitle={`Parte 1/2 · Team Agreements (${synthDone.length}/${TEAM_AGREEMENT_TOPICS.length} acuerdos redactados)`}
           currentStep={currentStep}
           totalSteps={totalSteps}
         />
         <div style={{ maxWidth: 1280, margin: "0 auto", padding: "24px 22px" }}>
           {/* Intro */}
           <div style={{ background: "linear-gradient(135deg, rgba(0,212,170,0.06), rgba(96,165,250,0.04))", borderLeft: "4px solid #00d4aa", borderRadius: 10, padding: 16, marginBottom: 18 }}>
-            <div style={{ fontSize: 11, fontWeight: 900, letterSpacing: 2, color: "#00d4aa", marginBottom: 4 }}>🤝 PARTE 1 — WORKSHOP DE TEAM AGREEMENTS</div>
+            <div style={{ fontSize: 11, fontWeight: 900, letterSpacing: 2, color: "#00d4aa", marginBottom: 4 }}>🤝 PARTE 1 — TEAM AGREEMENTS</div>
             <div style={{ fontSize: 14, color: T.text, lineHeight: 1.55, fontWeight: 600 }}>
-              Facilitá un mini-workshop para definir <strong>3 categorías</strong> de acuerdos básicos. El equipo trajo propuestas — tomá las que te parezcan o agregá las tuyas.
+              El equipo trajo propuestas, pero <strong>no todas sirven</strong>: algunas se contradicen y otras son anti-patrones disfrazados. Elegí lo que aporta, descartá el ruido y <strong>redactá vos el acuerdo final</strong> de cada categoría.
             </div>
             <div style={{ fontSize: 12, color: T.sub, marginTop: 6, lineHeight: 1.5 }}>
-              📌 Click en sugerencias del equipo para "tomarlas" como acuerdo · botón <strong>+ Agregar mi acuerdo</strong> para texto libre · todo lo que decidas se evalúa en el Planning después.
+              📌 Click en una propuesta para tomarla como insumo · escribí el acuerdo final en tus palabras (reconciliá las contradicciones) · todo se evalúa en el Planning.
             </div>
           </div>
 
@@ -1112,14 +1128,14 @@ export default function Challenge01() {
                     <strong>⚠️ Tensión:</strong> {topic.tension}
                   </div>
 
-                  {/* AGREEMENTS BOARD (post-its agregados) */}
+                  {/* INSUMOS TOMADOS DEL MURO */}
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: 10, fontWeight: 800, color: "#059669", letterSpacing: 1, marginBottom: 6, textTransform: "uppercase" }}>
-                      ACUERDOS DEL EQUIPO ({agreements.length})
+                      Insumos que tomaste ({agreements.length})
                     </div>
                     {agreements.length === 0 && (
                       <div style={{ fontSize: 12, color: T.dim, padding: "10px 8px", textAlign: "center", border: "1.5px dashed rgba(15,23,42,0.10)", borderRadius: 8, fontStyle: "italic" }}>
-                        Agregá al menos 1 acuerdo para continuar
+                        Elegí del muro lo que sirva. El ruido, descartalo.
                       </div>
                     )}
                     {agreements.map((a, i) => {
@@ -1147,8 +1163,20 @@ export default function Challenge01() {
                       )
                     })}
 
-                    {/* SM custom input */}
-                    <SMAgreementInput topicId={topic.id} onAdd={(text) => addAgreement(topic.id, text, "sm")} />
+                  </div>
+
+                  {/* ACUERDO FINAL — síntesis del SM (lo que de verdad evalúa) */}
+                  <div>
+                    <div style={{ fontSize: 10, fontWeight: 800, color: "#0891b2", letterSpacing: 1, marginBottom: 6, textTransform: "uppercase" }}>
+                      ✍️ Acuerdo final — redactalo vos
+                    </div>
+                    <textarea
+                      value={agreementSynthesis[topic.id] || ""}
+                      onChange={e => setAgreementSynthesis(p => ({ ...p, [topic.id]: e.target.value }))}
+                      rows={3}
+                      placeholder="Escribí el acuerdo final en tus palabras. Combiná lo que sirve, descartá lo que no y resolvé las contradicciones."
+                      style={{ width: "100%", padding: 10, borderRadius: 8, border: `1.5px solid ${(agreementSynthesis[topic.id] || "").trim().length >= 12 ? "rgba(0,212,170,0.55)" : "#d1d5db"}`, fontSize: 12.5, fontFamily: "inherit", resize: "none", outline: "none", boxSizing: "border-box", color: "#0f172a", background: "#ffffff", lineHeight: 1.4 }}
+                    />
                   </div>
 
                   {/* TEAM SUGGESTIONS (chips clickeables) */}
@@ -1163,7 +1191,7 @@ export default function Challenge01() {
                           return (
                             <button
                               key={i}
-                              onClick={() => addAgreement(topic.id, s.text, s.from)}
+                              onClick={() => addAgreement(topic.id, s.text, s.from, s.bad)}
                               style={{
                                 display: "flex",
                                 alignItems: "flex-start",
@@ -1204,7 +1232,7 @@ export default function Challenge01() {
             </button>
           ) : (
             <div style={{ textAlign: "center", fontSize: 13, color: T.dim, padding: 12, background: "rgba(15,23,42,0.03)", borderRadius: 8 }}>
-              Necesitás al menos 1 acuerdo por categoría para continuar al Planning ({topicsWithAgreements.length}/{TEAM_AGREEMENT_TOPICS.length}).
+              Redactá el acuerdo final de cada categoría para continuar ({synthDone.length}/{TEAM_AGREEMENT_TOPICS.length}).
             </div>
           )}
         </div>
@@ -1272,7 +1300,7 @@ export default function Challenge01() {
 
             <div style={{ padding: 14, background: "rgba(0,212,170,0.05)", borderLeft: "3px solid #00d4aa", borderRadius: 8 }}>
               <div style={{ fontSize: 12, color: T.text, lineHeight: 1.5 }}>
-                <strong style={{ color: "#059669" }}>📌 Recordá:</strong> los <strong>{TEAM_AGREEMENT_TOPICS.reduce((s, t) => s + (teamAgreements[t.id] || []).length, 0)} acuerdos</strong> que cerraste en Parte 1 están vigentes. Si Nacho habla en horas pero acordaste "story points", es tu chance de coachear.
+                <strong style={{ color: "#059669" }}>📌 Recordá:</strong> los <strong>{TEAM_AGREEMENT_TOPICS.filter(t => (agreementSynthesis[t.id] || "").trim()).length} acuerdos</strong> que redactaste en Parte 1 están vigentes. Si Nacho habla en horas pero acordaste "story points", es tu chance de coachear.
               </div>
             </div>
           </div>
@@ -1313,49 +1341,227 @@ export default function Challenge01() {
     >
       <TopBar
         title="📊 Estimación & Priorización"
-        subtitle={`Parte 2 · Planning Session · ${Object.keys(toolExplanations).length}/6 tools · ${Object.keys(estimated).length}/4 PBIs estimados`}
         currentStep={currentStep}
         totalSteps={totalSteps}
         timer={{ display: `${mm}:${ss}`, warning: timer < 300 }}
       />
 
       <div style={{ flex: 1, display: "flex", overflow: "hidden" }}>
-        {/* LEFT PANEL */}
-        <div style={{ width: 238, background: T.bg, borderRight: `1px solid ${T.border}`, display: "flex", flexDirection: "column", flexShrink: 0 }}>
-          <div style={{ padding: "8px 7px", borderBottom: `1px solid ${T.border}` }}>
-            {TEAM.map(m => {
-              const bbl = bubbles[m.id]
-              const isTarget = replyTarget === m.id
-              return (
-                <div key={m.id} style={{ position: "relative", marginBottom: 1 }}>
-                  <div
-                    onClick={() => setReplyTarget(replyTarget === m.id ? null : m.id)}
-                    style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 10px", borderRadius: 13, cursor: "pointer", background: isTarget ? `${m.color}18` : "transparent", border: `2px solid ${isTarget ? m.color : "transparent"}`, transition: "all 0.15s" }}
+        {/* LEFT: TEAM CHAT */}
+        <div style={{ width: 340, background: T.bg, borderRight: `1px solid ${T.border}`, display: "flex", flexDirection: "column", flexShrink: 0 }}>
+          <div style={{ padding: "10px 12px", borderBottom: `1px solid ${T.border}` }}>
+            <div style={{ fontSize: 13, fontWeight: 800, color: T.text, marginBottom: 8 }}>💬 Equipo Setlist</div>
+            <div style={{ display: "flex", gap: 7 }}>
+              {TEAM.map(m => {
+                const isTarget = replyTarget === m.id
+                return (
+                  <button
+                    key={m.id}
+                    onClick={() => setReplyTarget(isTarget ? null : m.id)}
+                    title={`Hablarle a ${m.name.split(" ")[0]}`}
+                    style={{ position: "relative", padding: 0, border: `2px solid ${isTarget ? m.color : "transparent"}`, borderRadius: "50%", background: "transparent", cursor: "pointer", lineHeight: 0 }}
                   >
-                    <Avatar member={m} size={42} />
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: 14, fontWeight: 700, color: isTarget ? m.color : T.text }}>{m.name.split(" ")[0]}</div>
-                      <div style={{ fontSize: 10, color: T.dim }}>{m.role}</div>
-                    </div>
-                    <span style={{ fontSize: 22, flexShrink: 0 }}>{moods[m.id]}</span>
+                    <Avatar member={m} size={34} />
+                    <span style={{ position: "absolute", bottom: -3, right: -3, fontSize: 12 }}>{moods[m.id]}</span>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          <div ref={chatFeedRef} style={{ flex: 1, overflowY: "auto", padding: 12, display: "flex", flexDirection: "column", gap: 9 }}>
+            {chat.length === 0 && (
+              <div style={{ fontSize: 12, color: T.dim, fontStyle: "italic", textAlign: "center", marginTop: 20, lineHeight: 1.5 }}>
+                El equipo va a ir tirando dudas. Respondé acá y sacá las herramientas de la derecha cuando lo creas necesario.
+              </div>
+            )}
+            {chat.map((c, i) => {
+              if (c.narration) return <div key={i} style={{ fontSize: 12, fontStyle: "italic", color: T.teal, lineHeight: 1.45 }}>{c.text}</div>
+              if (c.isYou) return (
+                <div key={i} style={{ alignSelf: "flex-end", maxWidth: "88%" }}>
+                  <div style={{ fontSize: 10, color: T.dim, textAlign: "right", marginBottom: 2 }}>Vos (SM){c.targetName ? ` → ${c.targetName.split(" ")[0]}` : ""}</div>
+                  <div style={{ background: T.tealDim, border: `1px solid ${T.teal}40`, color: T.text, fontSize: 13, lineHeight: 1.4, padding: "8px 10px", borderRadius: 10 }}>{c.text}</div>
+                </div>
+              )
+              const m = MEMBER_MAP[c.from]
+              if (!m) return null
+              return (
+                <div key={i} onClick={() => setReplyTarget(c.from)} style={{ display: "flex", gap: 8, cursor: "pointer", maxWidth: "92%" }}>
+                  <Avatar member={m} size={26} />
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: m.color, marginBottom: 2 }}>{m.name.split(" ")[0]}</div>
+                    <div style={{ fontSize: 13, color: T.text, lineHeight: 1.4, background: T.panel, padding: "7px 9px", borderRadius: 10, border: `1px solid ${T.border}` }}>{c.text}</div>
                   </div>
-                  {bbl && (
-                    <div style={{ position: "absolute", left: "105%", top: "50%", transform: "translateY(-50%)", padding: "12px 16px", borderRadius: 16, borderTopLeftRadius: 6, background: "#fff", color: "#333", fontSize: 14, lineHeight: 1.5, boxShadow: "0 6px 24px rgba(0,0,0,0.15)", border: `2px solid ${m.color}40`, zIndex: 50, maxWidth: 360 }}>
-                      <span style={{ fontWeight: 700, color: m.color, fontSize: 12, marginRight: 6 }}>{m.name.split(" ")[0]}:</span>
-                      <span>{bbl}</span>
-                    </div>
-                  )}
                 </div>
               )
             })}
+            {loading && <div style={{ fontSize: 12, fontStyle: "italic", color: T.dim }}>El equipo está procesando…</div>}
           </div>
 
+          <div style={{ borderTop: `1px solid ${T.border}`, padding: 10 }}>
+            {replyTarget && (
+              <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 6, background: `${MEMBER_MAP[replyTarget]?.color}15`, padding: "5px 9px", borderRadius: 9 }}>
+                <Avatar member={MEMBER_MAP[replyTarget]} size={22} />
+                <span style={{ fontSize: 12, color: MEMBER_MAP[replyTarget]?.color, fontWeight: 700 }}>→ {MEMBER_MAP[replyTarget]?.name.split(" ")[0]}</span>
+                <button onClick={() => setReplyTarget(null)} style={{ marginLeft: "auto", background: "none", border: "none", color: T.dim, cursor: "pointer", fontSize: 14 }}>✕</button>
+              </div>
+            )}
+            <div style={{ display: "flex", gap: 8, alignItems: "flex-end" }}>
+              <textarea
+                value={smInput}
+                onChange={e => setSmInput(e.target.value)}
+                onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey && smInput.trim() && !loading) { e.preventDefault(); const msg = smInput; const target = replyTarget; setSmInput(""); setReplyTarget(null); handleSMMessage(msg, target) } }}
+                disabled={loading}
+                rows={2}
+                placeholder={loading ? "Procesando..." : (replyTarget ? `Respondele a ${MEMBER_MAP[replyTarget]?.name.split(" ")[0]}...` : "Hablale al equipo...")}
+                style={{ flex: 1, padding: "9px 11px", borderRadius: 10, border: `1px solid ${T.border}`, background: T.panel, color: T.text, fontSize: 14, fontFamily: "inherit", outline: "none", resize: "none", boxSizing: "border-box" }}
+              />
+              <button
+                onClick={() => { if (!smInput.trim() || loading) return; const msg = smInput; const target = replyTarget; setSmInput(""); setReplyTarget(null); handleSMMessage(msg, target) }}
+                disabled={!smInput.trim() || loading}
+                style={{ padding: "0 14px", height: 40, borderRadius: 10, border: "none", background: smInput.trim() && !loading ? T.teal : T.panel, color: "#000", fontWeight: 800, fontSize: 15, cursor: smInput.trim() && !loading ? "pointer" : "not-allowed" }}
+              >
+                Enviar
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* WHITEBOARD */}
+        <div
+          ref={boardRef}
+          style={{ flex: 1, position: "relative", overflow: "hidden", background: "#ffffff", backgroundImage: "radial-gradient(circle, rgba(15,23,42,0.04) 1px, transparent 1px)", backgroundSize: "24px 24px" }}
+        >
+          {/* Progress chip arriba del whiteboard */}
+          <div style={{ position: "absolute", top: 12, left: 12, zIndex: 30, padding: "6px 12px", background: "rgba(255,255,255,0.95)", border: "1px solid rgba(15,23,42,0.10)", borderRadius: 20, fontSize: 11, fontWeight: 700, color: "#475569", boxShadow: "0 2px 8px rgba(15,23,42,0.05)", display: "flex", alignItems: "center", gap: 8 }}>
+            <span>🛠️ {Object.keys(toolExplanations).length}/6 tools</span>
+            <span style={{ color: "#cbd5e1" }}>·</span>
+            <span>🃏 {Object.keys(estimated).length}/{POKER_STORIES.length} historias</span>
+            {(Object.keys(toolExplanations).length >= 3 || Object.keys(estimated).length >= 2) && (
+              <>
+                <span style={{ color: "#cbd5e1" }}>·</span>
+                <span style={{ color: "#059669" }}>✓ Listo para cerrar</span>
+              </>
+            )}
+          </div>
+          {boardItems.map(item => (
+            <div key={item.id} onMouseDown={e => item.type !== "challenge" && onItemDrag(item.id, e)} style={{ position: "absolute", left: item.x, top: item.y, cursor: item.type === "challenge" ? "default" : "grab", zIndex: 20, transform: "translate(-50%,-50%)" }}>
+              {item.type === "postit" && (
+                <div style={{ width: 210, minHeight: 133, background: T.sY, borderRadius: 4, padding: 17, boxShadow: "4px 6px 20px rgba(0,0,0,0.12)", borderBottom: "4px solid #f0e68c", position: "relative" }}>
+                  <button onClick={e => { e.stopPropagation(); removeItem(item.id) }} style={{ position: "absolute", top: 4, right: 7, background: "none", border: "none", color: "#ccc", cursor: "pointer", fontSize: 17 }}>✕</button>
+                  <textarea defaultValue={item.text} onBlur={e => setBoardItems(p => p.map(i => i.id === item.id ? { ...i, text: e.target.value } : i))} style={{ width: "100%", height: 98, background: "transparent", border: "none", color: "#555", fontSize: 16, fontFamily: "inherit", resize: "none", outline: "none", lineHeight: 1.4 }} placeholder="Escribí tu nota..." />
+                </div>
+              )}
+              {item.type === "textbox" && (
+                <div style={{ width: 336, minHeight: 98, background: "#fff", borderRadius: 12, padding: 17, boxShadow: "3px 4px 20px rgba(0,0,0,0.1)", border: "1px solid #e0e0e0", position: "relative" }}>
+                  <button onClick={e => { e.stopPropagation(); removeItem(item.id) }} style={{ position: "absolute", top: 4, right: 7, background: "none", border: "none", color: "#ccc", cursor: "pointer", fontSize: 17 }}>✕</button>
+                  <textarea defaultValue={item.text} onBlur={e => setBoardItems(p => p.map(i => i.id === item.id ? { ...i, text: e.target.value } : i))} style={{ width: "100%", height: 77, background: "transparent", border: "none", color: "#333", fontSize: 16, fontFamily: "inherit", resize: "none", outline: "none", lineHeight: 1.5 }} placeholder="Escribí lo que quieras explicar..." />
+                </div>
+              )}
+              {item.type === "challenge" && (
+                <div style={{ background: "#fff", borderRadius: 16, boxShadow: "3px 6px 28px rgba(0,0,0,0.15)", border: "1px solid #e8e8e8", overflow: "hidden", position: "relative" }}>
+                  <div
+                    onMouseDown={e => onItemDrag(item.id, e)}
+                    style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 7, padding: "5px 0", background: "#f1f5f9", borderBottom: "1px solid #e8e8e8", cursor: "grab" }}
+                  >
+                    <span style={{ fontSize: 13, color: "#94a3b8", letterSpacing: 2, lineHeight: 1 }}>⠿</span>
+                    <span style={{ fontSize: 10, fontWeight: 700, color: "#94a3b8", letterSpacing: 0.5 }}>mover</span>
+                  </div>
+                  <button onClick={e => { e.stopPropagation(); removeItem(item.id) }} style={{ position: "absolute", top: 4, right: 8, background: "none", border: "none", color: "#bbb", cursor: "pointer", fontSize: 17, zIndex: 5 }}>✕</button>
+                  {item.toolId === "poker5" && <PokerStepsTool onComplete={data => onToolComplete("poker5", data)} />}
+                  {item.toolId === "fib" && <FibonacciTool onComplete={data => onToolComplete("fib", data)} />}
+                  {item.toolId === "relabs" && <RelAbsTool onComplete={data => onToolComplete("relabs", data)} />}
+                  {item.toolId === "kano" && <KanoTool onComplete={data => onToolComplete("kano", data)} />}
+                  {item.toolId === "moscow" && <MoscowTool onComplete={data => onToolComplete("moscow", data)} />}
+                  {item.toolId === "tshirt" && <TshirtTool onComplete={data => onToolComplete("tshirt", data)} />}
+                </div>
+              )}
+            </div>
+          ))}
+
+          {/* Planning Poker Modal */}
+          {pokerActive && (() => {
+            const story = POKER_STORIES[pokerIdx]
+            if (!story) return null
+            return (
+            <div style={{ position: "absolute", left: "50%", top: "50%", transform: "translate(-50%,-50%)", background: "#fff", borderRadius: 20, padding: 22, boxShadow: "0 12px 48px rgba(0,0,0,0.18)", border: `2px solid ${T.teal}40`, zIndex: 25, width: 520, maxHeight: "90%", overflowY: "auto" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 4 }}>
+                <span style={{ fontSize: 17, fontWeight: 800, color: T.teal }}>{story.pbi.id}: {story.pbi.title}</span>
+                <span style={{ fontSize: 13, color: "#999", background: "#f0f0f0", padding: "3px 11px", borderRadius: 7 }}>{pokerIdx + 1}/{POKER_STORIES.length}</span>
+              </div>
+              <div style={{ fontSize: 12, color: "#64748b", marginBottom: 12, lineHeight: 1.4 }}>{story.pbi.desc}</div>
+
+              <div style={{ display: "flex", justifyContent: "center", gap: 12, marginBottom: 14 }}>
+                {Object.entries(story.votes).map(([mid, val]) => {
+                  const m = MEMBER_MAP[mid]
+                  return (
+                    <div key={mid} style={{ textAlign: "center" }}>
+                      <div style={{ width: 54, height: 72, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", background: revealed ? "#fff" : m.color + "15", border: `3px solid ${revealed ? m.color : m.color + "35"}`, fontSize: revealed ? 26 : 20, fontWeight: 900, color: revealed ? m.color : m.color + "50", transition: "all 0.5s" }}>
+                        {revealed ? val : "?"}
+                      </div>
+                      <div style={{ fontSize: 11, color: "#888", marginTop: 4 }}>{m.name.split(" ")[0]}</div>
+                    </div>
+                  )
+                })}
+              </div>
+
+              {!revealed ? (
+                <div style={{ textAlign: "center" }}>
+                  <button onClick={revealCards} style={{ padding: "12px 36px", background: T.teal, color: "#000", border: "none", borderRadius: 12, fontWeight: 800, fontSize: 16, cursor: "pointer" }}>🃏 REVELAR CARTAS</button>
+                </div>
+              ) : (
+                <>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: "#0f172a", marginBottom: 6 }}>Después de facilitar, ¿con qué número queda?</div>
+                  <div style={{ display: "flex", justifyContent: "center", gap: 7, marginBottom: 12, flexWrap: "wrap" }}>
+                    {FIBONACCI.map(n => {
+                      const sel = pokerFinal === n
+                      return (
+                        <button key={n} onClick={() => setPokerFinal(n)} style={{ width: 44, height: 44, borderRadius: 8, border: `2px solid ${sel ? T.teal : "#e2e8f0"}`, background: sel ? T.teal : "#f8fafc", color: sel ? "#fff" : "#334155", fontWeight: 800, fontSize: 18, cursor: "pointer", fontFamily: "inherit" }}>
+                          {n}
+                        </button>
+                      )
+                    })}
+                  </div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: "#0f172a", marginBottom: 6 }}>¿Por qué este número final?</div>
+                  <textarea
+                    value={pokerJustif}
+                    onChange={e => setPokerJustif(e.target.value)}
+                    rows={2}
+                    placeholder="Explicá tu decisión: ¿qué hiciste con el desacuerdo / el sesgo que apareció?"
+                    style={{ width: "100%", padding: 10, borderRadius: 8, border: "1.5px solid #d1d5db", fontSize: 13, fontFamily: "inherit", resize: "none", outline: "none", boxSizing: "border-box", color: "#0f172a", background: "#fff", lineHeight: 1.4 }}
+                  />
+                  <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 10 }}>
+                    <button
+                      onClick={() => pokerFinal && pokerJustif.trim() && !loading && confirmPts(pokerFinal, pokerJustif.trim())}
+                      disabled={!pokerFinal || !pokerJustif.trim() || loading}
+                      style={{ padding: "9px 20px", borderRadius: 8, border: "none", background: pokerFinal && pokerJustif.trim() && !loading ? T.teal : "#e5e7eb", color: pokerFinal && pokerJustif.trim() && !loading ? "#000" : "#9ca3af", fontWeight: 800, fontSize: 14, cursor: pokerFinal && pokerJustif.trim() && !loading ? "pointer" : "not-allowed", fontFamily: "inherit" }}
+                    >
+                      {loading ? "Procesando..." : (pokerIdx >= POKER_STORIES.length - 1 ? "Cerrar estimación →" : "Confirmar y seguir →")}
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+            )
+          })()}
+
+          {boardItems.length === 0 && !pokerActive && (
+            <div style={{ position: "absolute", left: "50%", top: "50%", transform: "translate(-50%,-50%)", textAlign: "center", pointerEvents: "none" }}>
+              <div style={{ fontSize: 58, marginBottom: 14, opacity: 0.2 }}>🧰</div>
+              <div style={{ fontSize: 18, color: "#aaa" }}>Hablale al equipo desde el chat de la izquierda</div>
+              <div style={{ fontSize: 14, color: "#ccc", marginTop: 6 }}>y sacá las herramientas de la derecha cuando lo creas necesario</div>
+            </div>
+          )}
+        </div>
+
+        {/* RIGHT: TOOLS */}
+        <div style={{ width: 210, background: T.bg, borderLeft: `1px solid ${T.border}`, display: "flex", flexDirection: "column", flexShrink: 0 }}>
           <div style={{ flex: 1, overflowY: "auto", padding: "10px 8px" }}>
             <div style={{ fontSize: 10, fontWeight: 700, color: T.dim, letterSpacing: 2, marginBottom: 6, textAlign: "center" }}>🧰 HERRAMIENTAS</div>
             {DOCK_ITEMS.map(item => {
               if (item.type === "divider") return <div key={item.id} style={{ height: 1, background: T.border, margin: "6px 0" }} />
               const done = item.type === "challenge" && toolExplanations[item.id]
-              const isPokerDisabled = item.id === "poker_start" && (pokerActive || Object.keys(estimated).length >= 4)
+              const isPokerDisabled = item.id === "poker_start" && (pokerActive || Object.keys(estimated).length >= POKER_STORIES.length)
               return (
                 <div
                   key={item.id}
@@ -1393,140 +1599,6 @@ export default function Challenge01() {
             )}
           </div>
         </div>
-
-        {/* WHITEBOARD */}
-        <div
-          ref={boardRef}
-          style={{ flex: 1, position: "relative", overflow: "hidden", background: "#ffffff", backgroundImage: "radial-gradient(circle, rgba(15,23,42,0.04) 1px, transparent 1px)", backgroundSize: "24px 24px" }}
-        >
-          {/* Progress chip arriba del whiteboard */}
-          <div style={{ position: "absolute", top: 12, left: 12, zIndex: 30, padding: "6px 12px", background: "rgba(255,255,255,0.95)", border: "1px solid rgba(15,23,42,0.10)", borderRadius: 20, fontSize: 11, fontWeight: 700, color: "#475569", boxShadow: "0 2px 8px rgba(15,23,42,0.05)", display: "flex", alignItems: "center", gap: 8 }}>
-            <span>🛠️ {Object.keys(toolExplanations).length}/6 tools</span>
-            <span style={{ color: "#cbd5e1" }}>·</span>
-            <span>🃏 {Object.keys(estimated).length}/4 PBIs</span>
-            {(Object.keys(toolExplanations).length >= 3 || Object.keys(estimated).length >= 2) && (
-              <>
-                <span style={{ color: "#cbd5e1" }}>·</span>
-                <span style={{ color: "#059669" }}>✓ Listo para cerrar</span>
-              </>
-            )}
-          </div>
-          {boardItems.map(item => (
-            <div key={item.id} onMouseDown={e => item.type !== "challenge" && onItemDrag(item.id, e)} style={{ position: "absolute", left: item.x, top: item.y, cursor: item.type === "challenge" ? "default" : "grab", zIndex: 20, transform: "translate(-50%,-50%)" }}>
-              {item.type === "postit" && (
-                <div style={{ width: 210, minHeight: 133, background: T.sY, borderRadius: 4, padding: 17, boxShadow: "4px 6px 20px rgba(0,0,0,0.12)", borderBottom: "4px solid #f0e68c", position: "relative" }}>
-                  <button onClick={e => { e.stopPropagation(); removeItem(item.id) }} style={{ position: "absolute", top: 4, right: 7, background: "none", border: "none", color: "#ccc", cursor: "pointer", fontSize: 17 }}>✕</button>
-                  <textarea defaultValue={item.text} onBlur={e => setBoardItems(p => p.map(i => i.id === item.id ? { ...i, text: e.target.value } : i))} style={{ width: "100%", height: 98, background: "transparent", border: "none", color: "#555", fontSize: 16, fontFamily: "inherit", resize: "none", outline: "none", lineHeight: 1.4 }} placeholder="Escribí tu nota..." />
-                </div>
-              )}
-              {item.type === "textbox" && (
-                <div style={{ width: 336, minHeight: 98, background: "#fff", borderRadius: 12, padding: 17, boxShadow: "3px 4px 20px rgba(0,0,0,0.1)", border: "1px solid #e0e0e0", position: "relative" }}>
-                  <button onClick={e => { e.stopPropagation(); removeItem(item.id) }} style={{ position: "absolute", top: 4, right: 7, background: "none", border: "none", color: "#ccc", cursor: "pointer", fontSize: 17 }}>✕</button>
-                  <textarea defaultValue={item.text} onBlur={e => setBoardItems(p => p.map(i => i.id === item.id ? { ...i, text: e.target.value } : i))} style={{ width: "100%", height: 77, background: "transparent", border: "none", color: "#333", fontSize: 16, fontFamily: "inherit", resize: "none", outline: "none", lineHeight: 1.5 }} placeholder="Escribí lo que quieras explicar..." />
-                </div>
-              )}
-              {item.type === "challenge" && (
-                <div style={{ background: "#fff", borderRadius: 16, boxShadow: "3px 6px 28px rgba(0,0,0,0.15)", border: "1px solid #e8e8e8", overflow: "hidden", position: "relative" }}>
-                  <button onClick={e => { e.stopPropagation(); removeItem(item.id) }} style={{ position: "absolute", top: 6, right: 8, background: "none", border: "none", color: "#bbb", cursor: "pointer", fontSize: 17, zIndex: 5 }}>✕</button>
-                  {item.toolId === "poker5" && <PokerStepsTool onComplete={data => onToolComplete("poker5", data)} />}
-                  {item.toolId === "fib" && <FibonacciTool onComplete={data => onToolComplete("fib", data)} />}
-                  {item.toolId === "relabs" && <RelAbsTool onComplete={data => onToolComplete("relabs", data)} />}
-                  {item.toolId === "kano" && <KanoTool onComplete={data => onToolComplete("kano", data)} />}
-                  {item.toolId === "moscow" && <MoscowTool onComplete={data => onToolComplete("moscow", data)} />}
-                  {item.toolId === "tshirt" && <TshirtTool onComplete={data => onToolComplete("tshirt", data)} />}
-                </div>
-              )}
-            </div>
-          ))}
-
-          {/* Planning Poker Modal */}
-          {pokerActive && (
-            <div style={{ position: "absolute", left: "50%", top: "50%", transform: "translate(-50%,-50%)", background: "#fff", borderRadius: 20, padding: 24, boxShadow: "0 12px 48px rgba(0,0,0,0.18)", border: `2px solid ${T.teal}40`, zIndex: 25, minWidth: 504 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 14 }}>
-                <span style={{ fontSize: 17, fontWeight: 800, color: T.teal }}>{PBIS[pokerIdx]?.id}: {PBIS[pokerIdx]?.title}</span>
-                <span style={{ fontSize: 13, color: "#999", background: "#f0f0f0", padding: "3px 11px", borderRadius: 7 }}>{pokerIdx + 1}/4</span>
-              </div>
-              <div style={{ display: "flex", justifyContent: "center", gap: 14, marginBottom: 14 }}>
-                {Object.entries(POKER_VOTES[pokerIdx] || {}).map(([mid, val]) => {
-                  const m = MEMBER_MAP[mid]
-                  return (
-                    <div key={mid} style={{ textAlign: "center" }}>
-                      <div style={{ width: 60, height: 80, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", background: revealed ? "#fff" : m.color + "15", border: `3px solid ${revealed ? m.color : m.color + "35"}`, fontSize: revealed ? 28 : 22, fontWeight: 900, color: revealed ? m.color : m.color + "50", transition: "all 0.5s" }}>
-                        {revealed ? val : "?"}
-                      </div>
-                      <div style={{ fontSize: 11, color: "#888", marginTop: 4 }}>{m.name.split(" ")[0]}</div>
-                    </div>
-                  )
-                })}
-              </div>
-              {!revealed ? (
-                <div style={{ textAlign: "center" }}>
-                  <button onClick={revealCards} style={{ padding: "12px 36px", background: T.teal, color: "#000", border: "none", borderRadius: 12, fontWeight: 800, fontSize: 16, cursor: "pointer" }}>🃏 REVELAR</button>
-                </div>
-              ) : (
-                <>
-                  <div style={{ fontSize: 11, color: T.dim, textAlign: "center", marginBottom: 8 }}>Después de discusión, ¿con qué puntaje queda?</div>
-                  <div style={{ display: "flex", justifyContent: "center", gap: 7 }}>
-                    {FIBONACCI.map(n => (
-                      <button key={n} onClick={() => confirmPts(n)} style={{ width: 44, height: 44, borderRadius: 8, border: `1px solid ${T.teal}40`, background: "#f8f8f8", color: T.teal, fontWeight: 800, fontSize: 18, cursor: "pointer" }}>
-                        {n}
-                      </button>
-                    ))}
-                  </div>
-                </>
-              )}
-            </div>
-          )}
-
-          {boardItems.length === 0 && !pokerActive && (
-            <div style={{ position: "absolute", left: "50%", top: "50%", transform: "translate(-50%,-50%)", textAlign: "center", pointerEvents: "none" }}>
-              <div style={{ fontSize: 58, marginBottom: 14, opacity: 0.2 }}>🧰</div>
-              <div style={{ fontSize: 18, color: "#aaa" }}>Hablale al equipo desde el chat de abajo</div>
-              <div style={{ fontSize: 14, color: "#ccc", marginTop: 6 }}>O iniciá Planning Poker desde la izquierda</div>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* CHAT BAR (composer) */}
-      <div style={{ minHeight: 70, background: T.bg, borderTop: `1px solid ${T.border}`, display: "flex", alignItems: "center", padding: "12px 17px", gap: 11, flexShrink: 0 }}>
-        {replyTarget && (
-          <div style={{ display: "flex", alignItems: "center", gap: 7, background: `${MEMBER_MAP[replyTarget]?.color}15`, padding: "6px 11px", borderRadius: 11 }}>
-            <Avatar member={MEMBER_MAP[replyTarget]} size={28} />
-            <span style={{ fontSize: 13, color: MEMBER_MAP[replyTarget]?.color, fontWeight: 700 }}>→ {MEMBER_MAP[replyTarget]?.name.split(" ")[0]}</span>
-            <button onClick={() => setReplyTarget(null)} style={{ background: "none", border: "none", color: T.dim, cursor: "pointer", fontSize: 14 }}>✕</button>
-          </div>
-        )}
-        <input
-          value={smInput}
-          onChange={e => setSmInput(e.target.value)}
-          onKeyDown={e => {
-            if (e.key === "Enter" && !e.shiftKey && smInput.trim() && !loading) {
-              const msg = smInput
-              const target = replyTarget
-              setSmInput("")
-              setReplyTarget(null)
-              handleSMMessage(msg, target)
-            }
-          }}
-          disabled={loading}
-          placeholder={loading ? "El equipo está procesando..." : (replyTarget ? `Respondele a ${MEMBER_MAP[replyTarget]?.name.split(" ")[0]}...` : "Hablale al equipo... (Enter para enviar)")}
-          style={{ flex: 1, padding: "12px 18px", borderRadius: 12, border: `2px solid ${replyTarget ? MEMBER_MAP[replyTarget]?.color + "40" : T.border}`, background: T.panel, color: T.text, fontSize: 15, fontFamily: "inherit", outline: "none" }}
-        />
-        <button
-          onClick={() => {
-            if (!smInput.trim() || loading) return
-            const msg = smInput
-            const target = replyTarget
-            setSmInput("")
-            setReplyTarget(null)
-            handleSMMessage(msg, target)
-          }}
-          disabled={!smInput.trim() || loading}
-          style={{ padding: "10px 22px", borderRadius: 12, border: "none", background: smInput.trim() && !loading ? T.teal : T.panel, color: "#000", fontWeight: 800, fontSize: 16, cursor: smInput.trim() && !loading ? "pointer" : "not-allowed" }}
-        >
-          Enviar
-        </button>
       </div>
 
       {dragging && (

@@ -25,6 +25,8 @@ export const TEAM_AGREEMENT_TOPICS = [
       { from: "alan", text: "Horario fijo 10-18hs. Después no respondo." },
       { from: "gabriela", text: "Si es urgente, llamada directa." },
       { from: "gian", text: "Todo lo no-urgente al daily, no Slack." },
+      { from: "gabriela", text: "Reunión diaria de 1 hora para alinear todo entre todos.", bad: true },
+      { from: "david", text: "Que todo pase por mail formal, así queda registro de todo.", bad: true },
     ]
   },
   {
@@ -39,6 +41,7 @@ export const TEAM_AGREEMENT_TOPICS = [
       { from: "david", text: "Dependencias externas identificadas." },
       { from: "alan", text: "Mockup/wireframe si es UI." },
       { from: "gabriela", text: "Aprobado por PO sin scope creep oculto." },
+      { from: "gabriela", text: "El PO decide solo si algo está listo, sin pasar por el equipo.", bad: true },
     ]
   },
   {
@@ -53,6 +56,7 @@ export const TEAM_AGREEMENT_TOPICS = [
       { from: "gian", text: "Voto secreto Planning Poker, después discusión." },
       { from: "alan", text: "Si hay desacuerdo grande, los extremos explican primero." },
       { from: "david", text: "El estimado lo da quien vaya a hacer la tarea." },
+      { from: "gabriela", text: "Que el más senior decida la estimación, total sabe más que el resto.", bad: true },
     ]
   }
 ]
@@ -81,13 +85,55 @@ export const EVENTS = [
   { id: "e4", poker: 2, from: "david", text: "Le sumo un par de puntos extra porque integrando con Spotify se complica.", tip: "Estima contexto personal, no complejidad", delay: 3000 },
 ]
 
+// ─── PLANNING POKER STORIES (3 historias = 3 trampas distintas) ───
+// Cada una mete UN sesgo clásico. El SM tiene que detectarlo, facilitar la
+// conversación precargada (discussion) y RE-ESTIMAR justificando por qué.
+// La justificación es lo que de verdad discrimina seniority.
+export const POKER_STORIES = [
+  {
+    pbi: PBIS.find(p => p.id === "SL-101"),
+    scenario: "Anclaje",
+    scenarioHint: "Alguien copia el voto de otro en vez de pensar por sí mismo. ¿Lo notás?",
+    votes: { eric: 5, david: 8, gian: 8, nacho: 8, alan: 5 },
+    discussion: [
+      { from: "alan", text: "Yo pongo lo mismo que Eric, él sabe más que yo de esto." },
+      { from: "gian", text: "Para mí es un toque más: hay validaciones de fecha y lugar que no son triviales." },
+    ],
+  },
+  {
+    pbi: PBIS.find(p => p.id === "SL-103"),
+    scenario: "Puntos vs tiempo",
+    scenarioHint: "Un voto está estimado en días, no en complejidad relativa. ¿Lo corregís?",
+    votes: { eric: 3, david: 3, gian: 5, nacho: 13, alan: 3 },
+    discussion: [
+      { from: "nacho", text: "Puse 13 porque me llevaría unos 13 días más o menos terminarlo." },
+      { from: "david", text: "Pero el link en sí es simple: generás un token único y poco más, ¿no?" },
+    ],
+  },
+  {
+    pbi: PBIS.find(p => p.id === "SL-105"),
+    scenario: "Complejidad oculta",
+    scenarioHint: "Spread enorme: alguien ve un riesgo que otros no. No promedies — sacá el porqué.",
+    votes: { eric: 3, david: 13, gian: 13, nacho: 21, alan: 5 },
+    discussion: [
+      { from: "eric", text: "Yo ya integré Spotify antes, no le veo drama. Hay SDK oficial." },
+      { from: "david", text: "Le metí varios puntos: si Spotify rate-limita o cambia la API, se cae todo el flujo de sugerir." },
+      { from: "nacho", text: "Nunca toqué una API externa. No sé manejar el cache ni el rate limit, lo siento enorme." },
+    ],
+  },
+]
+
 // ─── PROACTIVE TEAM QUESTIONS (fire at intervals) ───
+// Cada comentario del equipo "gatilla" una herramienta del dock: cuando se
+// dispara, el dock resalta el tool que el SM debería sacar para responder.
+// triggersTool = id del DOCK_ITEM correspondiente.
 export const TEAM_QUESTIONS = [
-  { id: "q1", from: "nacho", text: "¿Qué son los story points? No entiendo la diferencia con horas.", delay: 8000, mood: "🤔" },
-  { id: "q2", from: "gabriela", text: "¿Podemos empezar a estimar? Necesito saber cuánto entra en el sprint.", delay: 20000 },
-  { id: "q3", from: "alan", text: "¿Y si no estamos de acuerdo en la estimación qué hacemos?", delay: 35000 },
-  { id: "q4", from: "eric", text: "¿Vamos a usar algún framework para priorizar o decidimos a dedo?", delay: 55000, mood: "🤨" },
-  { id: "q5", from: "gian", text: "¿Cómo definimos qué es más importante? ¿Valor de negocio o complejidad técnica?", delay: 70000 },
+  { id: "q1", from: "nacho", text: "Che, ¿qué son los story points? No entiendo la diferencia con estimar en horas.", delay: 8000, mood: "🤔", triggersTool: "relabs" },
+  { id: "q2", from: "alan", text: "¿Y la secuencia esa rara —1, 2, 3, 5, 8, 13—? ¿Por qué no usamos 1, 2, 3, 4, 5 que es más simple?", delay: 24000, mood: "🤔", triggersTool: "fib" },
+  { id: "q3", from: "gian", text: "¿Y cómo arrancamos a votar con cartas? Nunca hicimos Planning Poker juntos.", delay: 42000, triggersTool: "poker5" },
+  { id: "q4", from: "alan", text: "¿Y si votamos distinto y no nos ponemos de acuerdo en la estimación?", delay: 60000, triggersTool: "tshirt" },
+  { id: "q5", from: "eric", text: "¿Vamos a usar algún framework para priorizar el backlog, o lo decidimos a dedo?", delay: 80000, mood: "🤨", triggersTool: "moscow" },
+  { id: "q6", from: "gian", text: "¿Y cómo definimos qué es más importante? ¿Valor para el usuario o complejidad técnica?", delay: 98000, triggersTool: "kano" },
 ]
 
 // ─── DOCK TOOLS (estaciones de coaching: el SM las usa + las explica) ───

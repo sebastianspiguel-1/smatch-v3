@@ -283,7 +283,7 @@ IMPORTANTE: NO incluyas el campo "quality" ni "feedback". El candidato NUNCA deb
 // Reemplaza el flujo MOMENTS scripted. Evalúa la facilitación de la retro
 // con criterios reales: facilitación, seguridad psicológica, pensamiento sistémico, diseño de procesos.
 // ai_fluency se mide post-challenge.
-export function buildRetroFacilitationPrompt(teamDesc, boardSummary, formatName, smAction, chatContext, candidateContext = "") {
+export function buildRetroFacilitationPrompt(teamDesc, boardSummary, formatName, smAction, chatContext, candidateContext = "", hiddenTensions = [], revealedIds = []) {
   const chatText = chatContext.map(m =>
     m.from === 'narration' ? `[Narración: ${m.text}]` : `[${m.from}: ${m.text}]`
   ).join('\n')
@@ -291,6 +291,15 @@ export function buildRetroFacilitationPrompt(teamDesc, boardSummary, formatName,
   const actionDescription = smAction.target
     ? `Le dijo a ${smAction.target}: "${smAction.message}"`
     : `Dijo al equipo: "${smAction.message}"`
+
+  const pending = hiddenTensions.filter(t => !revealedIds.includes(t.id))
+  const tensionsBlock = pending.length
+    ? `\n═══ TENSIONES LATENTES (lo no dicho — NO están en el tablero) ═══
+Hay cosas que el equipo NO dijo en voz alta. SOLO emergen si el SM facilita lo suficientemente bien para sacarlas. Pendientes:
+${pending.map(t => `- [${t.id}] ${t.from}: lo no dicho = "${t.text}"\n   Emerge cuando: ${t.hint}`).join('\n')}
+
+Si la acción del SM GENUINAMENTE saca una de estas (le preguntó a la persona correcta, con la apertura y seguridad correctas), incluí "revealedTension": "<id>" y hacé que ESE miembro lo diga en "reactions" con sus propias palabras (alineado al texto, no calcado). Si el SM no se lo ganó (fue genérico, acusó, o no tocó a esa persona), devolvé "revealedTension": null. NUNCA reveles por lástima ni con una pregunta vaga. Como mucho 1 revelación por turno.\n`
+    : `\n(Todas las tensiones latentes ya se revelaron. Devolvé "revealedTension": null.)\n`
 
   return `Sos el director de escena del Equipo Setlist en Sprint 1, Día 10/10 (retrospectiva de cierre) para el assessment SMatch. Es la primera retro del equipo. Entregaron 22 de 29 pts. Hay tensiones que nadie nombra: Nacho entregó tarde sin avisar, Alan cubrió en silencio, Gian reportó un bug que fue ignorado, Eric está callado, Gabriela celebra. Hay deuda de documentación que generó carry-over.
 
@@ -309,7 +318,7 @@ ${teamDesc}
 
 TABLERO DE RETRO (stickies actuales):
 ${boardSummary}
-
+${tensionsBlock}
 CHAT RECIENTE (últimos turnos):
 ${chatText}
 
@@ -376,6 +385,7 @@ Respondé SOLO con JSON (sin markdown):
     "process": 1-4
   },
   "reactions": [{"from": "eric|david|alan|gian|gabriela|nacho", "text": "respuesta realista"}],
+  "revealedTension": null,
   "newStickies": []
 }
 
