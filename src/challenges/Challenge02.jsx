@@ -321,7 +321,7 @@ export default function Challenge02() {
           totalSteps={totalSteps}
           backButton={{ label: "← Volver", onClick: () => nav("/challenges") }}
         />
-        <div style={{ maxWidth: 700, margin: "0 auto", padding: "40px 24px" }}>
+        <div style={{ maxWidth: 1100, margin: "0 auto", padding: "40px 24px" }}>
           <div style={{ textAlign: "center", marginBottom: 40 }}>
             <div style={{ fontSize: 13, fontWeight: 900, letterSpacing: 4, color: "#ff8a80", marginBottom: 12, opacity: 0.9 }}>SMATCH · CHALLENGE 02</div>
             <h1 style={{ fontSize: 42, fontWeight: 900, margin: "0 0 12px 0", background: "linear-gradient(135deg, #ff8a80, #fa8072)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", lineHeight: 1.2 }}>
@@ -361,7 +361,7 @@ export default function Challenge02() {
           </div>
 
           <div style={{ marginBottom: 32 }}>
-            <TeamPanel title="Equipo Setlist" showStakeholder={false} />
+            <TeamPanel strip showStakeholder={true} />
           </div>
 
           <button onClick={startDashboard} style={{ width: "100%", padding: "20px 0", background: "linear-gradient(135deg, #ff8a80, #fa8072)", color: "#ffffff", fontWeight: 900, fontSize: 16, border: "2px solid rgba(255, 138, 128, 0.8)", borderRadius: 12, cursor: "pointer", letterSpacing: 1.5, textTransform: "uppercase" }}>

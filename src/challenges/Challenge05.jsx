@@ -538,7 +538,7 @@ export default function Challenge05() {
           </div>
 
           <div className="team-section">
-            <TeamPanel title="Equipo Setlist" showStakeholder={false} compact />
+            <TeamPanel strip showStakeholder={true} />
           </div>
 
           <div className="signals-section">

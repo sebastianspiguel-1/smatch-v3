@@ -980,7 +980,7 @@ export default function Challenge01() {
         totalSteps={totalSteps}
         backButton={{ label: "← Volver a challenges", onClick: () => nav("/challenges") }}
       />
-      <div style={{ maxWidth: 920, margin: "0 auto", padding: "34px 22px" }}>
+      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "34px 24px" }}>
         <div style={{ textAlign: "center", marginBottom: 28 }}>
           <div style={{ fontSize: 14, fontWeight: 700, letterSpacing: 3, color: T.teal }}>SMATCH · CHALLENGE 01</div>
           <div style={{ fontSize: 31, fontWeight: 800, marginTop: 8 }}>Día 1 · Kickoff & Planning</div>
@@ -995,19 +995,6 @@ export default function Challenge01() {
           </div>
         </div>
 
-        {/* PRODUCTO + SPRINT GOAL */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 16 }}>
-          <div style={{ background: T.panel, borderRadius: 12, padding: 18, border: `1px solid ${T.border}` }}>
-            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: "#60a5fa", marginBottom: 8 }}>🎸 EL PRODUCTO</div>
-            <div style={{ fontSize: 14, color: T.text, fontWeight: 700, marginBottom: 4 }}>Setlist</div>
-            <div style={{ fontSize: 13, color: T.sub, lineHeight: 1.5 }}>App colaborativa: las <strong>bandas</strong> crean shows y los <strong>fans</strong> votan qué canciones se tocan. La banda interpreta el setlist más votado, sin veto.</div>
-          </div>
-          <div style={{ background: T.panel, borderRadius: 12, padding: 18, border: `1px solid ${T.border}` }}>
-            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: "#f59e0b", marginBottom: 8 }}>🎯 SPRINT GOAL</div>
-            <div style={{ fontSize: 14, color: T.text, fontWeight: 700, marginBottom: 4 }}>MVP funcional para el show piloto</div>
-            <div style={{ fontSize: 13, color: T.sub, lineHeight: 1.5 }}>Mateo (CEO) cerró un <strong>show real público</strong> con la banda piloto en <strong>4 semanas</strong>. La app va a estar en escena frente a audience real. Si falla, falla en público.</div>
-          </div>
-        </div>
 
         {/* MÉTRICAS DEL SPRINT */}
         <div style={{ background: T.panel, borderRadius: 12, padding: 18, marginBottom: 16, border: `1px solid ${T.border}` }}>
@@ -1039,7 +1026,7 @@ export default function Challenge01() {
 
         {/* EQUIPO */}
         <div style={{ marginBottom: 16 }}>
-          <TeamPanel title="Equipo Setlist" showStakeholder={false} />
+          <TeamPanel strip showStakeholder={true} />
         </div>
 
         {/* DISCLAIMER de evaluación */}

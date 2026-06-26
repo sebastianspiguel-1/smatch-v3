@@ -171,13 +171,14 @@
 .challenge-journey {
   position: relative;
   min-height: 100vh;
-  background: #f0f4f8;
+  background: #e9eef5;
   color: #0f172a;
   font-family: 'Plus Jakarta Sans', 'Segoe UI', system-ui, sans-serif;
   overflow-x: hidden;
 }
 
-/* Animated Background (light theme gradients) */
+/* Fondo de 3 capas: dos blobs de marca (visibles) + dot-grid tech sutil.
+   Las cards blancas flotan sobre la base un punto más oscura. */
 .journey-bg {
   position: fixed;
   top: 0;
@@ -185,8 +186,10 @@
   right: 0;
   bottom: 0;
   background-image:
-    radial-gradient(circle at 20% 10%, rgba(0, 212, 170, 0.06), transparent 50%),
-    radial-gradient(circle at 80% 80%, rgba(5, 150, 105, 0.04), transparent 60%);
+    radial-gradient(circle at 12% 0%, rgba(0, 212, 170, 0.13), transparent 45%),
+    radial-gradient(circle at 92% 100%, rgba(37, 99, 235, 0.08), transparent 50%),
+    radial-gradient(rgba(15, 23, 42, 0.04) 1px, transparent 1px);
+  background-size: auto, auto, 24px 24px;
   pointer-events: none;
   z-index: 0;
 }
@@ -587,10 +590,10 @@
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 1;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
   display: flex;
   flex-direction: column;
-  min-height: 280px;
+  min-height: 210px;
 }
 
 /* ─── STATE: AVAILABLE (unlocked, not the "next") ─── */
@@ -1146,7 +1149,7 @@
   font-size: 13px;
   color: #475569;
   line-height: 1.55;
-  margin: 0;
+  margin: 0 0 16px 0;
   font-weight: 500;
 }
 
@@ -1154,6 +1157,7 @@
 .card-footer {
   display: flex;
   align-items: center;
+  margin-top: auto;
 }
 
 .coming-soon {
@@ -1759,4 +1763,173 @@
     padding: 20px 32px;
     font-size: 16px;
   }
+}
+
+/* ═══════════════════════════════════════════════════
+   REDISEÑO 2025 — header compacto, progreso, about, accents
+   ═══════════════════════════════════════════════════ */
+
+.menu-header {
+  text-align: center;
+  padding: 8px 16px 0;
+  margin-bottom: 22px;
+}
+
+.menu-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  color: #009b7d;
+  background: rgba(0, 212, 170, 0.10);
+  padding: 7px 16px;
+  border-radius: 20px;
+  border: 1px solid rgba(0, 212, 170, 0.25);
+  margin-bottom: 16px;
+}
+
+.menu-title {
+  font-size: clamp(28px, 4.5vw, 44px);
+  font-weight: 900;
+  margin: 0 0 12px;
+  letter-spacing: -1px;
+  line-height: 1.1;
+  color: #0a1f44;
+}
+
+.menu-title .gradient-text {
+  background: linear-gradient(135deg, #00d4aa 0%, #2563eb 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.menu-subtitle {
+  font-size: 16px;
+  color: #475569;
+  line-height: 1.55;
+  max-width: 620px;
+  margin: 0 auto;
+  font-weight: 500;
+}
+
+.menu-progress {
+  max-width: 1100px;
+  margin: 0 auto 24px;
+  background: #ffffff;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 14px;
+  padding: 16px 20px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+}
+
+.menu-progress-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.menu-progress-label {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.menu-progress-count {
+  font-size: 13px;
+  font-weight: 800;
+  color: #0a1f44;
+}
+
+.menu-progress-track {
+  height: 8px;
+  border-radius: 6px;
+  background: rgba(15, 23, 42, 0.07);
+  overflow: hidden;
+}
+
+.menu-progress-fill {
+  height: 100%;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #00d4aa, #059669);
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.menu-section {
+  max-width: 1100px;
+  margin: 0 auto 24px;
+}
+
+/* Card meta row (número + skill) */
+.card-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.card-skill {
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+}
+
+/* Sobre Setlist (desplegado, arriba) */
+.about-setlist {
+  max-width: 1100px;
+  margin: 0 auto 24px;
+  background: #ffffff;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 16px;
+  padding: 20px 24px 22px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+}
+
+.about-head {
+  font-size: 15px;
+  font-weight: 900;
+  color: #0a1f44;
+  letter-spacing: -0.2px;
+}
+
+.about-tagline {
+  font-size: 15.5px;
+  color: #475569;
+  line-height: 1.7;
+  margin: 12px 0 0;
+  font-weight: 500;
+  max-width: 980px;
+}
+
+.about-tagline strong {
+  color: #0a1f44;
+  font-weight: 800;
+}
+
+.about-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px;
+}
+
+.about-item h4 {
+  font-size: 13px;
+  font-weight: 900;
+  color: #0a1f44;
+  margin: 0 0 6px;
+}
+
+.about-item p {
+  font-size: 13px;
+  color: #64748b;
+  line-height: 1.6;
+  margin: 0;
+  font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  .about-grid { grid-template-columns: 1fr; }
 }
