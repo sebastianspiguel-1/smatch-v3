@@ -154,6 +154,21 @@ export const MEMBER_BEHAVIORS = {
   },
 }
 
+// ─── Por qué cada miembro votó una tarjeta (cuando se le pregunta) ───
+// Respuesta corta, con el sabor de cada uno. Sirve para cualquier tarjeta
+// que haya votado: amplifica la voz del que apoyó sin ser el autor.
+export const VOTE_ECHO = {
+  eric: [
+    "Lo voté porque coincido, aunque solo no lo hubiera puesto sobre la mesa.",
+    "Me hizo ruido a mí también. Por eso lo voté, no porque sí.",
+  ],
+  gabriela: ["Lo voté porque me parece lo más relevante para no frenar las entregas."],
+  gian: ["Lo voté porque me pasó lo mismo. No soy el único que lo ve, entonces."],
+  nacho: ["Lo voté porque me tocó de cerca, aunque me cueste admitirlo en voz alta."],
+  david: ["Lo voté porque, mirado en frío, es lo que más impacto tiene en el equipo."],
+  alan: ["Lo voté porque lo viví: cubrí parte de eso y nadie lo notó."],
+}
+
 // Estado inicial de la sala (deriva de los defaults).
 export function initialMemberStates() {
   const s = {}

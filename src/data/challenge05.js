@@ -99,35 +99,137 @@ export const STICKIES = {
   sailboat: {
     initial: [
       // Wind 🌬️ — Lo que nos impulsa
-      { col: 0, author: "gian", text: "SL-101 (Crear show) y SL-102 (Login) salieron limpios. Los fans pueden sumarse al show con 1 tap.", color: T.sY, votes: ["eric", "david", "alan", "gabriela"] },
-      { col: 0, author: "eric", text: "El backend de Crear Show quedó armado rápido. Buena arquitectura, endpoints limpios.", color: T.sB, votes: ["david", "gian", "nacho"] },
-      { col: 0, author: "david", text: "David y Alan se juntaron 30 min para resolver un edge case del RSVP. Ese pairing nos salvó.", color: T.sY, votes: ["alan", "gian", "eric", "gabriela", "nacho"] },
-      { col: 0, author: "gabriela", text: "Buen ritmo. La banda piloto ya vio una demo del flujo de crear show.", color: T.sV, votes: ["gian"] },
+      {
+        col: 0, author: "gian", text: "SL-101 (Crear show) y SL-102 (Login) salieron limpios. Los fans pueden sumarse al show con 1 tap.", color: T.sY, votes: ["eric", "david", "alan", "gabriela"],
+        deepen: ["Esos dos salieron redondos. Cuando el alcance está claro desde el arranque, volamos."],
+        probe: ["La diferencia fue que tenían los criterios claros desde el día uno. No hubo cambios a mitad de camino. Justo lo contrario de lo que sufrimos en otras."],
+        action: ["Replicar ese nivel de claridad de criterios en el resto de las features."],
+      },
+      {
+        col: 0, author: "eric", text: "El backend de Crear Show quedó armado rápido. Buena arquitectura, endpoints limpios.", color: T.sB, votes: ["david", "gian", "nacho"],
+        deepen: ["El backend salió limpio. Estoy conforme con cómo quedó."],
+        probe: ["Salió rápido porque lo diseñamos antes de codear. Cuando hay diseño previo, no hay retrabajo."],
+        action: ["Reservar un rato de diseño antes de meter mano en features grandes."],
+      },
+      {
+        col: 0, author: "david", text: "David y Alan se juntaron 30 min para resolver un edge case del RSVP. Ese pairing nos salvó.", color: T.sY, votes: ["alan", "gian", "eric", "gabriela", "nacho"],
+        deepen: ["Ese pairing nos salvó. Alan estaba trabado, me senté media hora y lo sacamos. Deberíamos hacerlo más seguido."],
+        probe: ["El tema es que pasó de casualidad, no porque lo busquemos. Si no, cada uno se la banca solo hasta que explota."],
+        action: ["Habilitar pairing sin culpa: que pedir ayuda no se vea como debilidad. Me ofrezco a estar disponible."],
+      },
+      {
+        col: 0, author: "gabriela", text: "Buen ritmo. La banda piloto ya vio una demo del flujo de crear show.", color: T.sV, votes: ["gian"],
+        deepen: ["La banda vio la demo y quedó contenta. Para mí venimos muy bien."],
+        probe: ["El ritmo está, sí. Aunque admito que la demo mostró lo lindo y no lo que quedó a medias."],
+        action: ["Seguir mostrándole avances a la banda, pero también siendo honestos con lo que falta."],
+      },
 
       // Anchor ⚓ — Lo que nos frena
-      { col: 1, author: "alan", text: "Los criterios de aceptación de SL-104 (RSVP) cambiaron en comentarios. Nadie actualizó la descripción.", color: T.sO, votes: ["eric", "gian", "gabriela"] },
-      { col: 1, author: "gian", text: "SL-107 (Votar) llegó tarde con un bug que ya había reportado en el planning. Rebotó 2 veces.", color: T.sP, votes: ["nacho", "eric", "alan"] },
-      { col: 1, author: "nacho", text: "SL-106 (Sugerir canción) cambió de alcance solo en comentarios. Los AC nunca se actualizaron.", color: T.sP, votes: ["alan", "gian"] },
+      {
+        col: 1, author: "alan", text: "Los criterios de aceptación de SL-104 (RSVP) cambiaron en comentarios. Nadie actualizó la descripción.", color: T.sO, votes: ["eric", "gian", "gabriela"],
+        deepen: ["Los criterios de RSVP cambiaron en un comentario y nadie tocó la descripción. Me enteré tarde y lo reconstruí solo."],
+        probe: ["El problema de fondo es que las decisiones viven en comentarios sueltos. Lo terminé tapando yo, sin decir nada."],
+        action: ["Que todo cambio de AC se refleje en la descripción del ticket, no en un comentario perdido."],
+      },
+      {
+        col: 1, author: "gian", text: "SL-107 (Votar) llegó tarde con un bug que ya había reportado en el planning. Rebotó 2 veces.", color: T.sP, votes: ["nacho", "eric", "alan"],
+        deepen: ["Ese bug lo avisé en el planning. No se priorizó, llegó tarde, rebotó dos veces, y el lento parecí yo. Me caló, te soy sincero."],
+        probe: ["La causa es que los bugs que avisamos temprano se diluyen en el ruido. Es sistémico, no es que alguien la haya hecho a propósito."],
+        action: ["Que todo bug reportado en planning entre al backlog con prioridad explícita."],
+        reveal: "gian_bug", to: "venting",
+      },
+      {
+        col: 1, author: "nacho", text: "SL-106 (Sugerir canción) cambió de alcance solo en comentarios. Los AC nunca se actualizaron.", color: T.sP, votes: ["alan", "gian"],
+        deepen: ["El alcance de Sugerir cambió en comentarios y los criterios nunca se actualizaron. Me costó seguirle el ritmo siendo el nuevo, y entregué algo parecido tarde sin avisar."],
+        probe: ["La causa es doble: las decisiones viven en comentarios, y a mí me da cosa frenar y pedir que aclaren. Así que me como los cambios callado."],
+        action: ["Avisar los cambios de alcance explícito. Y que esté bien pedir aclaración sin sentir que molestás."],
+        reveal: "nacho_late", to: "open",
+      },
 
       // Rocks 🪨 — Riesgos
-      { col: 2, author: "david", text: "SL-105 (Buscar canción / Spotify) sigue bloqueada. Si no aprueban la API en 1 semana, el demo va sin búsqueda.", color: T.sB, votes: ["eric", "gabriela"] },
-      { col: 2, author: "eric", text: "Si seguimos sin doc central de features complejas, cada ticket va a tener carry-over.", color: T.sG, votes: ["alan", "gian", "gabriela"] },
+      {
+        col: 2, author: "david", text: "SL-105 (Buscar canción / Spotify) sigue bloqueada. Si no aprueban la API en 1 semana, el demo va sin búsqueda.", color: T.sB, votes: ["eric", "gabriela"],
+        deepen: ["Spotify sigue sin aprobar la API. Si no sale en una semana, la demo va sin búsqueda. No depende de nosotros y eso es lo peor."],
+        probe: ["El riesgo real es que dependemos de un tercero y no escalamos a tiempo. Lo dejamos correr esperando que se destrabe solo."],
+        action: ["Escalar el bloqueo a Mateo ya, y preparar un plan B (mock de búsqueda) por si no llega."],
+      },
+      {
+        col: 2, author: "eric", text: "Si seguimos sin doc central de features complejas, cada ticket va a tener carry-over.", color: T.sG, votes: ["alan", "gian", "gabriela"],
+        deepen: ["Sin una fuente única de criterios, cada feature compleja va a seguir teniendo carry-over. Es el patrón del sprint."],
+        probe: ["El fondo es que el conocimiento está disperso y cada uno arma el suyo. No escala."],
+        action: ["Crear un doc central de criterios por feature, con dueño."],
+      },
 
       // Island 🏝️ — Meta
-      { col: 3, author: "nacho", text: "Piloto con la primera banda en 4 semanas — flujo completo: crear show, RSVP, sugerir, votar.", color: T.sY, votes: ["gian", "eric"] },
-      { col: 3, author: "gian", text: "Tener una fuente de verdad para criterios de aceptación. Hoy no existe.", color: T.sG, votes: ["alan", "gabriela", "eric", "david"] },
+      {
+        col: 3, author: "nacho", text: "Piloto con la primera banda en 4 semanas — flujo completo: crear show, RSVP, sugerir, votar.", color: T.sY, votes: ["gian", "eric"],
+        deepen: ["La meta es tener el flujo completo para el piloto en 4 semanas: crear show, RSVP, sugerir, votar."],
+        probe: ["Lo que está en juego es que es un show real, en vivo. Si falla, falla en público. Por eso no podemos arrastrar deuda."],
+        action: ["Priorizar el camino crítico del flujo completo y no meter nada que no sume al piloto."],
+      },
+      {
+        col: 3, author: "gian", text: "Tener una fuente de verdad para criterios de aceptación. Hoy no existe.", color: T.sG, votes: ["alan", "gabriela", "eric", "david"],
+        deepen: ["La meta para mí es tener una sola fuente de verdad para los criterios. Hoy no existe y por eso sufrimos."],
+        probe: ["Es el mismo problema de raíz que vengo marcando: sin fuente única, todo se decide en comentarios y rebota."],
+        action: ["Definir un único lugar donde viven los criterios, y que sea obligatorio actualizarlos ahí."],
+      },
     ],
   },
   glad_sad_mad: {
     initial: [
-      { col: 0, author: "gian", text: "Orgullo: SL-101 + SL-102 + SL-103 en prod. Los fans ya pueden sumarse a un show.", color: T.sY, votes: ["eric", "david", "gabriela"] },
-      { col: 0, author: "eric", text: "Contento: el equipo se plantó en la estimación de SL-107 (Votar). Mostramos criterio técnico.", color: T.sG, votes: ["eric", "gian", "david"] },
-      { col: 0, author: "nacho", text: "Buen ambiente. Contento de ser parte de este equipo.", color: T.sO, votes: [] },
-      { col: 0, author: "david", text: "David y Alan resolviendo el RSVP en 30 min — eso es ownership del equipo de verdad.", color: T.sY, votes: ["alan", "gian", "eric", "gabriela", "nacho"] },
-      { col: 1, author: "alan", text: "Triste por SL-105 (Buscar canción) bloqueada todo el sprint. No depende de nosotros y eso frustra.", color: T.sO, votes: ["gabriela", "gian", "eric"] },
-      { col: 1, author: "gian", text: "Me entristece que el bug de SL-107 que reporté en el planning no se priorizó. Después rebotó.", color: T.sP, votes: ["alan", "gabriela", "david"] },
-      { col: 2, author: "nacho", text: "Me frustra que Gabriela cambie el alcance en comentarios y nadie se entere. Genera retrabajo.", color: T.sP, votes: ["nacho", "gian", "eric"] },
-      { col: 2, author: "eric", text: "Me molesta que tengamos carry-over por falta de documentación, no por falta de capacidad.", color: T.sB, votes: ["alan", "david", "gabriela", "gian"] },
+      {
+        col: 0, author: "gian", text: "Orgullo: SL-101 + SL-102 + SL-103 en prod. Los fans ya pueden sumarse a un show.", color: T.sY, votes: ["eric", "david", "gabriela"],
+        deepen: ["Orgulloso de eso. Tres features en prod y los fans ya pueden sumarse. Cuando está todo claro, salimos rápido."],
+        probe: ["Salieron bien porque tenían criterios claros. El contraste con las que sufrimos es justo ese."],
+        action: ["Replicar la claridad de criterios de estas tres en el resto."],
+      },
+      {
+        col: 0, author: "eric", text: "Contento: el equipo se plantó en la estimación de SL-107 (Votar). Mostramos criterio técnico.", color: T.sG, votes: ["eric", "gian", "david"],
+        deepen: ["Me gustó que nos plantáramos en la estimación. Aunque a mí discutir me cuesta, esa vez valió la pena."],
+        probe: ["Me banco el criterio técnico, pero cuando se calienta la discusión prefiero callarme. Y ahí me guardo cosas."],
+        action: ["Que en las estimaciones los que votan distinto expliquen sí o sí, así no me quedo callado."],
+        reveal: "eric_silence", to: "engaged",
+      },
+      {
+        col: 0, author: "nacho", text: "Buen ambiente. Contento de ser parte de este equipo.", color: T.sO, votes: [],
+        deepen: ["Estoy contento de estar en este equipo, la verdad. Buena onda."],
+        probe: ["Aunque… siendo el nuevo me cuesta pedir ayuda. Prefiero hacerme el que puedo antes que frenar y preguntar."],
+        action: ["Estaría bueno que pedir ayuda sea algo normal. A mí me destrabaría un montón."],
+        reveal: "nacho_late", to: "open",
+      },
+      {
+        col: 0, author: "david", text: "David y Alan resolviendo el RSVP en 30 min — eso es ownership del equipo de verdad.", color: T.sY, votes: ["alan", "gian", "eric", "gabriela", "nacho"],
+        deepen: ["Eso fue ownership de verdad. Me senté con Alan y lo sacamos en media hora. Más de eso necesitamos."],
+        probe: ["Pasó porque me ofrecí, no porque lo busquemos como equipo. Si no, cada uno sufre solo."],
+        action: ["Hacer del pairing algo habitual, no de emergencia."],
+      },
+      {
+        col: 1, author: "alan", text: "Triste por SL-105 (Buscar canción) bloqueada todo el sprint. No depende de nosotros y eso frustra.", color: T.sO, votes: ["gabriela", "gian", "eric"],
+        deepen: ["Me frustra SL-105 bloqueada todo el sprint. No depende de nosotros y eso desgasta."],
+        probe: ["Lo peor es que lo dejamos correr esperando que Spotify responda, sin escalar a nadie."],
+        action: ["Escalar el bloqueo ya y tener un plan B para no quedar de rehenes de un tercero."],
+      },
+      {
+        col: 1, author: "gian", text: "Me entristece que el bug de SL-107 que reporté en el planning no se priorizó. Después rebotó.", color: T.sP, votes: ["alan", "gabriela", "david"],
+        deepen: ["Me bajonea. Lo avisé en el planning, no se priorizó, rebotó, y quedé yo como el que frena. Me lo guardé, pero molesta."],
+        probe: ["La causa es que los bugs tempranos se diluyen en el ruido. No es una persona, es cómo priorizamos."],
+        action: ["Que todo bug de planning entre con prioridad explícita al backlog."],
+        reveal: "gian_bug", to: "venting",
+      },
+      {
+        col: 2, author: "nacho", text: "Me frustra que Gabriela cambie el alcance en comentarios y nadie se entere. Genera retrabajo.", color: T.sP, votes: ["nacho", "gian", "eric"],
+        deepen: ["Me calienta que el alcance cambie en un comentario y nadie se entere. Genera retrabajo. Y a mí, siendo nuevo, me cuesta el doble seguirlo."],
+        probe: ["El fondo: no hay canal confiable para decisiones, y yo no me animo a frenar y pedir que se aclare. Me como el retrabajo callado."],
+        action: ["Cambios de alcance avisados explícito. Y que esté bien pedir aclaración sin sentir que molestás."],
+        reveal: "nacho_late", to: "open",
+      },
+      {
+        col: 2, author: "eric", text: "Me molesta que tengamos carry-over por falta de documentación, no por falta de capacidad.", color: T.sB, votes: ["alan", "david", "gabriela", "gian"],
+        deepen: ["Me molesta arrastrar carry-over por falta de doc, no por capacidad. Es evitable."],
+        probe: ["El fondo es que el conocimiento está disperso. Y te confieso: hay varias de estas que me guardo para no generar roce."],
+        action: ["Doc central de criterios con dueño. Y un canal fijo para decisiones, no comentarios."],
+        reveal: "eric_silence", to: "engaged",
+      },
     ],
   },
   start_stop_continue: {

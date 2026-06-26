@@ -198,6 +198,18 @@ export function resolveTurn({ memberBehaviors, intentScores, memberStates, inten
   }
 }
 
+// ─── Preguntarle a un VOTANTE por qué likeó una tarjeta ───
+export function resolveVote({ voterId, voteEcho, usedTexts = [] }) {
+  const used = new Set(usedTexts)
+  const variants = voteEcho[voterId] || ["Lo voté porque me hace sentido."]
+  const fresh = variants.filter((v) => !used.has(v))
+  const pool = fresh.length ? fresh : variants
+  return {
+    reactions: [{ from: voterId, text: pool[Math.floor(Math.random() * pool.length)] }],
+    scores: { facilitation: 3, safety: 2 },
+  }
+}
+
 // ─── Respuesta del autor SOBRE SU tarjeta, según el tipo de movimiento ───
 // kind: "deepen" (contar más) · "probe" (ir a la causa) · "action" (qué hacer).
 // Cada tarjeta responde consistente con su propio contenido. Si esconde una

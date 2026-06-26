@@ -38,9 +38,10 @@ import {
   INTENTS,
   INTENT_SCORES,
   MEMBER_BEHAVIORS,
+  VOTE_ECHO,
   initialMemberStates,
 } from "../data/retroBehaviorBase"
-import { buildIntentClassifierPrompt, classifyLocal, resolveTurn, resolveCardIntent } from "../engine/behaviorEngine"
+import { buildIntentClassifierPrompt, classifyLocal, resolveTurn, resolveCardIntent, resolveVote } from "../engine/behaviorEngine"
 import "./Challenge05.css"
 import "./Challenge03.css"
 
@@ -77,7 +78,6 @@ export default function Challenge05() {
   // ─── Movimiento de facilitación: stickies que el SM marca para profundizar
   // (judgment: ¿elige lo que importa o lo cómodo?) + el patrón que los conecta.
   const [focusKeys, setFocusKeys] = useState([])
-  const [focusPattern, setFocusPattern] = useState("")
   // ─── Estado de cada personaje (base de comportamientos) ───
   const [memberStates, setMemberStates] = useState(initialMemberStates())
   // Último miembro que habló (para que "dale, contame más" le siga a ESA persona)
@@ -842,10 +842,6 @@ export default function Challenge05() {
   const cols = chosenFmt?.cols || ["Keep Doing", "Improve"]
   const colColors = ["#16a34a", "#dc2626", "#d97706", "#2563eb"]
 
-  // Sticky clickeable: marcar/desmarcar para profundizar (movimiento de facilitación)
-  const toggleFocus = (k) =>
-    setFocusKeys((p) => (p.includes(k) ? p.filter((x) => x !== k) : [...p, k]))
-
   // Tocar una tarjeta la trae al chat como PENDIENTE (removible). Tocarla de
   // nuevo (o la ✕) la deselecciona y desaparece. Recién queda LOCKEADA en el
   // historial cuando el candidato pregunta o comenta sobre ella.
@@ -912,6 +908,33 @@ export default function Challenge05() {
     setLoading(false)
   }
 
+  // Preguntarle a un VOTANTE por qué likeó la tarjeta de otro.
+  async function askVoter(card, voterId) {
+    if (loading) return
+    commitPending()
+    setActiveCard(card)
+    const vm = MEMBER_MAP[voterId]
+    const author = MEMBER_MAP[card.author]
+    setChat((p) => [
+      ...p,
+      { isYou: true, text: `${vm?.name.split(" ")[0]}, vos votaste la tarjeta de ${author?.name.split(" ")[0]}, ¿por qué te resonó?`, targetName: vm?.name },
+    ])
+    setLoading(true)
+    const out = resolveVote({ voterId, voteEcho: VOTE_ECHO, usedTexts: usedLines })
+    await streamReactions(out.reactions)
+    const vs = {}
+    Object.entries(out.scores).forEach(([k, v]) => { if (v > 0) vs[k] = v })
+    setAllScores((arr) => [...arr, vs])
+    setAllFeedback((f) => [
+      ...f,
+      { action: "card_vote_ask", target: voterId, message: `Preguntó a ${vm?.name.split(" ")[0]} por qué votó la tarjeta de ${author?.name.split(" ")[0]}`, scores: vs },
+    ])
+    setLastSpeaker(voterId)
+    setUsedLines((prev) => [...prev, ...out.reactions.filter((r) => r.from !== "narration").map((r) => r.text)])
+    setActionCount((c) => c + 1)
+    setLoading(false)
+  }
+
   const renderSticky = (s, i, prefix, accent = "#94a3b8") => {
     const on = focusKeys.includes(s.text)
     const m = MEMBER_MAP[s.author]
@@ -950,7 +973,6 @@ export default function Challenge05() {
       </div>
     )
   }
-  const focusedStickies = stickies.filter((s) => focusKeys.includes(s.text))
 
   return (
     <div
@@ -1230,6 +1252,26 @@ export default function Challenge05() {
                       </div>
                     ) : (
                       <div style={{ fontSize: 12, color: T.dim, fontStyle: "italic" }}>Escribile abajo para preguntarle sobre esto.</div>
+                    )}
+                    {cs.votes && cs.votes.filter((v) => v !== cs.author).length > 0 && (
+                      <div style={{ marginTop: 12, paddingTop: 10, borderTop: `1px solid ${cm.color}22`, display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                        <span style={{ fontSize: 11, color: "#64748b", fontWeight: 600 }}>👍 Lo votaron — preguntales por qué:</span>
+                        {cs.votes.filter((v) => v !== cs.author).map((vid) => {
+                          const vm = MEMBER_MAP[vid]
+                          if (!vm) return null
+                          return (
+                            <button
+                              key={vid}
+                              onClick={() => askVoter(cs, vid)}
+                              disabled={loading}
+                              title={`Preguntarle a ${vm.name.split(" ")[0]}`}
+                              style={{ border: "none", background: "transparent", padding: 0, cursor: loading ? "not-allowed" : "pointer", lineHeight: 0, borderRadius: "50%" }}
+                            >
+                              <Avatar member={vm} size={26} />
+                            </button>
+                          )
+                        })}
+                      </div>
                     )}
                   </div>
                 )
