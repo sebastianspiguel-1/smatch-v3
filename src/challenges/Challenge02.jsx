@@ -23,6 +23,7 @@ import {
 import {
   MEMBER_MAP,
   SPRINT_CONTEXT,
+  SITUACION,
   TEAM_DESC,
   DASHBOARD_METRICS,
   INITIAL_ALAN_STATE,
@@ -334,7 +335,7 @@ export default function Challenge02() {
           <div style={{ background: "linear-gradient(135deg, rgba(255, 138, 128, 0.06), #ffffff)", borderRadius: 16, padding: 24, marginBottom: 24, border: "2px solid rgba(255, 138, 128, 0.20)" }}>
             <div style={{ fontSize: 12, fontWeight: 900, letterSpacing: 3, color: "#ff8a80", marginBottom: 16 }}>📋 SITUACIÓN</div>
             <div style={{ fontSize: 15, color: T.sub, lineHeight: 1.7 }}>
-              {SPRINT_CONTEXT}
+              {SITUACION}
             </div>
           </div>
 

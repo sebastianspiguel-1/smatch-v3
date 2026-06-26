@@ -13,6 +13,10 @@ export const SPRINT_STATS = [
   { icon: "✅", label: "Completado", value: "22 pts" },
 ]
 
+// SITUACION: briefing que ve el candidato (recuadro, como en los otros challenges).
+export const SITUACION =
+  "Último día del Sprint: la primera retrospectiva del equipo. Entregaron 22 de 30 puntos. Sos el SM y facilitás la sesión. Es la primera vez que este equipo frena a mirar cómo trabajó."
+
 export const SPRINT_SIGNALS = [
   {
     from: "eric",
@@ -128,14 +132,76 @@ export const STICKIES = {
   },
   start_stop_continue: {
     initial: [
-      { col: 2, author: "gian", text: "Continuar el pairing espontáneo — David y Alan en el RSVP fue clave.", color: T.sY, votes: ["alan", "eric", "gabriela", "nacho", "david"] },
-      { col: 2, author: "eric", text: "Continuar manteniendo el criterio técnico en estimaciones. No ceder ante presión externa.", color: T.sY, votes: ["david", "gian", "nacho"] },
-      { col: 2, author: "gabriela", text: "Continuar el buen ritmo de entregas. La banda piloto vio progreso real.", color: T.sV, votes: ["gian"] },
-      { col: 0, author: "alan", text: "Empezar a centralizar los criterios de features complejas. Hoy están dispersos en comentarios.", color: T.sO, votes: ["eric", "gabriela", "gian", "david"] },
-      { col: 0, author: "gian", text: "Empezar a actualizar los AC cuando el alcance cambia. Que no quede solo en comentarios del PO.", color: T.sP, votes: ["nacho", "eric", "alan"] },
-      { col: 0, author: "eric", text: "Empezar a priorizar bugs reportados en planning. No esperar a que reboten en QA.", color: T.sG, votes: ["alan", "david", "gian"] },
-      { col: 1, author: "eric", text: "Dejar de asumir que todos leen los comentarios de los tickets. No es un canal confiable.", color: T.sB, votes: ["gian", "nacho", "alan", "gabriela"] },
-      { col: 1, author: "gian", text: "Dejar de cerrar retros sin action items con dueño y fecha. Las cosas no cambian solas.", color: T.sP, votes: ["eric", "david", "gabriela"] },
+      {
+        col: 2, author: "gian", text: "Continuar el pairing espontáneo — David y Alan en el RSVP fue clave.", color: T.sY, votes: ["alan", "eric", "gabriela", "nacho", "david"],
+        deepen: [
+          "Eso me gustó de verdad. David se sentó con Alan media hora y destrabó algo que venía frenado hace rato. Deberíamos provocarlo más en vez de sufrir cada uno por su lado.",
+          "El pairing fue lo mejor del sprint. Cuando nos juntamos, las cosas salen.",
+        ],
+        probe: ["Lo que lo hace funcionar es que nos sentamos sin agenda y sin pedir permiso. El tema es que solo lo hacemos cuando ya estamos contra las cuerdas, nunca antes."],
+        action: ["Bloquearía una franja fija por semana para pairing, así no esperamos a la urgencia. Me hago cargo de proponerlo."],
+      },
+      {
+        col: 2, author: "eric", text: "Continuar manteniendo el criterio técnico en estimaciones. No ceder ante presión externa.", color: T.sY, votes: ["david", "gian", "nacho"],
+        deepen: [
+          "Nos plantamos en SL-107 y estuvo bien. Aunque… te soy honesto, no siempre me animo a discutir. Prefiero que no se arme. Esa vez valió la pena igual.",
+        ],
+        probe: ["Mantener el criterio está bien. Lo que me cuesta es bancarme la discusión: cuando se calienta, me callo. Y ahí pierdo cosas que debería decir."],
+        action: ["Acordemos que en las estimaciones nadie cierra hasta que los que votaron distinto expliquen. Así no me quedo callado."],
+        reveal: "eric_silence", to: "engaged",
+      },
+      {
+        col: 2, author: "gabriela", text: "Continuar el buen ritmo de entregas. La banda piloto vio progreso real.", color: T.sV, votes: ["gian"],
+        deepen: [
+          "Para mí venimos bárbaro, la banda piloto vio progreso real. No le encuentro el drama que algunos le buscan.",
+        ],
+        probe: ["¿Profundizar qué? El ritmo está bien y la banda lo vio. No le veo la vuelta de tuerca que buscás."],
+        action: ["Mi acción sería seguir igual. Si acaso, mostrarle los avances a la banda piloto más seguido."],
+      },
+      {
+        col: 0, author: "alan", text: "Empezar a centralizar los criterios de features complejas. Hoy están dispersos en comentarios.", color: T.sO, votes: ["eric", "gabriela", "gian", "david"],
+        deepen: [
+          "Me pasé el sprint reconstruyendo criterios que estaban tirados en comentarios. Cubrí cosas que no me tocaban y ni lo dije. Si estuviera centralizado, no andaría tapando huecos.",
+        ],
+        probe: ["El laburo invisible es lo que más pesa. Reconstruí criterios de cero y nadie se enteró. Si no se centraliza, lo termino haciendo yo en silencio otra vez."],
+        action: ["Armaría un doc único de criterios por feature compleja, con dueño. Lo puedo empezar yo esta semana."],
+      },
+      {
+        col: 0, author: "gian", text: "Empezar a actualizar los AC cuando el alcance cambia. Que no quede solo en comentarios del PO.", color: T.sP, votes: ["nacho", "eric", "alan"],
+        deepen: [
+          "Esto me quema, te soy sincero. El alcance cambia en un comentario, me entero cuando rebota en QA, y después el lento parezco yo. El bug de SL-107 lo avisé en el planning y nadie lo priorizó.",
+          "No es burocracia. Es que cada cambio escondido en un comentario me explota a mí en la cara cuando testeo. Y me lo banco callado, pero ya van varias.",
+        ],
+        probe: ["La causa de fondo es que las decisiones viven en comentarios sueltos. El bug de SL-107 lo avisé en el planning, se diluyó en un comentario, y volvió. Es sistémico, no es una persona."],
+        action: ["Action item: todo cambio de alcance se refleja en los AC del ticket antes de pasar a dev. Dueño el PO, con QA validando."],
+        reveal: "gian_bug", to: "venting",
+      },
+      {
+        col: 0, author: "eric", text: "Empezar a priorizar bugs reportados en planning. No esperar a que reboten en QA.", color: T.sG, votes: ["alan", "david", "gian"],
+        deepen: [
+          "Lo pongo en general, pero es por algo puntual: Gian avisó un bug en el planning, no se priorizó, volvió y rebotó dos veces. Me molesta que pase y que nadie lo ponga sobre la mesa.",
+        ],
+        probe: ["El patrón es que los bugs que avisamos temprano se pierden y vuelven más caros. No es culpa de Gian, es de cómo priorizamos."],
+        action: ["Que todo bug reportado en planning entre al backlog con prioridad explícita, no que quede a criterio de quién lo lea."],
+        reveal: "gian_bug", to: "engaged",
+      },
+      {
+        col: 1, author: "eric", text: "Dejar de asumir que todos leen los comentarios de los tickets. No es un canal confiable.", color: T.sB, votes: ["gian", "nacho", "alan", "gabriela"],
+        deepen: [
+          "Se deciden cosas en comentarios y la mitad no se entera. Y mirá, ya que estamos: yo me callo varias de estas porque no quiero generar roce. Pero tengo varias guardadas.",
+        ],
+        probe: ["El fondo es que no tenemos un canal confiable para decisiones. Y te confieso: yo aprovecho ese ruido para no decir cosas que me incomodan. Pero ya van varias."],
+        action: ["Las decisiones importantes van al daily o a un canal fijo, no a comentarios. Y que cada uno confirme que las leyó."],
+        reveal: "eric_silence", to: "engaged",
+      },
+      {
+        col: 1, author: "gian", text: "Dejar de cerrar retros sin action items con dueño y fecha. Las cosas no cambian solas.", color: T.sP, votes: ["eric", "david", "gabriela"],
+        deepen: [
+          "Si esto no termina en algo con dueño y fecha, es catarsis y la semana que viene estamos igual. Ya lo viví mil veces.",
+        ],
+        probe: ["Lo viví mil veces: retro linda, cero cambios. Sin dueño y sin fecha, esto es terapia de grupo, no mejora."],
+        action: ["Que ninguna retro se cierre sin 2-3 action items con dueño y fecha. Me ofrezco a chequearlos el próximo sprint."],
+      },
     ],
   },
 }

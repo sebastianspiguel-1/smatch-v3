@@ -63,8 +63,14 @@ export const SPRINT_SUMMARY = {
   velocity: "20%",
 }
 
+// SPRINT_CONTEXT: contexto COMPLETO para la IA. No se muestra al candidato.
 export const SPRINT_CONTEXT =
   "Equipo Setlist, Sprint 1, día 5/10. PRODUCTO: app donde bandas crean shows y los fans co-crean el setlist votando canciones. Meta del sprint: flujo core funcionando (crear show → RSVP → sugerir → votar). HOY: SL-105 (Buscar canción, integración con Spotify Search API, 8 pts) está bloqueada hace 2 días esperando aprobación del Spotify Developer API. Alan escribió a Spotify el día 2 y 4 pero NO ESCALÓ a Mateo (founder). Sin SL-105 no se puede sugerir ni votar canciones reales: Nacho tiene SL-106 (Sugerir) listo para testear pero depende de la búsqueda. David no puede armar SL-107 (Votar) sin el pool real. 18 puntos en riesgo (60% del sprint). Mateo (founder) escribió a Gabriela esta mañana preguntando por el progreso del piloto."
+
+// SITUACION: briefing que VE el candidato. El estado visible del tablero, sin
+// el análisis hecho (si se escaló o no, % en riesgo) — eso lo lee el SM.
+export const SITUACION =
+  "Facilitación de la daily del día 5 (mitad del sprint). El tablero tiene que quedar con cada historia de usuario en su status correcto. Hay tickets frenados hace días y dependencias entre ellos. Ayudá al equipo a avanzar."
 
 // ─── TEAM DESCRIPTION (para prompts de AI) ───
 export const TEAM_DESC = `${TEAM_DESC_SHORT}

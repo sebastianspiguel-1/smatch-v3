@@ -288,8 +288,10 @@
 /* Column Header - Compact */
 .column-header {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  justify-content: center;
   align-items: center;
+  gap: 6px;
   margin-bottom: 10px;
   padding-bottom: 10px;
   border-bottom: 2px solid #e2e8f0;

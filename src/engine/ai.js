@@ -8,6 +8,10 @@ const API_URL = import.meta.env.PROD
 
 const API_KEY = import.meta.env.VITE_ANTHROPIC_API_KEY || "YOUR_API_KEY_HERE"
 
+// Último error de IA (para poder mostrarlo en pantalla y diagnosticar local).
+let _lastAIError = null
+export function getLastAIError() { return _lastAIError }
+
 export async function callAI(systemPrompt, userMessage) {
   try {
     const headers = {
@@ -16,6 +20,11 @@ export async function callAI(systemPrompt, userMessage) {
 
     // En desarrollo, usar API key directa
     if (!import.meta.env.PROD) {
+      if (!API_KEY || API_KEY === "YOUR_API_KEY_HERE") {
+        _lastAIError = "Falta VITE_ANTHROPIC_API_KEY en .env (y reiniciar el dev server)."
+        console.error("API Error:", _lastAIError)
+        return null
+      }
       headers["x-api-key"] = API_KEY
       headers["anthropic-version"] = "2023-06-01"
       headers["anthropic-dangerous-direct-browser-access"] = "true"
@@ -33,16 +42,19 @@ export async function callAI(systemPrompt, userMessage) {
     })
 
     if (!res.ok) {
-      const error = await res.json()
-      console.error("API Error:", error)
+      const error = await res.json().catch(() => ({}))
+      _lastAIError = `HTTP ${res.status} · ${error?.error?.message || JSON.stringify(error).slice(0, 200)}`
+      console.error("API Error:", _lastAIError)
       return null
     }
 
     const data = await res.json()
     const text = data.content?.map(b => b.text || "").join("") || ""
     const clean = text.replace(/```json|```/g, "").trim()
+    _lastAIError = null
     return JSON.parse(clean)
   } catch (e) {
+    _lastAIError = `${e.name}: ${e.message}`
     console.error("Error en llamada AI:", e)
     return null
   }

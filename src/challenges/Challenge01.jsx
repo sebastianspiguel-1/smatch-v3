@@ -642,6 +642,8 @@ export default function Challenge01() {
   const [teamAgreements, setTeamAgreements] = useState({})
   // Acuerdo final redactado por el SM (síntesis), por categoría
   const [agreementSynthesis, setAgreementSynthesis] = useState({})
+  // Acuerdos "cerrados" con el equipo (dispara el buy-in), por categoría
+  const [agreementConfirmed, setAgreementConfirmed] = useState({})
   const boardRef = useRef(null)
   const nextId = useRef(100)
   const startTime = useRef(null)
@@ -792,12 +794,12 @@ export default function Challenge01() {
         topicsForCtx.map(t => {
           const picks = (teamAgreements[t.id] || []).map(a => {
             const who = a.source === "sm" ? "SM" : (MEMBER_MAP[a.source]?.name || a.source)
-            return `     · "${a.text}" [tomado de ${who}${a.bad ? " — ⚠️ ANTI-PATRÓN que el SM aceptó como válido" : ""}]`
+            return `     · "${a.text}" [${who}${a.bad ? " — ⚠️ ESTO ES UN ANTI-PATRÓN" : ""}]`
           }).join("\n")
           const final = (agreementSynthesis[t.id] || "").trim()
-          return `• ${t.title}:\n   Acuerdo final redactado por el SM: "${final || "(no redactó acuerdo)"}"` + (picks ? `\n   Insumos que tomó del muro:\n${picks}` : "")
+          return `• ${t.title}:\n   Acuerdo final redactado por el SM: "${final || "(no redactó acuerdo)"}"` + (picks ? `\n   Propuestas que el SM trajo al borrador:\n${picks}` : "")
         }).join("\n") +
-        "\n\nEvaluá: (1) si el acuerdo final redactado es concreto y RECONCILIA las contradicciones del equipo (ej: Eric 'Slack a cualquier hora' vs Alan 'horario fijo' → una sola norma); (2) si el SM aceptó algún ANTI-PATRÓN como válido (red flag fuerte en bias_coaching y process_mastery); (3) si hace cumplir estos acuerdos durante el Planning. Premiá síntesis clara y discernimiento; penalizá copiar sin criterio o aceptar ruido."
+        "\n\nEvaluá SOBRE TODO el ACUERDO FINAL redactado (no los insumos que trajo): (1) ¿es concreto y RECONCILIA las contradicciones del equipo? (ej: Eric 'Slack a cualquier hora' vs Alan 'horario fijo' → una sola norma); (2) ¿quedó algún ANTI-PATRÓN incorporado en el acuerdo final? → red flag fuerte en bias_coaching/process_mastery. Si trajo un anti-patrón al borrador pero lo DESCARTÓ del texto final, eso es BUENO (mostró criterio); (3) ¿hace cumplir estos acuerdos durante el Planning? Premiá síntesis clara y discernimiento."
       : ""
 
     const sessionState = { pokerActive, pokerIdx, revealed }
@@ -989,7 +991,7 @@ export default function Challenge01() {
         <div style={{ background: T.panel, borderRadius: 14, padding: 22, marginBottom: 16, border: `1px solid ${T.border}` }}>
           <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: 2, color: T.orange, marginBottom: 10 }}>📋 SITUACIÓN</div>
           <div style={{ fontSize: 15, color: T.sub, lineHeight: 1.6 }}>
-            Primer Planning del equipo Setlist. <strong style={{ color: T.text }}>Nunca estimaron ni priorizaron juntos</strong> — seniorities mixtas, criterios distintos. Sos el SM de la sesión. Tu rol: <strong style={{ color: T.teal }}>enseñar frameworks (Planning Poker, Kano, MoSCoW) y facilitar la conversación</strong>, sin imponer decisiones.
+            Kickoff del equipo Setlist. Es la primera vez que refinan, estiman y priorizan juntos: nunca lo hicieron, y cada uno tiene sus formas más allá de los distintos seniorities. Ayudá al equipo a definir algunos acuerdos de equipo, y a explicarles y facilitar el uso de algunas de las herramientas más conocidas.
           </div>
         </div>
 
@@ -1054,21 +1056,25 @@ export default function Challenge01() {
 
   // ═══════════════════ PHASE: TEAM AGREEMENTS (Parte 1 del Día 1) ═══════════════════
   if (phase === "agreements") {
-    const synthDone = TEAM_AGREEMENT_TOPICS.filter(t => (agreementSynthesis[t.id] || "").trim().length >= 12)
+    const synthDone = TEAM_AGREEMENT_TOPICS.filter(t => agreementConfirmed[t.id] && (agreementSynthesis[t.id] || "").trim().length >= 12)
     const allDone = synthDone.length === TEAM_AGREEMENT_TOPICS.length
 
+    function confirmTopic(topicId) {
+      if ((agreementSynthesis[topicId] || "").trim().length < 12) return
+      setAgreementConfirmed(p => ({ ...p, [topicId]: true }))
+    }
+
+    // Tomar una propuesta del muro: la registra (para scoring) Y la vuelca
+    // al borrador del acuerdo final, que el SM después reconcilia/edita.
     function addAgreement(topicId, text, source, bad = false) {
       setTeamAgreements(prev => ({
         ...prev,
         [topicId]: [...(prev[topicId] || []), { text, source, bad, addedAt: Date.now() }]
       }))
-    }
-
-    function removeAgreement(topicId, index) {
-      setTeamAgreements(prev => ({
-        ...prev,
-        [topicId]: (prev[topicId] || []).filter((_, i) => i !== index)
-      }))
+      setAgreementSynthesis(prev => {
+        const cur = (prev[topicId] || "").replace(/\s+$/, "")
+        return { ...prev, [topicId]: (cur ? cur + "\n" : "") + text }
+      })
     }
 
     return (
@@ -1087,7 +1093,7 @@ export default function Challenge01() {
               El equipo trajo propuestas, pero <strong>no todas sirven</strong>: algunas se contradicen y otras son anti-patrones disfrazados. Elegí lo que aporta, descartá el ruido y <strong>redactá vos el acuerdo final</strong> de cada categoría.
             </div>
             <div style={{ fontSize: 12, color: T.sub, marginTop: 6, lineHeight: 1.5 }}>
-              📌 Click en una propuesta para tomarla como insumo · escribí el acuerdo final en tus palabras (reconciliá las contradicciones) · todo se evalúa en el Planning.
+              📌 Tomá del muro lo que aporta (se suma al borrador), descartá el ruido y reconciliá todo en <strong>un acuerdo final</strong> en tus palabras · se evalúa en el Planning.
             </div>
           </div>
 
@@ -1128,62 +1134,11 @@ export default function Challenge01() {
                     <strong>⚠️ Tensión:</strong> {topic.tension}
                   </div>
 
-                  {/* INSUMOS TOMADOS DEL MURO */}
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 10, fontWeight: 800, color: "#059669", letterSpacing: 1, marginBottom: 6, textTransform: "uppercase" }}>
-                      Insumos que tomaste ({agreements.length})
-                    </div>
-                    {agreements.length === 0 && (
-                      <div style={{ fontSize: 12, color: T.dim, padding: "10px 8px", textAlign: "center", border: "1.5px dashed rgba(15,23,42,0.10)", borderRadius: 8, fontStyle: "italic" }}>
-                        Elegí del muro lo que sirva. El ruido, descartalo.
-                      </div>
-                    )}
-                    {agreements.map((a, i) => {
-                      const sourceMember = a.source !== "sm" ? MEMBER_MAP[a.source] : null
-                      return (
-                        <div key={i} style={{
-                          background: a.source === "sm" ? "#fef9c3" : "#dbeafe",
-                          borderRadius: 8,
-                          padding: "8px 10px",
-                          marginBottom: 6,
-                          position: "relative",
-                          boxShadow: "0 2px 4px rgba(0,0,0,0.04)",
-                          border: a.source === "sm" ? "1px solid rgba(202,138,4,0.25)" : "1px solid rgba(37,99,235,0.20)",
-                        }}>
-                          <div style={{ fontSize: 9, fontWeight: 800, color: a.source === "sm" ? "#92400e" : "#1e40af", letterSpacing: 0.5, marginBottom: 3, textTransform: "uppercase" }}>
-                            {a.source === "sm" ? "📝 Tu propuesta" : `💡 ${sourceMember?.name}`}
-                          </div>
-                          <div style={{ fontSize: 12, color: "#0f172a", lineHeight: 1.4 }}>{a.text}</div>
-                          <button
-                            onClick={() => removeAgreement(topic.id, i)}
-                            style={{ position: "absolute", top: 4, right: 6, background: "transparent", border: "none", color: "#94a3b8", cursor: "pointer", fontSize: 14, padding: 2 }}
-                            title="Quitar"
-                          >×</button>
-                        </div>
-                      )
-                    })}
-
-                  </div>
-
-                  {/* ACUERDO FINAL — síntesis del SM (lo que de verdad evalúa) */}
-                  <div>
-                    <div style={{ fontSize: 10, fontWeight: 800, color: "#0891b2", letterSpacing: 1, marginBottom: 6, textTransform: "uppercase" }}>
-                      ✍️ Acuerdo final — redactalo vos
-                    </div>
-                    <textarea
-                      value={agreementSynthesis[topic.id] || ""}
-                      onChange={e => setAgreementSynthesis(p => ({ ...p, [topic.id]: e.target.value }))}
-                      rows={3}
-                      placeholder="Escribí el acuerdo final en tus palabras. Combiná lo que sirve, descartá lo que no y resolvé las contradicciones."
-                      style={{ width: "100%", padding: 10, borderRadius: 8, border: `1.5px solid ${(agreementSynthesis[topic.id] || "").trim().length >= 12 ? "rgba(0,212,170,0.55)" : "#d1d5db"}`, fontSize: 12.5, fontFamily: "inherit", resize: "none", outline: "none", boxSizing: "border-box", color: "#0f172a", background: "#ffffff", lineHeight: 1.4 }}
-                    />
-                  </div>
-
-                  {/* TEAM SUGGESTIONS (chips clickeables) */}
+                  {/* MURO DE PROPUESTAS — tomar suma al borrador de abajo */}
                   {availableSuggestions.length > 0 && (
                     <div>
                       <div style={{ fontSize: 10, fontWeight: 800, color: "#7c3aed", letterSpacing: 1, marginBottom: 6, textTransform: "uppercase" }}>
-                        💡 SUGERENCIAS DEL EQUIPO
+                        💡 Muro de propuestas — tomá las que sirvan
                       </div>
                       <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
                         {availableSuggestions.map((s, i) => {
@@ -1210,13 +1165,53 @@ export default function Challenge01() {
                             >
                               <span style={{ fontSize: 10, fontWeight: 800, color: m?.color, flexShrink: 0, marginTop: 1 }}>{m?.name.split(" ")[0]}:</span>
                               <span style={{ fontSize: 12, color: "#334155", lineHeight: 1.35 }}>"{s.text}"</span>
-                              <span style={{ fontSize: 14, color: m?.color, fontWeight: 700, marginLeft: "auto" }}>+</span>
+                              <span style={{ fontSize: 14, color: m?.color, fontWeight: 700, marginLeft: "auto" }}>+ tomar</span>
                             </button>
                           )
                         })}
                       </div>
                     </div>
                   )}
+
+                  {/* ACUERDO FINAL — el deliverable: se nutre del muro y lo reconciliás vos */}
+                  <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+                    <div style={{ fontSize: 10, fontWeight: 800, color: "#0891b2", letterSpacing: 1, marginBottom: 6, textTransform: "uppercase" }}>
+                      ✍️ Acuerdo final — armalo y reconcilialo
+                    </div>
+                    <textarea
+                      value={agreementSynthesis[topic.id] || ""}
+                      onChange={e => setAgreementSynthesis(p => ({ ...p, [topic.id]: e.target.value }))}
+                      placeholder="Tomá propuestas del muro (se suman acá) y reconcilialas en UN acuerdo único, en tus palabras. Descartá el ruido."
+                      style={{ flex: 1, minHeight: 120, width: "100%", padding: 10, borderRadius: 8, border: `1.5px solid ${(agreementSynthesis[topic.id] || "").trim().length >= 12 ? "rgba(0,212,170,0.55)" : "#d1d5db"}`, fontSize: 12.5, fontFamily: "inherit", resize: "none", outline: "none", boxSizing: "border-box", color: "#0f172a", background: "#ffffff", lineHeight: 1.4 }}
+                    />
+                  </div>
+
+                  {/* BUY-IN: cerrar el acuerdo → el equipo responde */}
+                  {(() => {
+                    const synth = (agreementSynthesis[topic.id] || "").trim()
+                    const confirmed = agreementConfirmed[topic.id]
+                    if (confirmed && topic.buyIn) {
+                      const bm = MEMBER_MAP[topic.buyIn.from]
+                      return (
+                        <div style={{ display: "flex", gap: 8, padding: "9px 11px", borderRadius: 10, background: "#e6fbf5", border: "1px solid rgba(0,212,170,0.35)" }}>
+                          <div style={{ flexShrink: 0 }}><Avatar member={bm} size={26} /></div>
+                          <div style={{ minWidth: 0 }}>
+                            <div style={{ fontSize: 11, fontWeight: 700, color: bm.color, marginBottom: 2 }}>{bm.name.split(" ")[0]} · acordado ✓</div>
+                            <div style={{ fontSize: 12, color: "#0f172a", lineHeight: 1.4 }}>{topic.buyIn.text}</div>
+                          </div>
+                        </div>
+                      )
+                    }
+                    return (
+                      <button
+                        onClick={() => confirmTopic(topic.id)}
+                        disabled={synth.length < 12}
+                        style={{ width: "100%", padding: "10px 0", borderRadius: 8, border: "none", background: synth.length >= 12 ? "#00d4aa" : "#e5e7eb", color: synth.length >= 12 ? "#fff" : "#9ca3af", fontWeight: 800, fontSize: 13, cursor: synth.length >= 12 ? "pointer" : "not-allowed", fontFamily: "inherit" }}
+                      >
+                        ✓ Cerrar acuerdo con el equipo
+                      </button>
+                    )
+                  })()}
                 </div>
               )
             })}
@@ -1232,7 +1227,7 @@ export default function Challenge01() {
             </button>
           ) : (
             <div style={{ textAlign: "center", fontSize: 13, color: T.dim, padding: 12, background: "rgba(15,23,42,0.03)", borderRadius: 8 }}>
-              Redactá el acuerdo final de cada categoría para continuar ({synthDone.length}/{TEAM_AGREEMENT_TOPICS.length}).
+              Redactá y cerrá el acuerdo de cada categoría con el equipo para continuar ({synthDone.length}/{TEAM_AGREEMENT_TOPICS.length}).
             </div>
           )}
         </div>
@@ -1347,11 +1342,12 @@ export default function Challenge01() {
       />
 
       <div style={{ flex: 1, display: "flex", overflow: "hidden" }}>
-        {/* LEFT: TEAM CHAT */}
-        <div style={{ width: 340, background: T.bg, borderRight: `1px solid ${T.border}`, display: "flex", flexDirection: "column", flexShrink: 0 }}>
-          <div style={{ padding: "10px 12px", borderBottom: `1px solid ${T.border}` }}>
-            <div style={{ fontSize: 13, fontWeight: 800, color: T.text, marginBottom: 8 }}>💬 Equipo Setlist</div>
-            <div style={{ display: "flex", gap: 7 }}>
+        {/* LEFT: TEAM CHAT (estilo Atlassian Q&A) */}
+        <div style={{ width: 380, background: "#ffffff", borderRight: "1px solid #ebecf0", boxShadow: "2px 0 10px rgba(9,30,66,0.05)", display: "flex", flexDirection: "column", flexShrink: 0, zIndex: 2 }}>
+          {/* Header */}
+          <div style={{ padding: "16px 18px 12px", borderBottom: "1px solid #ebecf0" }}>
+            <div style={{ fontSize: 18, fontWeight: 800, color: "#172b4d", letterSpacing: -0.2, marginBottom: 12 }}>Equipo Setlist</div>
+            <div style={{ display: "flex", gap: 8 }}>
               {TEAM.map(m => {
                 const isTarget = replyTarget === m.id
                 return (
@@ -1369,41 +1365,46 @@ export default function Challenge01() {
             </div>
           </div>
 
-          <div ref={chatFeedRef} style={{ flex: 1, overflowY: "auto", padding: 12, display: "flex", flexDirection: "column", gap: 9 }}>
+          {/* Feed */}
+          <div ref={chatFeedRef} style={{ flex: 1, overflowY: "auto", padding: 16, display: "flex", flexDirection: "column", gap: 12, background: "#ffffff" }}>
             {chat.length === 0 && (
-              <div style={{ fontSize: 12, color: T.dim, fontStyle: "italic", textAlign: "center", marginTop: 20, lineHeight: 1.5 }}>
-                El equipo va a ir tirando dudas. Respondé acá y sacá las herramientas de la derecha cuando lo creas necesario.
+              <div style={{ margin: "auto", textAlign: "center", color: "#97a0af", padding: 20 }}>
+                <div style={{ fontSize: 40, marginBottom: 10, opacity: 0.5 }}>💬</div>
+                <div style={{ fontSize: 13, lineHeight: 1.5, maxWidth: 240 }}>El equipo va a ir tirando dudas acá. Respondé y sacá las herramientas de la derecha cuando lo creas necesario.</div>
               </div>
             )}
             {chat.map((c, i) => {
-              if (c.narration) return <div key={i} style={{ fontSize: 12, fontStyle: "italic", color: T.teal, lineHeight: 1.45 }}>{c.text}</div>
+              if (c.narration) return (
+                <div key={i} style={{ background: "#deebff", color: "#0747a6", fontSize: 13, lineHeight: 1.5, padding: "10px 14px", borderRadius: 12 }}>{c.text}</div>
+              )
               if (c.isYou) return (
-                <div key={i} style={{ alignSelf: "flex-end", maxWidth: "88%" }}>
-                  <div style={{ fontSize: 10, color: T.dim, textAlign: "right", marginBottom: 2 }}>Vos (SM){c.targetName ? ` → ${c.targetName.split(" ")[0]}` : ""}</div>
-                  <div style={{ background: T.tealDim, border: `1px solid ${T.teal}40`, color: T.text, fontSize: 13, lineHeight: 1.4, padding: "8px 10px", borderRadius: 10 }}>{c.text}</div>
+                <div key={i} style={{ alignSelf: "flex-end", maxWidth: "85%" }}>
+                  <div style={{ fontSize: 11, color: "#6b778c", textAlign: "right", marginBottom: 3 }}>Vos (SM){c.targetName ? ` → ${c.targetName.split(" ")[0]}` : ""}</div>
+                  <div style={{ background: "#e6fbf5", border: "1px solid rgba(0,212,170,0.35)", color: "#0f172a", fontSize: 13, lineHeight: 1.45, padding: "9px 13px", borderRadius: 14, borderBottomRightRadius: 4 }}>{c.text}</div>
                 </div>
               )
               const m = MEMBER_MAP[c.from]
               if (!m) return null
               return (
-                <div key={i} onClick={() => setReplyTarget(c.from)} style={{ display: "flex", gap: 8, cursor: "pointer", maxWidth: "92%" }}>
-                  <Avatar member={m} size={26} />
+                <div key={i} onClick={() => setReplyTarget(c.from)} style={{ display: "flex", gap: 9, cursor: "pointer", maxWidth: "90%" }}>
+                  <div style={{ flexShrink: 0, marginTop: 16 }}><Avatar member={m} size={28} /></div>
                   <div style={{ minWidth: 0 }}>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: m.color, marginBottom: 2 }}>{m.name.split(" ")[0]}</div>
-                    <div style={{ fontSize: 13, color: T.text, lineHeight: 1.4, background: T.panel, padding: "7px 9px", borderRadius: 10, border: `1px solid ${T.border}` }}>{c.text}</div>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: m.color, marginBottom: 3 }}>{m.name.split(" ")[0]}</div>
+                    <div style={{ fontSize: 13, color: "#172b4d", lineHeight: 1.45, background: "#f4f5f7", padding: "9px 13px", borderRadius: 14, borderTopLeftRadius: 4 }}>{c.text}</div>
                   </div>
                 </div>
               )
             })}
-            {loading && <div style={{ fontSize: 12, fontStyle: "italic", color: T.dim }}>El equipo está procesando…</div>}
+            {loading && <div style={{ fontSize: 12, color: "#97a0af", fontStyle: "italic" }}>El equipo está escribiendo…</div>}
           </div>
 
-          <div style={{ borderTop: `1px solid ${T.border}`, padding: 10 }}>
+          {/* Composer */}
+          <div style={{ borderTop: "1px solid #ebecf0", padding: 14 }}>
             {replyTarget && (
-              <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 6, background: `${MEMBER_MAP[replyTarget]?.color}15`, padding: "5px 9px", borderRadius: 9 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 8, background: `${MEMBER_MAP[replyTarget]?.color}14`, padding: "5px 10px", borderRadius: 10 }}>
                 <Avatar member={MEMBER_MAP[replyTarget]} size={22} />
                 <span style={{ fontSize: 12, color: MEMBER_MAP[replyTarget]?.color, fontWeight: 700 }}>→ {MEMBER_MAP[replyTarget]?.name.split(" ")[0]}</span>
-                <button onClick={() => setReplyTarget(null)} style={{ marginLeft: "auto", background: "none", border: "none", color: T.dim, cursor: "pointer", fontSize: 14 }}>✕</button>
+                <button onClick={() => setReplyTarget(null)} style={{ marginLeft: "auto", background: "none", border: "none", color: "#97a0af", cursor: "pointer", fontSize: 14 }}>✕</button>
               </div>
             )}
             <div style={{ display: "flex", gap: 8, alignItems: "flex-end" }}>
@@ -1412,16 +1413,19 @@ export default function Challenge01() {
                 onChange={e => setSmInput(e.target.value)}
                 onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey && smInput.trim() && !loading) { e.preventDefault(); const msg = smInput; const target = replyTarget; setSmInput(""); setReplyTarget(null); handleSMMessage(msg, target) } }}
                 disabled={loading}
-                rows={2}
+                rows={1}
                 placeholder={loading ? "Procesando..." : (replyTarget ? `Respondele a ${MEMBER_MAP[replyTarget]?.name.split(" ")[0]}...` : "Hablale al equipo...")}
-                style={{ flex: 1, padding: "9px 11px", borderRadius: 10, border: `1px solid ${T.border}`, background: T.panel, color: T.text, fontSize: 14, fontFamily: "inherit", outline: "none", resize: "none", boxSizing: "border-box" }}
+                style={{ flex: 1, padding: "10px 14px", borderRadius: 22, border: "1px solid #dfe1e6", background: "#fafbfc", color: "#172b4d", fontSize: 14, fontFamily: "inherit", outline: "none", resize: "none", boxSizing: "border-box", lineHeight: 1.4 }}
+                onFocus={e => { e.target.style.borderColor = "#4c9aff"; e.target.style.background = "#fff" }}
+                onBlur={e => { e.target.style.borderColor = "#dfe1e6"; e.target.style.background = "#fafbfc" }}
               />
               <button
                 onClick={() => { if (!smInput.trim() || loading) return; const msg = smInput; const target = replyTarget; setSmInput(""); setReplyTarget(null); handleSMMessage(msg, target) }}
                 disabled={!smInput.trim() || loading}
-                style={{ padding: "0 14px", height: 40, borderRadius: 10, border: "none", background: smInput.trim() && !loading ? T.teal : T.panel, color: "#000", fontWeight: 800, fontSize: 15, cursor: smInput.trim() && !loading ? "pointer" : "not-allowed" }}
+                title="Enviar"
+                style={{ width: 40, height: 40, flexShrink: 0, borderRadius: "50%", border: "none", background: smInput.trim() && !loading ? T.teal : "#dfe1e6", color: "#fff", fontWeight: 800, fontSize: 16, cursor: smInput.trim() && !loading ? "pointer" : "not-allowed", display: "flex", alignItems: "center", justifyContent: "center" }}
               >
-                Enviar
+                ➤
               </button>
             </div>
           </div>

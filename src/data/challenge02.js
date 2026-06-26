@@ -4,7 +4,13 @@ import { TEAM, MEMBER_MAP, TEAM_DESC_SHORT } from "./setlistSprint1"
 export { TEAM, MEMBER_MAP }
 
 // ─── CONTEXTO DEL SPRINT ───
+// SPRINT_CONTEXT: contexto COMPLETO para la IA (incluye la verdad oculta de Alan).
+// No se muestra al candidato — para eso está SITUACION.
 export const SPRINT_CONTEXT = "Setlist · Sprint 1, Día 3/10. Es la primera semana del equipo trabajando juntos — Mateo armó el equipo en las últimas 2-3 semanas. Alan (Dev Mobile) llegó arrastrando burnout de su empresa anterior (1+ año a 14h/día), pero NADIE del equipo sabe esto. En el board sus tickets del Sprint 1 (SL-104 RSVP, SL-105 Buscar canción / Spotify, SL-110 Galería de fotos) están en DOING sin avanzar. Los últimos commits son a las 2-3am. Gian ya rebotó 2 PRs por bugs básicos que Alan nunca cometería. En el daily Alan dice 'está todo controlado'. El show piloto real con audience pública es en 4 semanas y Alan es clave para el mobile. El SM tiene que detectar señales sin pista obvia — el equipo no lo conoce hace ni una semana."
+
+// SITUACION: briefing que VE el candidato. Solo señales observables, sin
+// diagnóstico ni spoiler — detectar qué le pasa a Alan ES el challenge.
+export const SITUACION = "Tenés un 1-1 con Alan, el dev mobile. Hace tres días que sus tickets —RSVP, Buscar canción y Galería— no se mueven de 'Doing', y sus últimos commits aparecen a las 2 de la mañana. Gian, de QA, le rebotó dos PRs por bugs básicos, raros en él. En la última daily dijo que estaba 'todo controlado'. Es de los primeros 1-1 del equipo: se conocen hace menos de una semana."
 
 // ─── TEAM DESCRIPTION (para prompts de AI) ───
 export const TEAM_DESC = `${TEAM_DESC_SHORT}

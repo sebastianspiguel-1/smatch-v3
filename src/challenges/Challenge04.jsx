@@ -24,6 +24,7 @@ import {
   STAKEHOLDER_MAP,
   MEMBER_MAP,
   SPRINT_CONTEXT,
+  SITUACION,
   SPRINT_SNAPSHOT,
   TEAM_DESC,
   INVESTIGATION_METRICS,
@@ -304,7 +305,7 @@ export default function Challenge04() {
           <div style={{ background: "linear-gradient(135deg, rgba(220, 38, 38, 0.06), #ffffff)", borderRadius: 16, padding: 24, marginBottom: 24, border: "2px solid rgba(220, 38, 38, 0.20)" }}>
             <div style={{ fontSize: 12, fontWeight: 900, letterSpacing: 3, color: "#dc2626", marginBottom: 16 }}>📋 SITUACIÓN</div>
             <div style={{ fontSize: 15, color: T.sub, lineHeight: 1.7 }}>
-              {SPRINT_CONTEXT}
+              {SITUACION}
             </div>
           </div>
 

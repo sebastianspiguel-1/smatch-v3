@@ -27,7 +27,8 @@ export const TEAM_AGREEMENT_TOPICS = [
       { from: "gian", text: "Todo lo no-urgente al daily, no Slack." },
       { from: "gabriela", text: "Reunión diaria de 1 hora para alinear todo entre todos.", bad: true },
       { from: "david", text: "Que todo pase por mail formal, así queda registro de todo.", bad: true },
-    ]
+    ],
+    buyIn: { from: "alan", text: "Ok. Mientras quede claro cuándo SÍ se puede pingear fuera de horario, lo banco." },
   },
   {
     id: "dor",
@@ -42,7 +43,8 @@ export const TEAM_AGREEMENT_TOPICS = [
       { from: "alan", text: "Mockup/wireframe si es UI." },
       { from: "gabriela", text: "Aprobado por PO sin scope creep oculto." },
       { from: "gabriela", text: "El PO decide solo si algo está listo, sin pasar por el equipo.", bad: true },
-    ]
+    ],
+    buyIn: { from: "gian", text: "Me sirve tenerlo escrito. Lo voy a usar para frenar los tickets que entran a medias." },
   },
   {
     id: "estimation",
@@ -57,7 +59,8 @@ export const TEAM_AGREEMENT_TOPICS = [
       { from: "alan", text: "Si hay desacuerdo grande, los extremos explican primero." },
       { from: "david", text: "El estimado lo da quien vaya a hacer la tarea." },
       { from: "gabriela", text: "Que el más senior decida la estimación, total sabe más que el resto.", bad: true },
-    ]
+    ],
+    buyIn: { from: "nacho", text: "Dale. Si me bancan pensar en relativo las primeras veces, me adapto." },
   }
 ]
 

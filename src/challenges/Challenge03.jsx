@@ -18,6 +18,7 @@ import {
   TEAM,
   MEMBER_MAP,
   SPRINT_CONTEXT,
+  SITUACION,
   SPRINT_SUMMARY,
   TEAM_DESC,
   KANBAN_COLUMNS,
@@ -390,7 +391,10 @@ export default function Challenge03() {
               <span style={{ fontSize: 20 }}>📊</span>
               SITUACIÓN DEL SPRINT
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16, marginBottom: 16 }}>
+            <div style={{ fontSize: 14, color: T.sub, lineHeight: 1.6, marginBottom: 18 }}>
+              {SITUACION}
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
               <div style={{ background: T.panel, borderRadius: 12, padding: 16, border: `1px solid ${T.border}` }}>
                 <div style={{ fontSize: 11, color: T.dim, marginBottom: 4 }}>Velocity</div>
                 <div style={{ fontSize: 24, fontWeight: 900, color: T.orange }}>57%</div>
@@ -406,9 +410,6 @@ export default function Challenge03() {
                 <div style={{ fontSize: 24, fontWeight: 900, color: "#f59e0b" }}>16 pts</div>
                 <div style={{ fontSize: 10, color: T.sub }}>38% sprint</div>
               </div>
-            </div>
-            <div style={{ fontSize: 14, color: T.sub, lineHeight: 1.6 }}>
-              {SPRINT_CONTEXT}
             </div>
           </div>
 

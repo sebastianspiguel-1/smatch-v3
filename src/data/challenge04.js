@@ -10,7 +10,13 @@ import {
 export { TEAM, MEMBER_MAP, STAKEHOLDERS, STAKEHOLDER_MAP }
 
 // ─── CONTEXTO DEL SPRINT ───
+// SPRINT_CONTEXT: contexto COMPLETO para la IA (incluye las causas reales).
+// No se muestra al candidato — para eso está SITUACION.
 export const SPRINT_CONTEXT = "Setlist · Sprint 1, Día 7/10. Es el PRIMER sprint del equipo trabajando juntos (Mateo armó el equipo en las últimas 2-3 semanas). Se comprometieron 30 pts, hoy llevan 13 completados. Paula (Engineering Manager) convocó una reunión 1-1 con el SM en pánico: hizo una proyección lineal y le quedó que se va a entregar solo el 60% del scope comprometido. El show piloto real con audience pública es en 4 semanas. Causas reales del retraso: SL-105 (búsqueda Spotify) bloqueado 2 días por aprobación de la API; Alan arrastrando burnout de su empresa anterior (nadie en el equipo sabe esto); Gabriela agregó cambios de alcance mid-sprint sin actualizar AC. Paula trae presión de Mateo (CEO). La conversación define cómo se va a comunicar el estado a la banda y al equipo."
+
+// SITUACION: briefing que VE el candidato. Las causas reales NO se dan acá —
+// se descubren en la fase de investigación previa a la reunión.
+export const SITUACION = "Día 7 del sprint. Se comprometieron 30 puntos y por ahora hay 13 completos. Paula, quien es la Engineering Manager y stakeholder, te pide un 1-1: hizo una cuenta lineal, le dio que se entregará el ~60% de lo comprometido y entró en pánico. Trae presión del CEO y el piloto es en cuatro semanas. Antes de sentarte con ella podés mirar qué está pasando de verdad y afrontar esta conversación difícil."
 
 export const INITIAL_PAULA_STATE = {
   pressure: 70,
