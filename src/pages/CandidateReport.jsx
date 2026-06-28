@@ -4,7 +4,7 @@ import { T, QUALITY, DIM_LABELS } from "../theme"
 import { getResults } from "../engine/supabase"
 import { RadarChartComponent } from "../components"
 import { getChallengeById } from "../data/challengesMetadata"
-import { getProfile } from "../engine/candidateProfile"
+import { getProfile, syncProfileFromCloud } from "../engine/candidateProfile"
 import { getMockResults, seedMockJourney } from "../dev/seedMockJourney"
 import { consolidateToMacro } from "../engine/macroDimensions"
 
@@ -12,6 +12,22 @@ import { consolidateToMacro } from "../engine/macroDimensions"
 // si no hay data y muestra el reporte sample.
 const DEMO_CANDIDATE_ID = "demo"
 import "./CandidateReport.css"
+
+// Deriva la "calidad" de una respuesta. Los mocks traen fb.quality; la data
+// real trae fb.scores (sub-dimensiones 1-4) → la promediamos a un nivel.
+function deriveQuality(fb) {
+  if (fb.quality) return fb.quality
+  const vals = fb.scores ? Object.values(fb.scores).filter((v) => typeof v === "number" && v > 0) : []
+  if (!vals.length) return null
+  const avg = vals.reduce((a, b) => a + b, 0) / vals.length
+  if (avg <= 1.6) return "red_flag"
+  if (avg >= 3.5) return "expert"
+  if (avg >= 2.6) return "competent"
+  return "developing"
+}
+
+// Texto visible de una respuesta: el feedback del mock, o lo que dijo/hizo el candidato.
+const fbText = (fb) => fb.feedback || fb.message || ""
 
 export default function CandidateReport() {
   const { id } = useParams()
@@ -178,9 +194,9 @@ export default function CandidateReport() {
         setResults(data || [])
       }
 
-      // Cargar profile del candidato (localStorage por ahora, Supabase en MVP)
+      // Cargar profile del candidato: primero Supabase (cross-device), fallback local
       try {
-        const candidateProfile = getProfile(id)
+        const candidateProfile = await syncProfileFromCloud(id)
         setProfile(candidateProfile)
       } catch (e) {
         console.warn("Profile not found:", e)
@@ -233,15 +249,17 @@ export default function CandidateReport() {
   const redFlags = []
   const highlights = []
   results.forEach((r, idx) => {
-    if (r.feedback) {
-      r.feedback.forEach(fb => {
-        if (fb.quality === "red_flag") {
-          redFlags.push({ challenge: idx + 1, ...fb })
-        } else if (fb.quality === "expert") {
-          highlights.push({ challenge: idx + 1, ...fb })
-        }
-      })
-    }
+    if (!r.feedback) return
+    r.feedback.forEach(fb => {
+      const q = deriveQuality(fb)
+      const text = fbText(fb)
+      if (!text) return
+      if (q === "red_flag") {
+        redFlags.push({ challenge: idx + 1, ...fb, feedback: text })
+      } else if (q === "expert") {
+        highlights.push({ challenge: idx + 1, ...fb, feedback: text })
+      }
+    })
   })
 
   const totalTime = results.reduce((sum, r) => sum + (r.time_used || 0), 0)
@@ -333,44 +351,71 @@ export default function CandidateReport() {
           </div>
         </div>
 
-        {/* Compact Score + Seniority + Hiring Decision */}
-        <div className="score-hiring-row">
-          <div className="score-card-compact">
-            <div className="score-badge-compact" style={{ borderColor: globalGrade.color }}>
-              <div className="score-letter-compact" style={{ color: globalGrade.color }}>{globalGrade.letter}</div>
-              <div className="score-percentage-compact">{globalScore}%</div>
-            </div>
-            <div className="score-label-compact">{globalGrade.label}</div>
-          </div>
+        {/* ═══ VEREDICTO — tarjeta ejecutiva (ancla visual) ═══ */}
+        <div className="report-verdict">
+          <div className="verdict-eyebrow">Reporte de Assessment · Sprint 1 · Equipo Setlist</div>
 
-          <div className="seniority-card" style={{ borderColor: seniorityLevel.color, background: `${seniorityLevel.color}10` }}>
-            <div className="seniority-header">
-              <div className="seniority-badge" style={{ background: seniorityLevel.color }}>
-                {seniorityLevel.level.toUpperCase()}
-              </div>
-              <div className="seniority-label" style={{ color: seniorityLevel.color }}>
-                {seniorityLevel.label}
-              </div>
+          <div className="verdict-main">
+            <div className="verdict-score">
+              <span className="verdict-score-num">{globalScore}</span>
+              <span className="verdict-score-max">/100</span>
+              <span className="verdict-level-pill" style={{ background: globalGrade.color }}>
+                {globalGrade.label.replace("Scrum Master ", "")}
+              </span>
             </div>
-            <div className="seniority-description">
-              {seniorityLevel.description}
+            <div className="verdict-seniority">
+              <div className="verdict-seniority-label">{seniorityLevel.label}</div>
+              <div className="verdict-seniority-desc">{seniorityLevel.description}</div>
             </div>
           </div>
 
-          <div className="hiring-decision" style={{ borderColor: hiringRecommendation.color, background: `${hiringRecommendation.color}10` }}>
-            <div className="hiring-icon" style={{ color: hiringRecommendation.color }}>{hiringRecommendation.icon}</div>
-            <div className="hiring-text">
-              <div className="hiring-label" style={{ color: hiringRecommendation.color }}>{hiringRecommendation.label}</div>
-              <div className="hiring-reason">
+          <div className="verdict-divider" />
+
+          <div className="verdict-hiring">
+            <span className="verdict-dot" style={{ background: hiringRecommendation.color }} />
+            <div className="verdict-hiring-text">
+              <span className="verdict-hiring-label">{hiringRecommendation.label}</span>
+              <span className="verdict-hiring-reason">
                 {redFlags.length > 0 ? `${redFlags.length} red flag${redFlags.length > 1 ? 's' : ''}` : "Sin red flags"}
-                {" • "}
+                {" · "}
                 {highlights.length} highlight{highlights.length !== 1 ? 's' : ''}
-              </div>
+              </span>
             </div>
           </div>
+        </div>
 
-          <div className="radar-chart-compact">
-            <RadarChartComponent data={consolidatedScores} height={140} />
+        {/* PERFIL DE COMPETENCIAS — radar + barras (clave para el recruiter) */}
+        <div className="competency-section">
+          <div className="competency-head">
+            <h3 className="section-title-compact">Perfil de competencias</h3>
+            <div className="competency-legend">
+              <span style={{ color: T.green }}>● Fuerte</span>
+              <span style={{ color: T.blue }}>● Sólido</span>
+              <span style={{ color: T.orange }}>● En desarrollo</span>
+              <span style={{ color: T.red }}>● A reforzar</span>
+            </div>
+          </div>
+          <div className="competency-grid">
+            <div className="competency-radar">
+              <RadarChartComponent data={consolidatedScores} size={320} />
+            </div>
+            <div className="competency-bars">
+              {[...consolidatedScores]
+                .sort((a, b) => (b.sampleCount === 0 ? -1 : a.sampleCount === 0 ? 1 : b.score - a.score))
+                .map((s) => {
+                  const noData = s.sampleCount === 0
+                  const col = noData ? "#94a3b8" : s.score >= 75 ? T.green : s.score >= 50 ? T.blue : s.score >= 25 ? T.orange : T.red
+                  return (
+                    <div key={s.dimension} className="dimension-row-compact">
+                      <div className="dimension-name-compact">{s.dimension}</div>
+                      <div className="dimension-bar-compact">
+                        <div className="dimension-fill-compact" style={{ width: noData ? "0%" : `${s.score}%`, background: noData ? "#cbd5e1" : col }} />
+                      </div>
+                      <div className="dimension-score-compact" style={{ color: col }}>{noData ? "n/a" : `${s.score}%`}</div>
+                    </div>
+                  )
+                })}
+            </div>
           </div>
         </div>
 
@@ -382,52 +427,53 @@ export default function CandidateReport() {
           (profile.ai_coach_usage?.total_calls || 0) > 0
         ) && (
           <div className="ai-insights-section">
-            <h3 className="section-title-compact">
-              <span className="ai-badge">🤖 AI</span> Insights generados durante el assessment
-            </h3>
+            <div className="ai-eyebrow">El diferenciador Smatch</div>
+            <h3 className="ai-headline">Cómo usó la IA durante el assessment</h3>
+            <p className="ai-synthesis">
+              {(() => {
+                const calls = profile.ai_coach_usage?.total_calls || 0
+                const hist = profile.challenge_history || []
+                const eff = hist.filter((c) => c.ai_fluency_score >= 3).length
+                const styleMap = { directive: "directivo", empathic: "empático", analytical: "analítico", balanced: "balanceado", passive: "pasivo" }
+                const parts = []
+                if (calls > 0) parts.push(`Consultó al asistente ${calls} ${calls === 1 ? "vez" : "veces"} durante el assessment.`)
+                if (hist.length > 0) parts.push(`En ${eff} de ${hist.length} challenges el uso de IA fue eficiente.`)
+                if (styleMap[profile.communication_style]) parts.push(`Estilo de trabajo ${styleMap[profile.communication_style]}.`)
+                return parts.join(" ") || "Sin uso de IA registrado en este assessment."
+              })()}
+            </p>
 
-            {/* Row 1: 4 chips de stats rápidos */}
-            <div className="ai-insights-stats-row">
-              {profile.communication_style && (
-                <div className="ai-insight-stat-chip">
-                  <div className="ai-insight-stat-label">Estilo</div>
-                  <div className="ai-insight-stat-value">
-                    {profile.communication_style === "directive" && "🎯 Directivo"}
-                    {profile.communication_style === "empathic" && "💚 Empático"}
-                    {profile.communication_style === "analytical" && "📊 Analítico"}
-                    {profile.communication_style === "balanced" && "⚖️ Balanceado"}
-                    {profile.communication_style === "passive" && "🌫️ Pasivo"}
-                  </div>
-                </div>
-              )}
-              <div className="ai-insight-stat-chip">
-                <div className="ai-insight-stat-label">Consultas a Lyra</div>
-                <div className="ai-insight-stat-value">
-                  {profile.ai_coach_usage?.total_calls || 0}
-                </div>
-              </div>
-              <div className="ai-insight-stat-chip">
-                <div className="ai-insight-stat-label">Uso eficiente de IA</div>
-                <div className="ai-insight-stat-value">
+            <div className="ai-stats">
+              <div className="ai-stat">
+                <div className="ai-stat-num">
                   {(profile.challenge_history || []).filter((c) => c.ai_fluency_score >= 3).length}
-                  /{(profile.challenge_history || []).length || 5}
+                  <span className="ai-stat-den">/{(profile.challenge_history || []).length || 5}</span>
                 </div>
+                <div className="ai-stat-label">Uso eficiente de IA</div>
               </div>
-              <div className="ai-insight-stat-chip">
-                <div className="ai-insight-stat-label">Patrones</div>
-                <div className="ai-insight-stat-value">
-                  {(profile.insights?.patterns || []).length}
+              <div className="ai-stat-sep" />
+              <div className="ai-stat">
+                <div className="ai-stat-num">{profile.ai_coach_usage?.total_calls || 0}</div>
+                <div className="ai-stat-label">Consultas a Lyra</div>
+              </div>
+              <div className="ai-stat-sep" />
+              <div className="ai-stat">
+                <div className="ai-stat-num">
+                  {profile.communication_style === "directive" && "Directivo"}
+                  {profile.communication_style === "empathic" && "Empático"}
+                  {profile.communication_style === "analytical" && "Analítico"}
+                  {profile.communication_style === "balanced" && "Balanceado"}
+                  {profile.communication_style === "passive" && "Pasivo"}
+                  {!profile.communication_style && "—"}
                 </div>
+                <div className="ai-stat-label">Estilo de comunicación</div>
               </div>
             </div>
 
-            {/* Row 2: 3 columnas — Fortalezas · Oportunidades · Momentos */}
-            <div className="ai-insights-cols">
-              <div className="ai-insights-col strengths">
-                <div className="ai-insights-col-title" style={{ color: "#059669" }}>
-                  ✓ Fortalezas
-                </div>
-                <ul className="ai-insights-col-list">
+            <div className="ai-cols">
+              <div className="ai-col">
+                <div className="ai-col-title" style={{ color: "#059669" }}>Fortalezas</div>
+                <ul className="ai-col-list strengths">
                   {(profile.insights?.strengths || []).slice(0, 4).map((s, i) => (
                     <li key={i}>{s}</li>
                   ))}
@@ -436,12 +482,9 @@ export default function CandidateReport() {
                   )}
                 </ul>
               </div>
-
-              <div className="ai-insights-col weaknesses">
-                <div className="ai-insights-col-title" style={{ color: "#ea580c" }}>
-                  ⚠ Oportunidades
-                </div>
-                <ul className="ai-insights-col-list">
+              <div className="ai-col">
+                <div className="ai-col-title" style={{ color: "#ea580c" }}>Oportunidades</div>
+                <ul className="ai-col-list weaknesses">
                   {(profile.insights?.weaknesses || []).slice(0, 4).map((w, i) => (
                     <li key={i}>{w}</li>
                   ))}
@@ -450,15 +493,12 @@ export default function CandidateReport() {
                   )}
                 </ul>
               </div>
-
-              <div className="ai-insights-col moments">
-                <div className="ai-insights-col-title" style={{ color: "#2563eb" }}>
-                  ⭐ Momentos destacados
-                </div>
-                <ul className="ai-insights-col-list">
+              <div className="ai-col">
+                <div className="ai-col-title" style={{ color: "#2563eb" }}>Momentos destacados</div>
+                <ul className="ai-col-list moments">
                   {(profile.insights?.notable_moments || []).slice(-4).map((m, i) => (
                     <li key={i}>
-                      <span className="moment-tag">{m.challenge}</span> {m.note}
+                      <span className="ai-moment-tag">{m.challenge}</span> {m.note}
                     </li>
                   ))}
                   {(profile.insights?.notable_moments || []).length === 0 && (
@@ -468,34 +508,25 @@ export default function CandidateReport() {
               </div>
             </div>
 
-            {/* Row 3: Lyra por challenge (1 línea cada uno) */}
             {(profile.challenge_history || []).filter((c) => c.ai_fluency_rationale).length > 0 && (
-              <details className="ai-coach-details">
-                <summary>
-                  Cómo usó a Lyra en cada challenge ({(profile.challenge_history || []).length})
-                </summary>
-                <div className="ai-coach-list">
+              <div className="ai-bychallenge">
+                <div className="ai-bychallenge-title">Uso de IA por challenge</div>
+                <div className="ai-bychallenge-list">
                   {(profile.challenge_history || [])
                     .filter((c) => c.ai_fluency_rationale)
-                    .map((c, i) => (
-                      <div key={i} className="ai-coach-list-item">
-                        <span className="ai-coach-challenge">{c.challenge_name || c.challenge}</span>
-                        <span
-                          className={`ai-fluency-score score-${
-                            c.ai_fluency_score >= 3
-                              ? "high"
-                              : c.ai_fluency_score >= 2
-                              ? "mid"
-                              : "low"
-                          }`}
-                        >
-                          {c.ai_fluency_score}/4
-                        </span>
-                        <span className="ai-coach-rationale">{c.ai_fluency_rationale}</span>
-                      </div>
-                    ))}
+                    .map((c, i) => {
+                      const sc = c.ai_fluency_score
+                      const scol = sc >= 3 ? "#059669" : sc >= 2 ? "#ea580c" : "#dc2626"
+                      return (
+                        <div key={i} className="ai-bychallenge-row">
+                          <span className="ai-bychallenge-name">{c.challenge_name || c.challenge}</span>
+                          <span className="ai-bychallenge-score" style={{ color: scol }}>{sc}/4</span>
+                          <span className="ai-bychallenge-rationale">{c.ai_fluency_rationale}</span>
+                        </div>
+                      )
+                    })}
                 </div>
-              </details>
+              </div>
             )}
           </div>
         )}
@@ -562,54 +593,6 @@ export default function CandidateReport() {
 
         {/* Compact Dimensions + Insights Grid */}
         <div className="insights-grid">
-          {/* Dimensions Column */}
-          <div className="dimensions-compact">
-            <h3 className="section-title-compact">Dimensiones</h3>
-            {[...consolidatedScores]
-              .sort((a, b) => (b.sampleCount === 0 ? -1 : a.sampleCount === 0 ? 1 : b.score - a.score))
-              .map((s) => {
-                const noData = s.sampleCount === 0
-                return (
-                  <div key={s.dimension} className="dimension-row-compact">
-                    <div className="dimension-name-compact">{s.dimension}</div>
-                    <div className="dimension-bar-compact">
-                      <div
-                        className="dimension-fill-compact"
-                        style={{
-                          width: noData ? "0%" : `${s.score}%`,
-                          background: noData
-                            ? "#cbd5e1"
-                            : s.score >= 75
-                            ? T.green
-                            : s.score >= 50
-                            ? T.blue
-                            : s.score >= 25
-                            ? T.orange
-                            : T.red,
-                        }}
-                      />
-                    </div>
-                    <div
-                      className="dimension-score-compact"
-                      style={{
-                        color: noData
-                          ? "#94a3b8"
-                          : s.score >= 75
-                          ? T.green
-                          : s.score >= 50
-                          ? T.blue
-                          : s.score >= 25
-                          ? T.orange
-                          : T.red,
-                      }}
-                    >
-                      {noData ? "n/a" : `${s.score}%`}
-                    </div>
-                  </div>
-                )
-              })}
-          </div>
-
           {/* Insights Column */}
           <div className="insights-compact">
             {/* Strengths */}
@@ -683,7 +666,8 @@ export default function CandidateReport() {
             {redFlags.length > 0 && (
               <div className="flags-compact red-flags">
                 <h3 className="section-title-compact">
-                  ⚠️ Red Flags ({redFlags.length})
+                  <span style={{ display: "inline-block", width: 9, height: 9, borderRadius: "50%", background: T.red, marginRight: 8, verticalAlign: "middle" }} />
+                  Red Flags ({redFlags.length})
                 </h3>
                 {redFlags.slice(0, 3).map((flag, i) => {
                   const challenge = getChallengeById(flag.challenge)
@@ -702,7 +686,8 @@ export default function CandidateReport() {
             {highlights.length > 0 && (
               <div className="flags-compact highlights">
                 <h3 className="section-title-compact">
-                  ⭐ Highlights ({highlights.length})
+                  <span style={{ display: "inline-block", width: 9, height: 9, borderRadius: "50%", background: T.green, marginRight: 8, verticalAlign: "middle" }} />
+                  Highlights ({highlights.length})
                 </h3>
                 {highlights.slice(0, 3).map((highlight, i) => {
                   const challenge = getChallengeById(highlight.challenge)
@@ -757,15 +742,59 @@ export default function CandidateReport() {
           </div>
         </div>
 
+        {/* Evidencia por respuesta — qué dijo y cómo se evaluó */}
+        <div className="challenges-section">
+          <h3 className="section-title-compact">Evidencia — qué dijo y cómo se evaluó</h3>
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            {results.sort((a, b) => a.challenge_id - b.challenge_id).map((result) => {
+              const challenge = getChallengeById(result.challenge_id)
+              if (!challenge) return null
+              const items = (result.feedback || []).filter((fb) => fbText(fb).trim())
+              if (!items.length) return null
+              return (
+                <details key={result.challenge_id} style={{ background: T.panel, border: `1px solid ${T.border}`, borderLeft: `4px solid ${challenge.color}`, borderRadius: T.radiusMd, padding: "12px 16px", boxShadow: T.shadowCard }}>
+                  <summary style={{ cursor: "pointer", fontWeight: 800, color: T.navy, fontSize: 14, display: "flex", alignItems: "center", gap: 8, listStyle: "none" }}>
+                    <span style={{ color: challenge.color }}>{challenge.icon}</span>
+                    {challenge.shortTitle}
+                    <span style={{ marginLeft: "auto", fontSize: 12, color: T.dim, fontWeight: 600 }}>{items.length} respuestas</span>
+                  </summary>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 12 }}>
+                    {items.map((fb, i) => {
+                      const q = deriveQuality(fb)
+                      const qm = q ? QUALITY[q] : null
+                      const subs = fb.scores ? Object.entries(fb.scores).filter(([, v]) => typeof v === "number" && v > 0) : []
+                      return (
+                        <div key={i} style={{ background: T.card, borderRadius: 8, padding: "10px 12px", border: `1px solid ${T.border}` }}>
+                          <div style={{ fontSize: 13, color: T.text, lineHeight: 1.5, marginBottom: subs.length || qm ? 8 : 0 }}>"{fbText(fb)}"</div>
+                          {(qm || subs.length > 0) && (
+                            <div style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center" }}>
+                              {qm && (
+                                <span style={{ fontSize: 11, fontWeight: 800, color: qm.color, background: `${qm.color}1a`, border: `1px solid ${qm.color}40`, borderRadius: 6, padding: "2px 8px" }}>{qm.emoji} {qm.label}</span>
+                              )}
+                              {subs.map(([k, v]) => (
+                                <span key={k} style={{ fontSize: 11, color: T.dim, background: "rgba(15,23,42,0.04)", borderRadius: 6, padding: "2px 8px" }}>{DIM_LABELS[k] || k} · {v}/4</span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+                </details>
+              )
+            })}
+          </div>
+        </div>
+
         {/* Footer */}
         <div className="report-footer">
-          <p className="footer-brand">🤖 Generated with Claude Code & SMatch</p>
+          <p className="footer-brand">Smatch · Assessment de Scrum Master</p>
           <div className="footer-actions">
             <button onClick={() => nav("/challenges")} className="btn-secondary">
               Volver a Challenges
             </button>
             <button onClick={() => window.print()} className="btn-primary">
-              📄 Exportar PDF
+              Exportar PDF
             </button>
           </div>
         </div>

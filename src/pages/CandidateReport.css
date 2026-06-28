@@ -10,6 +10,8 @@
   font-family: 'Plus Jakarta Sans', 'Segoe UI', system-ui, sans-serif;
   padding: 20px 16px;
   position: relative;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
 }
 
 .candidate-report::before {
@@ -31,6 +33,135 @@
   margin: 0 auto;
   position: relative;
   z-index: 1;
+}
+
+/* ═══ VEREDICTO — tarjeta ejecutiva navy (ancla visual) ═══ */
+.report-verdict {
+  background: #0a1f44;
+  border-radius: 20px;
+  padding: 28px 32px 24px;
+  margin-bottom: 48px;
+  box-shadow: 0 18px 40px -16px rgba(10, 31, 68, 0.45);
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+  break-inside: avoid;
+}
+
+.verdict-eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #00d4aa;
+  margin-bottom: 18px;
+}
+
+.verdict-main {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  flex-wrap: wrap;
+}
+
+.verdict-score {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.verdict-score-num {
+  font-size: 64px;
+  font-weight: 900;
+  line-height: 0.9;
+  letter-spacing: -0.04em;
+  color: #ffffff;
+}
+
+.verdict-score-max {
+  font-size: 20px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.verdict-level-pill {
+  align-self: center;
+  margin-left: 6px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #ffffff;
+  white-space: nowrap;
+}
+
+.verdict-seniority {
+  flex: 1;
+  min-width: 240px;
+  border-left: 1px solid rgba(255, 255, 255, 0.14);
+  padding-left: 28px;
+}
+
+.verdict-seniority-label {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+  margin-bottom: 4px;
+}
+
+.verdict-seniority-desc {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.verdict-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.12);
+  margin: 22px 0 18px;
+}
+
+.verdict-hiring {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.verdict-dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.06);
+}
+
+.verdict-hiring-text {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.verdict-hiring-label {
+  font-size: 17px;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.verdict-hiring-reason {
+  font-size: 13px;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+@media (max-width: 768px) {
+  .report-verdict { padding: 22px 20px; margin-bottom: 32px; }
+  .verdict-score-num { font-size: 52px; }
+  .verdict-seniority { border-left: none; padding-left: 0; padding-top: 14px; }
 }
 
 /* Loading State with Animation */
@@ -160,11 +291,11 @@
 }
 
 .candidate-name {
-  font-size: 24px;
-  font-weight: 900;
+  font-size: 26px;
+  font-weight: 700;
   margin: 0 0 4px 0;
   color: #0a1f44;
-  letter-spacing: -0.5px;
+  letter-spacing: -0.02em;
 }
 
 .candidate-subtitle {
@@ -180,7 +311,7 @@
   padding: 14px 20px;
   background: #ffffff;
   border-radius: 12px;
-  border: 2px solid rgba(0, 212, 170, 0.15);
+  border: 1px solid rgba(0, 212, 170, 0.15);
   box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
 }
 
@@ -200,9 +331,9 @@
 
 .meta-value {
   font-size: 18px;
-  font-weight: 900;
-  color: #00d4aa;
-  letter-spacing: -0.5px;
+  font-weight: 800;
+  color: #0a1f44;
+  letter-spacing: -0.02em;
 }
 
 /* Global Score Section */
@@ -214,7 +345,7 @@
   background: #ffffff;
   border-radius: 14px;
   padding: 20px;
-  border: 2px solid rgba(30, 41, 59, 0.10);
+  border: 1px solid rgba(30, 41, 59, 0.10);
   box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
   animation: fadeIn 0.6s ease 0.1s both;
   transition: all 0.3s ease;
@@ -232,9 +363,9 @@
   justify-content: center;
   text-align: center;
   padding: 16px;
-  background: linear-gradient(135deg, rgba(0, 212, 170, 0.08), rgba(5, 150, 105, 0.06));
+  background: rgba(0, 212, 170, 0.08);
   border-radius: 12px;
-  border: 2px solid;
+  border: 1px solid;
   transition: all 0.3s ease;
 }
 
@@ -300,7 +431,7 @@
   background: #ffffff;
   border-radius: 14px;
   padding: 20px;
-  border: 2px solid rgba(0, 212, 170, 0.20);
+  border: 1px solid rgba(0, 212, 170, 0.20);
   margin-bottom: 20px;
   box-shadow: 0 4px 16px rgba(0, 212, 170, 0.08);
   animation: fadeIn 0.6s ease 0.15s both;
@@ -316,23 +447,23 @@
   background: #f9fafb;
   border-radius: 10px;
   padding: 16px;
-  border: 2px solid;
+  border: 1px solid;
   transition: all 0.3s ease;
 }
 
 .recommendation-card.strengths {
   border-color: rgba(5, 150, 105, 0.30);
-  background: linear-gradient(135deg, rgba(5, 150, 105, 0.04), rgba(5, 150, 105, 0.02));
+  background: rgba(5, 150, 105, 0.04);
 }
 
 .recommendation-card.attention {
   border-color: rgba(245, 158, 11, 0.30);
-  background: linear-gradient(135deg, rgba(245, 158, 11, 0.04), rgba(245, 158, 11, 0.02));
+  background: rgba(245, 158, 11, 0.04);
 }
 
 .recommendation-card.questions {
   border-color: rgba(37, 99, 235, 0.30);
-  background: linear-gradient(135deg, rgba(37, 99, 235, 0.04), rgba(37, 99, 235, 0.02));
+  background: rgba(37, 99, 235, 0.04);
 }
 
 .recommendation-card:hover {
@@ -402,7 +533,7 @@
   background: #ffffff;
   border-radius: 14px;
   padding: 20px;
-  border: 2px solid rgba(30, 41, 59, 0.10);
+  border: 1px solid rgba(30, 41, 59, 0.10);
   margin-bottom: 20px;
   box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
   animation: fadeIn 0.6s ease 0.2s both;
@@ -457,7 +588,7 @@
   background: #ffffff;
   border-radius: 14px;
   padding: 20px;
-  border: 2px solid rgba(30, 41, 59, 0.10);
+  border: 1px solid rgba(30, 41, 59, 0.10);
   margin-bottom: 20px;
   box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
   animation: fadeIn 0.6s ease 0.3s both;
@@ -486,12 +617,12 @@
 
 .flag-item.red-flag {
   border-left-color: #dc2626;
-  background: linear-gradient(135deg, rgba(220, 38, 38, 0.06), rgba(220, 38, 38, 0.03));
+  background: rgba(220, 38, 38, 0.06);
 }
 
 .flag-item.highlight {
   border-left-color: #059669;
-  background: linear-gradient(135deg, rgba(5, 150, 105, 0.06), rgba(5, 150, 105, 0.03));
+  background: rgba(5, 150, 105, 0.06);
 }
 
 .flag-header {
@@ -523,11 +654,11 @@
 /* Challenges Section */
 .challenges-section {
   background: #ffffff;
-  border-radius: 14px;
-  padding: 20px;
-  border: 2px solid rgba(30, 41, 59, 0.10);
-  margin-bottom: 20px;
-  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+  border-radius: 16px;
+  padding: 24px 26px;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 40px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
   animation: fadeIn 0.6s ease 0.4s both;
 }
 
@@ -536,7 +667,7 @@
   border-radius: 10px;
   padding: 14px;
   margin-bottom: 12px;
-  border: 2px solid rgba(30, 41, 59, 0.08);
+  border: 1px solid rgba(30, 41, 59, 0.08);
   transition: all 0.3s ease;
   box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
 }
@@ -576,7 +707,7 @@
   padding: 8px 14px;
   border-radius: 10px;
   background: rgba(0, 212, 170, 0.08);
-  border: 2px solid;
+  border: 1px solid;
 }
 
 .grade-letter {
@@ -643,7 +774,7 @@
   background: #ffffff;
   border-radius: 14px;
   padding: 20px;
-  border: 2px solid rgba(30, 41, 59, 0.10);
+  border: 1px solid rgba(30, 41, 59, 0.10);
   text-align: center;
   box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
   animation: fadeIn 0.6s ease 0.5s both;
@@ -717,7 +848,7 @@
 .btn-secondary {
   background: #ffffff;
   color: #00d4aa;
-  border: 2px solid #00d4aa;
+  border: 1px solid #00d4aa;
   box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
 }
 
@@ -1216,7 +1347,7 @@
 
 /* Journey Cards Section */
 .journey-section {
-  margin-bottom: 20px;
+  margin-bottom: 40px;
 }
 
 .section-title-compact {
@@ -1347,9 +1478,49 @@
 /* Insights Grid (Dimensions + Insights) */
 .insights-grid {
   display: grid;
-  grid-template-columns: 1.2fr 1fr;
+  grid-template-columns: 1fr;
   gap: 16px;
+  margin-bottom: 40px;
+}
+
+/* ─── Perfil de competencias (radar + barras) ─── */
+.competency-section {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 20px 24px 24px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
   margin-bottom: 20px;
+}
+
+.competency-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+
+.competency-legend {
+  display: flex;
+  gap: 14px;
+  font-size: 11px;
+  font-weight: 700;
+  flex-wrap: wrap;
+}
+
+.competency-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 420px) 1fr;
+  gap: 32px;
+  align-items: center;
+}
+
+.competency-radar { min-width: 0; }
+.competency-bars { display: flex; flex-direction: column; }
+
+@media (max-width: 768px) {
+  .competency-grid { grid-template-columns: 1fr; gap: 14px; }
 }
 
 .dimensions-compact {
@@ -1657,22 +1828,22 @@
 }
 
 .profile-card-style {
-  background: linear-gradient(135deg, rgba(124, 58, 237, 0.04), rgba(109, 40, 217, 0.02));
+  background: rgba(124, 58, 237, 0.04);
   border-color: rgba(124, 58, 237, 0.20);
 }
 
 .profile-card-patterns {
-  background: linear-gradient(135deg, rgba(96, 165, 250, 0.04), rgba(59, 130, 246, 0.02));
+  background: rgba(96, 165, 250, 0.04);
   border-color: rgba(96, 165, 250, 0.20);
 }
 
 .profile-card-strengths {
-  background: linear-gradient(135deg, rgba(0, 212, 170, 0.04), rgba(5, 150, 105, 0.02));
+  background: rgba(0, 212, 170, 0.04);
   border-color: rgba(0, 212, 170, 0.20);
 }
 
 .profile-card-weaknesses {
-  background: linear-gradient(135deg, rgba(234, 88, 12, 0.04), rgba(217, 119, 6, 0.02));
+  background: rgba(234, 88, 12, 0.04);
   border-color: rgba(234, 88, 12, 0.20);
 }
 
@@ -1738,7 +1909,7 @@
 .ai-fluency-stat {
   padding: 16px;
   border-radius: 12px;
-  background: linear-gradient(135deg, rgba(124, 58, 237, 0.06), rgba(109, 40, 217, 0.04));
+  background: rgba(124, 58, 237, 0.06);
   border: 1px solid rgba(124, 58, 237, 0.18);
   text-align: center;
 }
@@ -1912,12 +2083,160 @@
    ═══════════════════════════════════════════════════ */
 
 .ai-insights-section {
-  background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+  background: #ffffff;
   border: 1px solid #e2e8f0;
-  border-radius: 14px;
-  padding: 20px 22px;
-  margin-bottom: 20px;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  border-top: 3px solid #00d4aa;
+  border-radius: 16px;
+  padding: 24px 26px;
+  margin-bottom: 48px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+}
+
+/* ─── AI Insights (rediseño: eyebrow + narrativa + stats + columnas) ─── */
+.ai-eyebrow {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #009b7d;
+  margin-bottom: 8px;
+}
+
+.ai-headline {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #0a1f44;
+  margin: 0 0 10px;
+}
+
+.ai-synthesis {
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.6;
+  color: #475569;
+  max-width: 640px;
+  margin: 0 0 24px;
+}
+
+.ai-stats {
+  display: flex;
+  align-items: stretch;
+  border-top: 1px solid #eef2f6;
+  border-bottom: 1px solid #eef2f6;
+  margin-bottom: 24px;
+}
+
+.ai-stat {
+  flex: 1;
+  padding: 18px 8px;
+  text-align: center;
+}
+
+.ai-stat-sep { width: 1px; background: #eef2f6; }
+
+.ai-stat-num {
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #0a1f44;
+  line-height: 1;
+}
+
+.ai-stat-den { font-size: 18px; color: #94a3b8; }
+
+.ai-stat-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #64748b;
+  margin-top: 6px;
+}
+
+.ai-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 24px;
+}
+
+.ai-col-title {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.ai-col-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ai-col-list li {
+  font-size: 13px;
+  line-height: 1.45;
+  color: #334155;
+  padding-left: 14px;
+  position: relative;
+}
+
+.ai-col-list.strengths li::before { content: "·"; position: absolute; left: 0; color: #059669; font-weight: 800; }
+.ai-col-list.weaknesses li::before { content: "·"; position: absolute; left: 0; color: #ea580c; font-weight: 800; }
+.ai-col-list.moments li { padding-left: 0; }
+.ai-col-list li.muted { color: #94a3b8; font-style: italic; }
+.ai-col-list li.muted::before { content: none; }
+
+.ai-moment-tag {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 800;
+  color: #2563eb;
+  background: #dbeafe;
+  padding: 1px 6px;
+  border-radius: 4px;
+  margin-right: 6px;
+}
+
+.ai-bychallenge {
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid #eef2f6;
+}
+
+.ai-bychallenge-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #64748b;
+  margin-bottom: 12px;
+}
+
+.ai-bychallenge-list { display: flex; flex-direction: column; gap: 10px; }
+
+.ai-bychallenge-row {
+  display: grid;
+  grid-template-columns: 180px 44px 1fr;
+  gap: 12px;
+  align-items: center;
+}
+
+.ai-bychallenge-name { font-size: 13px; font-weight: 700; color: #0a1f44; }
+.ai-bychallenge-score { font-size: 12px; font-weight: 800; text-align: center; }
+.ai-bychallenge-rationale { font-size: 13px; line-height: 1.4; color: #475569; }
+
+@media (max-width: 768px) {
+  .ai-stats { flex-wrap: wrap; }
+  .ai-stat { flex-basis: 100%; }
+  .ai-stat-sep { display: none; }
+  .ai-cols { grid-template-columns: 1fr; gap: 18px; }
+  .ai-bychallenge-row { grid-template-columns: 1fr auto; }
+  .ai-bychallenge-rationale { grid-column: 1 / -1; }
 }
 
 .ai-insights-stats-row {

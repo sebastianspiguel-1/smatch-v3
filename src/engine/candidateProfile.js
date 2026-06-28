@@ -20,6 +20,8 @@
 //
 // ═══════════════════════════════════════════════════
 
+import { saveProfile, getProfileRow } from "./supabase"
+
 const STORAGE_PREFIX = "smatch_profile_"
 
 // Default empty profile
@@ -81,6 +83,8 @@ export function updateProfile(candidateId, partial) {
     updated_at: new Date().toISOString(),
   }
   localStorage.setItem(STORAGE_PREFIX + candidateId, JSON.stringify(updated))
+  // Persistencia en Supabase (no bloquea; si falla o no existe la tabla, sigue local)
+  saveProfile(candidateId, updated).catch(() => {})
   return updated
 }
 
@@ -102,7 +106,35 @@ export function logAICoachUsage(candidateId, interaction) {
     updated_at: new Date().toISOString(),
   }
   localStorage.setItem(STORAGE_PREFIX + candidateId, JSON.stringify(updated))
+  saveProfile(candidateId, updated).catch(() => {})
   return updated
+}
+
+// ─── Traer el perfil desde Supabase y cachearlo en localStorage ───
+// El reporte lo llama antes de renderizar para no depender del navegador donde
+// se jugaron los challenges. Si no hay nube/tabla, cae al perfil local.
+export async function syncProfileFromCloud(candidateId) {
+  if (!candidateId) return getProfile(candidateId)
+  try {
+    const { data } = await getProfileRow(candidateId)
+    if (data) {
+      const base = emptyProfile(candidateId)
+      const merged = {
+        ...base,
+        candidate_id: candidateId,
+        insights: { ...base.insights, ...(data.insights || {}) },
+        challenge_history: data.challenge_history || [],
+        communication_style: data.communication_style || null,
+        ai_coach_usage: data.ai_coach_usage || base.ai_coach_usage,
+        updated_at: new Date().toISOString(),
+      }
+      localStorage.setItem(STORAGE_PREFIX + candidateId, JSON.stringify(merged))
+      return merged
+    }
+  } catch {
+    // ignorar → fallback local
+  }
+  return getProfile(candidateId)
 }
 
 // ─── Build AI context string to inject in prompts ───
