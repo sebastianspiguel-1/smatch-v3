@@ -598,7 +598,7 @@ export default function CandidateReport() {
             {/* Strengths */}
             <div className="insight-card-compact strengths">
               <div className="insight-header-compact">
-                <span className="insight-icon">✅</span>
+                <span style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", background: T.green }} />
                 <span className="insight-title">Top Skills</span>
               </div>
               <div className="insight-list-compact">
@@ -620,7 +620,7 @@ export default function CandidateReport() {
             {/* Areas to develop */}
             <div className="insight-card-compact attention">
               <div className="insight-header-compact">
-                <span className="insight-icon">⚠️</span>
+                <span style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", background: T.orange }} />
                 <span className="insight-title">A Desarrollar</span>
               </div>
               <div className="insight-list-compact">
@@ -642,7 +642,7 @@ export default function CandidateReport() {
             {/* Interview questions */}
             <div className="insight-card-compact questions">
               <div className="insight-header-compact">
-                <span className="insight-icon">💬</span>
+                <span style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", background: T.blue }} />
                 <span className="insight-title">Preguntas Clave</span>
               </div>
               <div className="insight-list-compact">
@@ -769,7 +769,7 @@ export default function CandidateReport() {
                           {(qm || subs.length > 0) && (
                             <div style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center" }}>
                               {qm && (
-                                <span style={{ fontSize: 11, fontWeight: 800, color: qm.color, background: `${qm.color}1a`, border: `1px solid ${qm.color}40`, borderRadius: 6, padding: "2px 8px" }}>{qm.emoji} {qm.label}</span>
+                                <span style={{ fontSize: 11, fontWeight: 800, color: qm.color, background: `${qm.color}1a`, border: `1px solid ${qm.color}40`, borderRadius: 6, padding: "2px 8px" }}>{qm.label}</span>
                               )}
                               {subs.map(([k, v]) => (
                                 <span key={k} style={{ fontSize: 11, color: T.dim, background: "rgba(15,23,42,0.04)", borderRadius: 6, padding: "2px 8px" }}>{DIM_LABELS[k] || k} · {v}/4</span>
