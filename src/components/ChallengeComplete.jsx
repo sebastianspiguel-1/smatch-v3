@@ -8,6 +8,7 @@ export default function ChallengeComplete({
   accentColor,
   gradientStart,
   gradientEnd,
+  grade,
 }) {
   const nav = useNavigate()
 
@@ -47,7 +48,24 @@ export default function ChallengeComplete({
         <h1 className="complete-title">Challenge Completado</h1>
 
         {/* Nombre del challenge */}
-        <p className="complete-challenge-name">"{challengeTitle}"</p>
+        <p className="complete-challenge-name">
+          {challengeNumber ? `Challenge ${challengeNumber} · ` : ""}{challengeTitle}
+        </p>
+
+        {/* Score — la recompensa: cómo le fue */}
+        {grade && grade.avg > 0 && (
+          <div style={{ margin: "6px 0 10px", display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
+            <div style={{ fontSize: 56, fontWeight: 900, lineHeight: 1, color: "#ffffff", letterSpacing: "-0.03em" }}>
+              {Math.round(grade.avg)}
+              <span style={{ fontSize: 22, fontWeight: 700, opacity: 0.55 }}>/100</span>
+            </div>
+            {grade.label && (
+              <div style={{ fontSize: 12, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "rgba(255,255,255,0.92)", background: "rgba(255,255,255,0.16)", padding: "4px 12px", borderRadius: 999 }}>
+                {grade.label.replace("Scrum Master ", "")}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Mensaje */}
         <p className="complete-message">

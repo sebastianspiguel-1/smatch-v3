@@ -572,11 +572,11 @@ export default function Challenge04() {
     return (
       <ChallengeComplete
         challengeTitle="Día 7 · Reunión con Paula"
-        challengeNumber={5}
+        challengeNumber={4}
         accentColor="#dc2626"
         gradientStart="rgba(220, 38, 38, 0.85)"
         gradientEnd="rgba(185, 28, 28, 0.80)"
-        isLastChallenge={isLastChallenge(4)}
+        grade={gradeData}
       />
     )
   }

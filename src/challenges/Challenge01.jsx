@@ -1305,12 +1305,12 @@ export default function Challenge01() {
   // ═══════════════════ RESULTS ═══════════════════
   if (phase === "results") return (
     <ChallengeComplete
-      challengeTitle="Estimación & Priorización"
-      challengeNumber={4}
+      challengeTitle="Día 1 · Kickoff & Planning"
+      challengeNumber={1}
       accentColor="#0891b2"
       gradientStart="rgba(8, 145, 178, 0.85)"
       gradientEnd="rgba(6, 182, 212, 0.80)"
-      isLastChallenge={isLastChallenge(1)}
+      grade={gradeData}
     />
   )
 

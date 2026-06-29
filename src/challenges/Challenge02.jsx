@@ -653,11 +653,11 @@ export default function Challenge02() {
     return (
       <ChallengeComplete
         challengeTitle="Día 3 · 1-1 con Alan"
-        challengeNumber={3}
+        challengeNumber={2}
         accentColor="#ff8a80"
         gradientStart="rgba(255, 138, 128, 0.85)"
         gradientEnd="rgba(250, 128, 114, 0.80)"
-        isLastChallenge={isLastChallenge(2)}
+        grade={gradeData}
       />
     )
   }

@@ -653,11 +653,11 @@ export default function Challenge05() {
     return (
       <ChallengeComplete
         challengeTitle="Día 10 · Retro del Sprint 1"
-        challengeNumber={1}
+        challengeNumber={5}
         accentColor="#00d4aa"
         gradientStart="rgba(0, 212, 170, 0.85)"
         gradientEnd="rgba(5, 150, 105, 0.80)"
-        isLastChallenge={isLastChallenge(5)}
+        grade={gradeData}
       />
     )
 
