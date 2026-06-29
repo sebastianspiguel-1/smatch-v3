@@ -56,7 +56,7 @@ export default function CandidateReport() {
           dimensions: { facilitation: 82, process: 76, coaching: 75, systems: 79 },
           redFlags: 1,
           highlights: 4,
-          completed: 6
+          completed: 5
         },
         "candidate3": {
           name: "Ana Torres",
@@ -64,7 +64,7 @@ export default function CandidateReport() {
           dimensions: { facilitation: 94, process: 91, coaching: 90, systems: 93 },
           redFlags: 0,
           highlights: 8,
-          completed: 6
+          completed: 5
         },
         "candidate4": {
           name: "Jorge Sánchez",
@@ -80,7 +80,7 @@ export default function CandidateReport() {
           dimensions: { facilitation: 85, process: 80, coaching: 78, systems: 82 },
           redFlags: 0,
           highlights: 5,
-          completed: 6
+          completed: 5
         },
         "candidate6": {
           name: "Diego Fernández",
@@ -88,7 +88,7 @@ export default function CandidateReport() {
           dimensions: { facilitation: 90, process: 87, coaching: 86, systems: 89 },
           redFlags: 0,
           highlights: 7,
-          completed: 6
+          completed: 5
         },
         "candidate7": {
           name: "Patricia Ruiz",
@@ -96,7 +96,7 @@ export default function CandidateReport() {
           dimensions: { facilitation: 76, process: 71, coaching: 70, systems: 73 },
           redFlags: 1,
           highlights: 3,
-          completed: 6
+          completed: 5
         },
         "candidate8": {
           name: "Roberto Silva",
@@ -113,11 +113,15 @@ export default function CandidateReport() {
       if (candidateData) {
         // Helper to generate scores with variation
         const generateScores = (baseDims, variation = 5) => {
+          const jitter = (base) => Math.max(0, Math.min(100, base + (Math.random() - 0.5) * variation * 2))
+          const extraBase = (baseDims.facilitation + baseDims.process + baseDims.coaching + baseDims.systems) / 4
           return [
-            { dimension: "Facilitation", score: Math.max(0, Math.min(100, baseDims.facilitation + (Math.random() - 0.5) * variation * 2)) },
-            { dimension: "Process", score: Math.max(0, Math.min(100, baseDims.process + (Math.random() - 0.5) * variation * 2)) },
-            { dimension: "Coaching", score: Math.max(0, Math.min(100, baseDims.coaching + (Math.random() - 0.5) * variation * 2)) },
-            { dimension: "Systems", score: Math.max(0, Math.min(100, baseDims.systems + (Math.random() - 0.5) * variation * 2)) }
+            { dimension: "Facilitation", score: jitter(baseDims.facilitation) },
+            { dimension: "Coaching", score: jitter(baseDims.coaching) },
+            { dimension: "Systems", score: jitter(baseDims.systems) },
+            { dimension: "Process", score: jitter(baseDims.process) },
+            { dimension: "Stakeholder Management", score: jitter(extraBase) },
+            { dimension: "AI Fluency", score: jitter(extraBase) }
           ].map(s => ({ ...s, score: Math.round(s.score) }))
         }
 
@@ -338,7 +342,7 @@ export default function CandidateReport() {
           <div className="report-meta">
             <div className="meta-item">
               <span className="meta-label">Challenges Completados</span>
-              <span className="meta-value">{results.length}/5</span>
+              <span className="meta-value">{new Set(results.filter((r) => r.challenge_id >= 1 && r.challenge_id <= 5).map((r) => r.challenge_id)).size}/5</span>
             </div>
             <div className="meta-item">
               <span className="meta-label">Tiempo Promedio</span>
